@@ -1,6 +1,6 @@
 package net.carmgate.morph.model.entities;
 
-import net.carmgate.morph.model.renderers.Renderable;
+import net.carmgate.morph.ui.renderers.Renderable;
 
 import org.lwjgl.util.vector.Vector2f;
 

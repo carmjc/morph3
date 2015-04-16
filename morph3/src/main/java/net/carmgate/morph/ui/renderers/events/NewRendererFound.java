@@ -1,7 +1,7 @@
-package net.carmgate.morph.model.renderers.events;
+package net.carmgate.morph.ui.renderers.events;
 
-import net.carmgate.morph.model.renderers.Renderable;
-import net.carmgate.morph.model.renderers.Renderer;
+import net.carmgate.morph.ui.renderers.Renderable;
+import net.carmgate.morph.ui.renderers.Renderer;
 
 public class NewRendererFound {
 

@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.renderers;
+package net.carmgate.morph.ui.renderers;
 
 import java.nio.FloatBuffer;
 

@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.renderers;
+package net.carmgate.morph.ui.renderers;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -6,8 +6,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.model.entities.Ship;
-import net.carmgate.morph.model.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;

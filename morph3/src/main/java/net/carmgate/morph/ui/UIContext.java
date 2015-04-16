@@ -2,7 +2,7 @@ package net.carmgate.morph.ui;
 
 import javax.inject.Singleton;
 
-import net.carmgate.morph.model.renderers.RenderMode;
+import net.carmgate.morph.ui.renderers.RenderMode;
 
 @Singleton
 public class UIContext {
