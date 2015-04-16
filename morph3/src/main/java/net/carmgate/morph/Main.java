@@ -13,7 +13,7 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.Model;
 import net.carmgate.morph.model.entities.Ship;
 import net.carmgate.morph.ui.UIContext;
-import net.carmgate.morph.ui.renderers.RenderMode;
+import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.renderers.Renderable;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
@@ -22,7 +22,6 @@ import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -43,6 +42,9 @@ public class Main {
 
 	@Inject
 	private UIContext uiContext;
+
+	@Inject
+	private MouseManager mouseManager;
 
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
@@ -108,68 +110,67 @@ public class Main {
 	}
 
 	/**
-	 * Start the application
+	 * Main Class
 	 */
-	public void main() {
-		final Runnable runnable = () -> {
-			// init OpenGL context
-			initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
+	public void main(@Observes ContainerInitialized event) {
+		LOGGER.debug("received in main");
+		try {
+			new Thread(() -> {
+				// init OpenGL context
+				initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
 
-			for (final Renderer renderer : renderers.values()) {
-				renderer.init();
-			}
-
-			// Rendering loop
-			while (true) {
-
-				// Renders everything
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-				if (!Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-					uiContext.setRenderMode(RenderMode.NORMAL);
-				} else {
-					uiContext.setRenderMode(RenderMode.SELECT);
-				}
-				render();
-
-				// updates display and sets frame rate
-				Display.update();
-				Display.sync(200);
-
-				// update model
-				// Model.getModel().update();
-
-				// handle window resize
-				if (Display.wasResized()) {
-					initView();
+				for (final Renderer<?> renderer : renderers.values()) {
+					renderer.init();
 				}
 
-				GL11.glMatrixMode(GL11.GL_PROJECTION);
-				GL11.glLoadIdentity();
+				// Rendering loop
+				while (true) {
 
-				final int width = Display.getWidth();
-				final int height = Display.getHeight();
-				GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
-				GL11.glViewport(0, 0, width, height);
+					// Renders everything
+					GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+					render();
 
-				GL11.glMatrixMode(GL11.GL_MODELVIEW);
-				GL11.glLoadIdentity();
+					// updates display and sets frame rate
+					Display.update();
+					Display.sync(200);
 
-				// Handles the window close requested event
-				if (Display.isCloseRequested()) {
-					Display.destroy();
-					System.exit(0);
+					// update model
+					// Model.getModel().update();
+
+					// handle window resize
+					if (Display.wasResized()) {
+						initView();
+					}
+
+					GL11.glMatrixMode(GL11.GL_PROJECTION);
+					GL11.glLoadIdentity();
+
+					final int width = Display.getWidth();
+					final int height = Display.getHeight();
+					GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
+					GL11.glViewport(0, 0, width, height);
+
+					GL11.glMatrixMode(GL11.GL_MODELVIEW);
+					GL11.glLoadIdentity();
+
+					// Handles the window close requested event
+					if (Display.isCloseRequested()) {
+						Display.destroy();
+						System.exit(0);
+					}
+
+					mouseManager.handleMouseEvent();
 				}
-			}
-		};
-
-		new Thread(runnable, "UI").start();
+			}, "UI").start();
+		} catch (final Exception e) {
+			LOGGER.error("main exception", e);
+		}
 	}
 
 	@SuppressWarnings({ "unused" })
 	private void registerRenderer(@Observes NewRendererFound event) {
 		try {
 			final Renderer<? extends Renderable> renderer = event.getRenderer();
-			LOGGER.debug("Trying to add new renderer: " + renderer.getClass().getName());
 			final Type[] interfaces = renderer.getClass().getGenericInterfaces();
 			for (final Type interf : interfaces) {
 				if (interf instanceof ParameterizedType) {
@@ -192,6 +193,11 @@ public class Main {
 	}
 
 	private void render() {
+		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final float zoomFactor = uiContext.getViewport().getZoomFactor();
+		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+		GL11.glScalef(zoomFactor, zoomFactor, 1);
+
 		switch (uiContext.getRenderMode()) {
 		case SELECT:
 			renderSelect();
@@ -199,6 +205,9 @@ public class Main {
 		default:
 			renderNormal();
 		}
+
+		GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
+		GL11.glScalef(1/zoomFactor, 1/zoomFactor, 1);
 	}
 
 	private void renderNormal() {
@@ -222,18 +231,6 @@ public class Main {
 				shipRenderer.render(ship);
 				GL11.glTranslatef(-pos.x, -pos.y, 0);
 			}
-		}
-	}
-
-	/**
-	 * Main Class
-	 */
-	public void start(@Observes ContainerInitialized event) {
-		LOGGER.debug("received in main");
-		try {
-			main();
-		} catch (final Exception e) {
-			LOGGER.error("main exception", e);
 		}
 	}
 }
