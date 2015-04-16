@@ -16,7 +16,8 @@ import net.carmgate.morph.model.renderers.RenderMode;
 import net.carmgate.morph.model.renderers.Renderable;
 import net.carmgate.morph.model.renderers.Renderer;
 import net.carmgate.morph.model.renderers.ShipRenderer;
-import net.carmgate.morph.model.renderers.events.NewRenderer;
+import net.carmgate.morph.model.renderers.events.NewRendererFound;
+import net.carmgate.morph.ui.UIContext;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.LWJGLException;
@@ -24,19 +25,23 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Vector2f;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class Main {
 
-   private static Logger LOGGER = LoggerFactory.getLogger(Main.class);
+   @Inject
+   private Logger LOGGER;
 
    @Inject
    private Conf conf;
 
    @Inject
    private Model model;
+
+   @Inject
+   private UIContext uiContext;
 
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 
@@ -255,7 +260,7 @@ public class Main {
    // }
 
    @SuppressWarnings({ "unused" })
-   private void registerRenderer(@Observes NewRenderer event) {
+   private void registerRenderer(@Observes NewRendererFound event) {
       try {
          final Renderer<? extends Renderable> renderer = event.getRenderer();
          LOGGER.debug("Trying to add new renderer: " + renderer.getClass().getName());
@@ -278,9 +283,14 @@ public class Main {
    private void render() {
       final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
 
-      if (shipRenderer != null) {
-         for (final Ship ship : model.getShips()) {
-            shipRenderer.render(ship, RenderMode.NORMAL);
+      if (uiContext.getRenderMode() == RenderMode.NORMAL) {
+         if (shipRenderer != null) {
+            for (final Ship ship : model.getShips()) {
+               Vector2f pos = ship.getPos();
+               GL11.glTranslatef(pos.x, pos.y, 0);
+               shipRenderer.render(ship);
+               GL11.glTranslatef(-pos.x, -pos.y, 0);
+            }
          }
       }
    }

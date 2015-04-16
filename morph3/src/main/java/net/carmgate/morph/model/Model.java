@@ -25,8 +25,10 @@ public class Model {
 
    @PostConstruct
    private void init() {
-      final Ship firstShip = new Ship(new Vector2f(0f, 0f));
-      ships.add(firstShip);
+      Ship newShip = new Ship(new Vector2f(0f, 0f));
+      ships.add(newShip);
+      newShip = new Ship(new Vector2f(100f, 0f));
+      ships.add(newShip);
    }
 
    public void removeShip(Ship ship) {
