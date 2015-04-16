@@ -1,17 +1,24 @@
 package net.carmgate.morph.model;
 
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 import net.carmgate.morph.model.entities.Ship;
 
-import org.lwjgl.util.vector.Vector2f;
+import org.slf4j.Logger;
 
 @Singleton
 public class Model {
+
+   @Inject
+   private Logger LOGGER;
 
    private final List<Ship> ships = new ArrayList<>();
 
@@ -25,10 +32,16 @@ public class Model {
 
    @PostConstruct
    private void init() {
-      Ship newShip = new Ship(new Vector2f(0f, 0f));
-      ships.add(newShip);
-      newShip = new Ship(new Vector2f(100f, 0f));
-      ships.add(newShip);
+      ScriptEngineManager manager = new ScriptEngineManager();
+      ScriptEngine engine = manager.getEngineByName("nashorn");
+      try {
+         FileReader reader = new FileReader(getClass().getResource("/model-init.js").getPath());
+         engine.put("model", this);
+         engine.eval(reader);
+      } catch (Exception e) {
+         LOGGER.error("Cannot open init file", e);
+      }
+
    }
 
    public void removeShip(Ship ship) {
