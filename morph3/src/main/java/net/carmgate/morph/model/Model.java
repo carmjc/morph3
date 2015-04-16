@@ -13,23 +13,23 @@ import org.lwjgl.util.vector.Vector2f;
 @Singleton
 public class Model {
 
-	private final List<Ship> ships = new ArrayList<>();
+   private final List<Ship> ships = new ArrayList<>();
 
-	public void addShip(Ship ship) {
-		ships.add(ship);
-	}
+   public void addShip(Ship ship) {
+      ships.add(ship);
+   }
 
-	public List<Ship> getShips() {
-		return ships;
-	}
+   public List<Ship> getShips() {
+      return ships;
+   }
 
-	@PostConstruct
-	private void init() {
-		final Ship firstShip = new Ship(new Vector2f(120f, 250f));
-		ships.add(firstShip);
-	}
+   @PostConstruct
+   private void init() {
+      final Ship firstShip = new Ship(new Vector2f(0f, 0f));
+      ships.add(firstShip);
+   }
 
-	public void removeShip(Ship ship) {
-		ships.remove(ship);
-	}
+   public void removeShip(Ship ship) {
+      ships.remove(ship);
+   }
 }
