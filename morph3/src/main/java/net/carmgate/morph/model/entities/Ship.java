@@ -1,6 +1,8 @@
 package net.carmgate.morph.model.entities;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import net.carmgate.morph.model.Player;
@@ -8,7 +10,7 @@ import net.carmgate.morph.model.api.WorldChangeListener;
 import net.carmgate.morph.model.events.ShipAdded;
 import net.carmgate.morph.model.events.WorldChanged;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.goals.Goal;
+import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.renderers.api.Renderable;
 
@@ -19,8 +21,9 @@ public class Ship implements Renderable, WorldChangeListener, PhysicalEntity {
    private float mass;
    private Player owner;
    private Surroundings surroundings = new Surroundings();
-   private Goal currentGoal;
+   private Order currentGoal;
    private Set<ForceSource> forceSources = new HashSet<>();
+   private List<Order> orders = new ArrayList<>();
 
    public Ship(Vector2f pos) {
       this.pos.copy(pos);
@@ -71,24 +74,11 @@ public class Ship implements Renderable, WorldChangeListener, PhysicalEntity {
       return surroundings;
    }
 
-   public void add(Goal goal) {
-      Goal tmpGoal = currentGoal;
+   public void add(Order order) {
+      orders.add(order);
 
-      if (currentGoal == null) {
-         currentGoal = goal;
-      } else {
-         while (tmpGoal != null) {
-            if (tmpGoal.getNextGoal() == null || tmpGoal.getNextGoal().getPriority() > goal.getPriority()) {
-               Goal nextGoal = tmpGoal.getNextGoal();
-               tmpGoal.setNextGoal(goal);
-               goal.setNextGoal(nextGoal);
-               return;
-            }
-         }
-      }
-
-      if (goal instanceof ForceSource) {
-         forceSources.add((ForceSource) goal);
+      if (order instanceof ForceSource) {
+         forceSources.add((ForceSource) order);
       }
    }
 
@@ -102,7 +92,7 @@ public class Ship implements Renderable, WorldChangeListener, PhysicalEntity {
       return forceSources;
    }
 
-   public Goal getCurrentGoal() {
+   public Order getCurrentGoal() {
       return currentGoal;
    }
 

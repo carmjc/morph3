@@ -1,13 +1,13 @@
-package net.carmgate.morph.model.goals.ship;
+package net.carmgate.morph.model.orders.ship;
 
 import java.util.List;
 
 import net.carmgate.morph.model.entities.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.goals.Goal;
+import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
 
-public class Flee extends Goal implements ForceSource {
+public class Flee extends Order implements ForceSource {
 
    private static final float MAX_FLEE_FORCE = 0.01f;
 
@@ -18,7 +18,6 @@ public class Flee extends Goal implements ForceSource {
    private Ship owner;
 
    public Flee(Ship owner, List<Ship> ships) {
-      super(0);
       this.owner = owner;
       this.ships = ships;
    }

@@ -1,6 +1,10 @@
 package net.carmgate.morph.model;
 
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +56,12 @@ public class World {
       return ships;
    }
 
+   static String readFile(String path, Charset encoding)
+         throws IOException {
+      byte[] encoded = Files.readAllBytes(Paths.get(path));
+      return new String(encoded, encoding);
+   }
+
    @PostConstruct
    private void init() {
       ScriptEngineManager manager = new ScriptEngineManager();
@@ -63,7 +73,6 @@ public class World {
       } catch (Exception e) {
          LOGGER.error("Cannot open init file", e);
       }
-
    }
 
    public void removeShip(Ship ship) {

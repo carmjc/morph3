@@ -1,6 +1,8 @@
 load("nashorn:mozilla_compat.js");
 importPackage(Packages.net.carmgate.morph.model)
 importPackage(Packages.net.carmgate.morph.model.entities)
+importPackage(Packages.net.carmgate.morph.model.geometry)
+importPackage(Packages.net.carmgate.morph.model.goals.ship)
 importPackage(Packages.org.lwjgl.util.vector)
 var ArrayList = Java.type('java.util.ArrayList');
 

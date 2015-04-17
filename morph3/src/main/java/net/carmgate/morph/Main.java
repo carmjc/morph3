@@ -14,7 +14,7 @@ import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.goals.Goal;
+import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.inputs.InputHistory;
@@ -145,7 +145,7 @@ public class Main {
 
                   // update model
                   for (Ship ship : world.getShips()) {
-                     Goal goal = ship.getCurrentGoal();
+                     Order goal = ship.getCurrentGoal();
                      if (goal != null) {
                         goal.evaluate(0);
                      }
