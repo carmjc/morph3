@@ -1,4 +1,4 @@
-package net.carmgate.morph.model;
+package net.carmgate.morph.model.geometry;
 
 public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<Vector2f> {
 

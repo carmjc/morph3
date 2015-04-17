@@ -12,10 +12,10 @@ import javax.inject.Singleton;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import net.carmgate.morph.model.api.WorldChangeListener;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.Ship;
-import net.carmgate.morph.model.entities.ShipAdded;
-import net.carmgate.morph.model.entities.WorldChangeListener;
+import net.carmgate.morph.model.events.ShipAdded;
 
 import org.slf4j.Logger;
 

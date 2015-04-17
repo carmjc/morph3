@@ -1,6 +1,6 @@
 package net.carmgate.morph.ui;
 
-import net.carmgate.morph.model.Vector2f;
+import net.carmgate.morph.model.geometry.Vector2f;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -3,7 +3,7 @@ package net.carmgate.morph.ui.inputs;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.model.Vector2f;
+import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 
 import org.lwjgl.input.Mouse;

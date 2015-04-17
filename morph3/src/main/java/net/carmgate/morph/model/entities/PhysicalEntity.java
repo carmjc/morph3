@@ -2,8 +2,8 @@ package net.carmgate.morph.model.entities;
 
 import java.util.Set;
 
-import net.carmgate.morph.model.ForceSource;
-import net.carmgate.morph.model.Vector2f;
+import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.physics.ForceSource;
 
 public interface PhysicalEntity {
 

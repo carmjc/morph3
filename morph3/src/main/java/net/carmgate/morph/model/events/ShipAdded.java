@@ -1,6 +1,7 @@
-package net.carmgate.morph.model.entities;
+package net.carmgate.morph.model.events;
 
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.entities.Ship;
 
 public class ShipAdded implements WorldChanged {
    private Ship ship;

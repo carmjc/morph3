@@ -1,4 +1,4 @@
-package net.carmgate.morph.model;
+package net.carmgate.morph.model.goals;
 
 public abstract class Goal {
 

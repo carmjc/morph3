@@ -3,11 +3,14 @@ package net.carmgate.morph.model.entities;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.carmgate.morph.model.ForceSource;
-import net.carmgate.morph.model.Goal;
 import net.carmgate.morph.model.Player;
-import net.carmgate.morph.model.Vector2f;
-import net.carmgate.morph.ui.renderers.Renderable;
+import net.carmgate.morph.model.api.WorldChangeListener;
+import net.carmgate.morph.model.events.ShipAdded;
+import net.carmgate.morph.model.events.WorldChanged;
+import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.goals.Goal;
+import net.carmgate.morph.model.physics.ForceSource;
+import net.carmgate.morph.ui.renderers.api.Renderable;
 
 public class Ship implements Renderable, WorldChangeListener, PhysicalEntity {
 

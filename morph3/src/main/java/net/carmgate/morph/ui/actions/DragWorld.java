@@ -4,14 +4,14 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.model.Vector2f;
+import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.ViewPort;
 import net.carmgate.morph.ui.inputs.GameMouse;
+import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.MouseManager;
-import net.carmgate.morph.ui.inputs.common.InputHistory;
-import net.carmgate.morph.ui.inputs.common.MouseListener;
-import net.carmgate.morph.ui.inputs.common.UIEvent.EventType;
+import net.carmgate.morph.ui.inputs.api.MouseListener;
+import net.carmgate.morph.ui.inputs.api.UIEvent.EventType;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;

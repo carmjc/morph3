@@ -1,4 +1,4 @@
-package net.carmgate.morph.model;
+package net.carmgate.morph.model.geometry;
 
 public interface Vector<V> {
 

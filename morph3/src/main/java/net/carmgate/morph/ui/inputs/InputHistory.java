@@ -1,10 +1,12 @@
-package net.carmgate.morph.ui.inputs.common;
+package net.carmgate.morph.ui.inputs;
 
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 import javax.inject.Singleton;
+
+import net.carmgate.morph.ui.inputs.api.UIEvent;
 
 @Singleton
 public class InputHistory {

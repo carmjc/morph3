@@ -1,4 +1,4 @@
-package net.carmgate.morph;
+package net.carmgate.morph.logs;
 
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;

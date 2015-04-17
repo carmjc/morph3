@@ -6,10 +6,9 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.ui.inputs.common.InputHistory;
-import net.carmgate.morph.ui.inputs.common.MouseListener;
-import net.carmgate.morph.ui.inputs.common.UIEvent;
-import net.carmgate.morph.ui.inputs.common.UIEvent.EventType;
+import net.carmgate.morph.ui.inputs.api.MouseListener;
+import net.carmgate.morph.ui.inputs.api.UIEvent;
+import net.carmgate.morph.ui.inputs.api.UIEvent.EventType;
 
 import org.lwjgl.input.Mouse;
 import org.slf4j.Logger;

@@ -1,8 +1,11 @@
-package net.carmgate.morph.model;
+package net.carmgate.morph.model.goals.ship;
 
 import java.util.List;
 
 import net.carmgate.morph.model.entities.Ship;
+import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.goals.Goal;
+import net.carmgate.morph.model.physics.ForceSource;
 
 public class Flee extends Goal implements ForceSource {
 
