@@ -9,7 +9,7 @@ import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.ViewPort;
 import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.inputs.MouseManager;
-import net.carmgate.morph.ui.inputs.common.InteractionStack;
+import net.carmgate.morph.ui.inputs.common.InputHistory;
 import net.carmgate.morph.ui.inputs.common.MouseListener;
 import net.carmgate.morph.ui.inputs.common.UIEvent.EventType;
 
@@ -24,7 +24,7 @@ public class Zoom implements MouseListener {
    @Inject
    private MouseManager mouseManager;
    @Inject
-   private InteractionStack inputHistory;
+   private InputHistory inputHistory;
    @Inject
    private UIContext uiContext;
    @Inject

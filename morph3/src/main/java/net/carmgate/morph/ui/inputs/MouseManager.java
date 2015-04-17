@@ -6,7 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.ui.inputs.common.InteractionStack;
+import net.carmgate.morph.ui.inputs.common.InputHistory;
 import net.carmgate.morph.ui.inputs.common.MouseListener;
 import net.carmgate.morph.ui.inputs.common.UIEvent;
 import net.carmgate.morph.ui.inputs.common.UIEvent.EventType;
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 public class MouseManager {
 
 	@Inject private Logger LOGGER;
-	@Inject private InteractionStack inputHistory;
+	@Inject private InputHistory inputHistory;
 	private final List<MouseListener> mouseListeners = new ArrayList<>();
 
 	public void addMouseListener(MouseListener mouseListener) {

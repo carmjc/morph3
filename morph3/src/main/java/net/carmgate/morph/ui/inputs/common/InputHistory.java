@@ -10,7 +10,7 @@ import javax.inject.Singleton;
 import net.carmgate.morph.ui.inputs.common.UIEvent.EventType;
 
 @Singleton
-public class InteractionStack {
+public class InputHistory {
 	private static final int STACK_SIZE = 10;
 
 	private final Deque<UIEvent> stack = new LinkedList<>();
@@ -20,7 +20,7 @@ public class InteractionStack {
 	 * Fills the stack with NOOP, so that the stack is always full,
 	 * even at start.
 	 */
-	public InteractionStack() {
+	public InputHistory() {
 		for (int i = 0; i < STACK_SIZE; i++) {
 			addEvent(new UIEvent(EventType.NOOP));
 		}

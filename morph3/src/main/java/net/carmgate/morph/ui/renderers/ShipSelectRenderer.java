@@ -15,29 +15,29 @@ import org.lwjgl.opengl.GL11;
 @Singleton
 public class ShipSelectRenderer implements SelectRenderer<Ship> {
 
-	@Inject
-	private UIContext uiContext;
+   @Inject
+   private UIContext uiContext;
 
-	@Override
-	public void init() {
-		// TODO Auto-generated method stub
+   @Override
+   public void init() {
+      // TODO Auto-generated method stub
 
-	}
+   }
 
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-		newRendererEventMgr.fire(new NewRendererFound(this));
-	}
+   @SuppressWarnings("unused")
+   private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
+      newRendererEventMgr.fire(new NewRendererFound(this));
+   }
 
-	@Override
-	public void render(Ship ship) {
-		final float mass = 2;
-		final float massScale = mass / 10 * uiContext.getZoom();
-		final float width = 128;
+   @Override
+   public void render(Ship ship) {
+      final float mass = 2;
+      final float massScale = mass / 10 * uiContext.getViewport().getZoomFactor();
+      final float width = 128;
 
-		GL11.glScalef(massScale, massScale, 0);
-		GL11.glColor4f(1f, 1f, 1f, 0.6f);
-		RenderUtils.renderDisc(width / 2f);
-	}
+      GL11.glScalef(massScale, massScale, 0);
+      GL11.glColor4f(1f, 1f, 1f, 0.6f);
+      RenderUtils.renderDisc(width / 2f);
+   }
 
 }
