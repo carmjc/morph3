@@ -14,7 +14,9 @@ import net.carmgate.morph.model.Model;
 import net.carmgate.morph.model.Vector2f;
 import net.carmgate.morph.model.entities.Ship;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
+import net.carmgate.morph.ui.inputs.common.InputHistory;
 import net.carmgate.morph.ui.renderers.Renderable;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
@@ -36,15 +38,16 @@ public class Main {
 
    @Inject
    private Conf conf;
-
    @Inject
    private Model model;
-
    @Inject
    private UIContext uiContext;
-
    @Inject
    private MouseManager mouseManager;
+   @Inject
+   private KeyboardManager keyboardManager;
+   @Inject
+   private InputHistory inputHistory;
 
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
@@ -117,51 +120,52 @@ public class Main {
       try {
          new Thread(() -> {
             // init OpenGL context
-               initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
+            initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
 
-               for (final Renderer<?> renderer : renderers.values()) {
-                  renderer.init();
+            for (final Renderer<?> renderer : renderers.values()) {
+               renderer.init();
+            }
+
+            // Rendering loop
+            while (true) {
+
+               // Renders everything
+               GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+               render();
+
+               // updates display and sets frame rate
+               Display.update();
+               Display.sync(200);
+
+               // update model
+               // Model.getModel().update();
+
+               // handle window resize
+               if (Display.wasResized()) {
+                  initView();
                }
 
-               // Rendering loop
-               while (true) {
+               GL11.glMatrixMode(GL11.GL_PROJECTION);
+               GL11.glLoadIdentity();
 
-                  // Renders everything
-                  GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-                  render();
+               final int width = Display.getWidth();
+               final int height = Display.getHeight();
+               GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
+               GL11.glViewport(0, 0, width, height);
 
-                  // updates display and sets frame rate
-                  Display.update();
-                  Display.sync(200);
+               GL11.glMatrixMode(GL11.GL_MODELVIEW);
+               GL11.glLoadIdentity();
 
-                  // update model
-                  // Model.getModel().update();
-
-                  // handle window resize
-                  if (Display.wasResized()) {
-                     initView();
-                  }
-
-                  GL11.glMatrixMode(GL11.GL_PROJECTION);
-                  GL11.glLoadIdentity();
-
-                  final int width = Display.getWidth();
-                  final int height = Display.getHeight();
-                  GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
-                  GL11.glViewport(0, 0, width, height);
-
-                  GL11.glMatrixMode(GL11.GL_MODELVIEW);
-                  GL11.glLoadIdentity();
-
-                  // Handles the window close requested event
-                  if (Display.isCloseRequested()) {
-                     Display.destroy();
-                     System.exit(0);
-                  }
-
-                  mouseManager.handleMouseEvent();
+               // Handles the window close requested event
+               if (Display.isCloseRequested()) {
+                  Display.destroy();
+                  System.exit(0);
                }
-            }, "UI").start();
+
+               mouseManager.handleMouseEvent();
+               keyboardManager.handleKeyboardEvent();
+            }
+         }, "UI").start();
       } catch (final Exception e) {
          LOGGER.error("main exception", e);
       }

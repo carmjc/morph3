@@ -40,9 +40,9 @@ public class DragWorld implements MouseListener {
 
    @Override
    public void onMouseEvent() {
-      if (inputHistory.getLastEvents(2).get(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
-            && inputHistory.getLastEvents(2).get(1).getButton() == 0
-            && inputHistory.getLastEvents(2).get(0).getEventType() == EventType.MOUSE_MOVE) {
+      if (inputHistory.getLastEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
+            && inputHistory.getLastEvent(1).getButton() == 0
+            && inputHistory.getLastEvent().getEventType() == EventType.MOUSE_MOVE) {
 
          // Model.getModel().getViewport().setLockedOnEntity(null);
 
@@ -59,7 +59,7 @@ public class DragWorld implements MouseListener {
          }
          inputHistory.consumeLastEvents(2);
       }
-      while (inputHistory.getLastEvents(1).get(0).getEventType() == EventType.MOUSE_MOVE
+      while (inputHistory.getLastEvent().getEventType() == EventType.MOUSE_MOVE
             && dragContext.dragInProgress()) {
 
          final Vector2f oldFP = dragContext.getOldFP();
@@ -73,7 +73,7 @@ public class DragWorld implements MouseListener {
 
          inputHistory.consumeLastEvents(1);
       }
-      if (inputHistory.getLastEvents(1).get(0).getEventType() == EventType.MOUSE_BUTTON_UP
+      if (inputHistory.getLastEvent().getEventType() == EventType.MOUSE_BUTTON_UP
             && dragContext.dragInProgress()) {
          LOGGER.debug("dragContext reset");
          dragContext.reset();

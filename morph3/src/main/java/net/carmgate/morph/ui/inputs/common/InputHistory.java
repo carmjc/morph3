@@ -1,62 +1,48 @@
 package net.carmgate.morph.ui.inputs.common;
 
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.inject.Singleton;
 
-import net.carmgate.morph.ui.inputs.common.UIEvent.EventType;
-
 @Singleton
 public class InputHistory {
-	private static final int STACK_SIZE = 10;
+   private static final int STACK_SIZE = 100;
+   private final Deque<UIEvent> stack = new LinkedList<>();
 
-	private final Deque<UIEvent> stack = new LinkedList<>();
+   public void addEvent(UIEvent event) {
+      stack.addFirst(event);
+      if (stack.size() > STACK_SIZE) {
+         stack.removeLast();
+      }
+   }
 
-	/**
-	 * Default constructor.
-	 * Fills the stack with NOOP, so that the stack is always full,
-	 * even at start.
-	 */
-	public InputHistory() {
-		for (int i = 0; i < STACK_SIZE; i++) {
-			addEvent(new UIEvent(EventType.NOOP));
-		}
-	}
+   public void consumeLastEvents(int nb) {
+      for (int i = 0; i < nb; i++) {
+         stack.removeFirst();
+      }
+   }
 
-	public void addEvent(UIEvent event) {
-		stack.addFirst(event);
-		if (stack.size() > STACK_SIZE) {
-			stack.removeLast();
-		}
-	}
+   public UIEvent getLastEvent() {
+      try {
+         return stack.getFirst();
+      } catch (NoSuchElementException e) {
+         return UIEvent.NOOP;
+      }
+   }
 
-	public void consumeLastEvents(int nb) {
-		for (int i = 0; i < nb; i++) {
-			stack.addLast(new UIEvent(EventType.NOOP));
-			stack.removeFirst();
-		}
-	}
+   public UIEvent getLastEvent(int n) {
+      int i = 0;
+      for (final UIEvent event : stack) {
+         if (i++ >= n) {
+            return event;
+         }
+      }
+      return UIEvent.NOOP;
+   }
 
-	public UIEvent getLastEvent() {
-		return stack.getFirst();
-	}
-
-	public List<UIEvent> getLastEvents(int n) {
-		final List<UIEvent> result = new ArrayList<>();
-		int i = 0;
-		for (final UIEvent event : stack) {
-			if (i++ >= n) {
-				break;
-			}
-			result.add(event);
-		}
-		return result;
-	}
-
-	public int size() {
-		return stack.size();
-	}
+   public int size() {
+      return stack.size();
+   }
 }
