@@ -31,26 +31,25 @@ public class ShipRenderer implements Renderer<Ship> {
    public void render(Ship ship) {
 
       // TODO
-      final float mass = 2;
-      final float massScale = mass / 10 * uiContext.getZoom();
+      final float massScale = ship.getMass() * uiContext.getZoom();
       final float width = 128;
 
       GL11.glScalef(massScale, massScale, 0);
       GL11.glColor4f(1f, 1f, 1f, 0.6f);
       RenderUtils.renderCircle(0,
-            width / 2f - 2 / massScale,
+            width / 2f - 4 / massScale,
             0,
             2 / massScale,
-            new Float[] { 1f, 1f, 1f, 0.2f },
-            new Float[] { 0.7f, 0.7f, 0.7f, 1f },
-            new Float[] { 1f, 1f, 1f, 0f });
-      RenderUtils.renderCircle(width / 2f - 2 / massScale,
-            width / 2f + 2 / massScale,
-            1 / massScale,
-            1 / massScale,
-            new Float[] { 1f, 1f, 1f, 0f },
-            new Float[] { 1f, 0.5f, 0.5f, 1f },
-            new Float[] { 0f, 0f, 0f, 0f });
+            new float[] { 1f, 1f, 1f, 0.2f },
+            new float[] { 0.7f, 0.7f, 0.7f, 1f },
+            new float[] { 1f, 1f, 1f, 0f });
+      RenderUtils.renderCircle(width / 2f - 4 / massScale,
+            width / 2f + 4 / massScale,
+            2 / massScale,
+            2 / massScale,
+            new float[] { 1f, 1f, 1f, 0f },
+            ship.getOwner().getColor(),
+            new float[] { 0f, 0f, 0f, 0f });
 
       GL11.glScalef(1f / massScale, 1f / massScale, 0);
    }

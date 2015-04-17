@@ -21,11 +21,16 @@ public class Model {
    private Logger LOGGER;
 
    private final List<Ship> ships = new ArrayList<>();
+   private final List<Player> players = new ArrayList<>();
 
-   public void addShip(Ship ship) {
+   public void add(Ship ship) {
       ships.add(ship);
+      ship.getOwner().add(ship);
    }
 
+   /**
+    * Do not use this method if you intend to modify this list.
+    */
    public List<Ship> getShips() {
       return ships;
    }

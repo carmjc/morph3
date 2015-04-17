@@ -12,7 +12,7 @@ public class RenderUtils {
    private static final float cos = (float) Math.cos(deltaAngle);
    private static final float sin = (float) Math.sin(deltaAngle);
 
-   public static void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, Float[] colorInt, Float[] colorMiddle, Float[] colorExt) {
+   public static void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt) {
 
       // render limit of effect zone
       TextureImpl.bindNone();
