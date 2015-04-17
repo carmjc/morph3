@@ -2,17 +2,18 @@ package net.carmgate.morph.model;
 
 public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<Vector2f> {
 
+   public static final Vector2f NULL = new Vector2f();
+
    public Vector2f() {
+      super(0, 0);
    }
 
    public Vector2f(float x, float y) {
-      this.x = x;
-      this.y = y;
+      super(x, y);
    }
 
    public Vector2f(Vector2f v) {
-      x = v.x;
-      y = v.y;
+      super(v.x, v.y);
    }
 
    @Override

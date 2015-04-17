@@ -10,8 +10,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.Model;
+import net.carmgate.morph.model.ForceSource;
+import net.carmgate.morph.model.Goal;
 import net.carmgate.morph.model.Vector2f;
+import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.Ship;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
@@ -39,7 +42,7 @@ public class Main {
    @Inject
    private Conf conf;
    @Inject
-   private Model model;
+   private World world;
    @Inject
    private UIContext uiContext;
    @Inject
@@ -48,6 +51,9 @@ public class Main {
    private KeyboardManager keyboardManager;
    @Inject
    private InputHistory inputHistory;
+
+   // Computation attributes
+   private Vector2f accel = new Vector2f();
 
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
@@ -120,52 +126,68 @@ public class Main {
       try {
          new Thread(() -> {
             // init OpenGL context
-            initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
+               initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
 
-            for (final Renderer<?> renderer : renderers.values()) {
-               renderer.init();
-            }
-
-            // Rendering loop
-            while (true) {
-
-               // Renders everything
-               GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-               render();
-
-               // updates display and sets frame rate
-               Display.update();
-               Display.sync(200);
-
-               // update model
-               // Model.getModel().update();
-
-               // handle window resize
-               if (Display.wasResized()) {
-                  initView();
+               for (final Renderer<?> renderer : renderers.values()) {
+                  renderer.init();
                }
 
-               GL11.glMatrixMode(GL11.GL_PROJECTION);
-               GL11.glLoadIdentity();
+               // Rendering loop
+               while (true) {
 
-               final int width = Display.getWidth();
-               final int height = Display.getHeight();
-               GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
-               GL11.glViewport(0, 0, width, height);
+                  // Renders everything
+                  GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+                  render();
 
-               GL11.glMatrixMode(GL11.GL_MODELVIEW);
-               GL11.glLoadIdentity();
+                  // updates display and sets frame rate
+                  Display.update();
+                  Display.sync(200);
 
-               // Handles the window close requested event
-               if (Display.isCloseRequested()) {
-                  Display.destroy();
-                  System.exit(0);
+                  // update model
+                  for (Ship ship : world.getShips()) {
+                     Goal goal = ship.getCurrentGoal();
+                     if (goal != null) {
+                        goal.evaluate(0);
+                     }
+                  }
+                  for (PhysicalEntity entity : world.getPhysicalEntities()) {
+                     accel.copy(Vector2f.NULL);
+
+                     for (ForceSource source : entity.getForceSources()) {
+                        accel.add(source.getForce());
+                     }
+
+                     // kinematics
+                     entity.getSpeed().add(accel);
+                     entity.getPos().add(entity.getSpeed());
+                  }
+
+                  // handle window resize
+                  if (Display.wasResized()) {
+                     initView();
+                  }
+
+                  GL11.glMatrixMode(GL11.GL_PROJECTION);
+                  GL11.glLoadIdentity();
+
+                  final int width = Display.getWidth();
+                  final int height = Display.getHeight();
+                  GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
+                  GL11.glViewport(0, 0, width, height);
+
+                  GL11.glMatrixMode(GL11.GL_MODELVIEW);
+                  GL11.glLoadIdentity();
+
+                  // Handles the window close requested event
+                  if (Display.isCloseRequested()) {
+                     Display.destroy();
+                     System.exit(0);
+                  }
+
+                  mouseManager.handleMouseEvent();
+                  keyboardManager.handleKeyboardEvent();
                }
-
-               mouseManager.handleMouseEvent();
-               keyboardManager.handleKeyboardEvent();
-            }
-         }, "UI").start();
+            }, "UI").start();
       } catch (final Exception e) {
          LOGGER.error("main exception", e);
       }
@@ -217,7 +239,7 @@ public class Main {
    private void renderNormal() {
       final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
       if (shipRenderer != null) {
-         for (final Ship ship : model.getShips()) {
+         for (final Ship ship : world.getShips()) {
             final Vector2f pos = ship.getPos();
             GL11.glTranslatef(pos.x, pos.y, 0);
             shipRenderer.render(ship);
@@ -229,7 +251,7 @@ public class Main {
    private void renderSelect() {
       final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
       if (shipRenderer != null) {
-         for (final Ship ship : model.getShips()) {
+         for (final Ship ship : world.getShips()) {
             final Vector2f pos = ship.getPos();
             GL11.glTranslatef(pos.x, pos.y, 0);
             shipRenderer.render(ship);

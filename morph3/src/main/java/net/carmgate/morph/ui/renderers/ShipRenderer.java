@@ -49,7 +49,7 @@ public class ShipRenderer implements Renderer<Ship> {
             1 / zoom / massScale,
             1 / zoom / massScale,
             new float[] { 1f, 1f, 1f, 0f },
-            ship.getOwner().getColor(),
+            ship.getPlayer().getColor(),
             new float[] { 0f, 0f, 0f, 0f });
 
       GL11.glScalef(1f / massScale, 1f / massScale, 0);

@@ -21,6 +21,9 @@ public class MouseManager {
    private Logger LOGGER;
    @Inject
    private InputHistory inputHistory;
+   @Inject
+   private GameMouse gameMouse;
+
    private final List<MouseListener> mouseListeners = new ArrayList<>();
 
    public void addMouseListener(MouseListener mouseListener) {
@@ -52,7 +55,7 @@ public class MouseManager {
          final int dx = Mouse.getDX();
          final int dy = Mouse.getDY();
          if (dx != 0 || dy != 0) {
-            final UIEvent event = new UIEvent(EventType.MOUSE_MOVE, Mouse.getEventButton(), new int[] { Mouse.getX(), Mouse.getY() });
+            final UIEvent event = new UIEvent(EventType.MOUSE_MOVE, Mouse.getEventButton(), new int[] { gameMouse.getX(), gameMouse.getY() });
             inputHistory.addEvent(event);
 
          }

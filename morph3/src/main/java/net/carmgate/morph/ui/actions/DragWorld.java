@@ -14,7 +14,6 @@ import net.carmgate.morph.ui.inputs.common.MouseListener;
 import net.carmgate.morph.ui.inputs.common.UIEvent.EventType;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
-import org.lwjgl.input.Mouse;
 import org.slf4j.Logger;
 
 @Singleton
@@ -54,8 +53,8 @@ public class DragWorld implements MouseListener {
          if (oldFP != null) {
             final ViewPort viewport = uiContext.getViewport();
             final Vector2f fp = viewport.getFocalPoint();
-            fp.x = oldFP.x - (Mouse.getX() - oldMousePosInWindow.x);
-            fp.y = oldFP.y + (Mouse.getY() - oldMousePosInWindow.y);
+            fp.x = oldFP.x - (gameMouse.getX() - oldMousePosInWindow.x);
+            fp.y = oldFP.y + (gameMouse.getY() - oldMousePosInWindow.y);
          }
          inputHistory.consumeLastEvents(2);
       }
@@ -67,8 +66,8 @@ public class DragWorld implements MouseListener {
          if (oldFP != null) {
             final ViewPort viewport = uiContext.getViewport();
             final Vector2f fp = viewport.getFocalPoint();
-            fp.x = oldFP.x - (Mouse.getX() - oldMousePosInWindow.x);
-            fp.y = oldFP.y + (Mouse.getY() - oldMousePosInWindow.y);
+            fp.x = oldFP.x - (gameMouse.getX() - oldMousePosInWindow.x);
+            fp.y = oldFP.y + (gameMouse.getY() - oldMousePosInWindow.y);
          }
 
          inputHistory.consumeLastEvents(1);
