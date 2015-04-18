@@ -1,5 +1,5 @@
 package net.carmgate.morph.model.events;
 
-public interface WorldChanged {
+public interface WorldUpdated {
 
 }

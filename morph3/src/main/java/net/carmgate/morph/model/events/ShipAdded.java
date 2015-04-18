@@ -3,7 +3,7 @@ package net.carmgate.morph.model.events;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Ship;
 
-public class ShipAdded implements WorldChanged {
+public class ShipAdded implements WorldUpdated {
    private Ship ship;
    private World world;
 
