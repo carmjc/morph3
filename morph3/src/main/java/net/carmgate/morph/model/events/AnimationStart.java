@@ -1,6 +1,6 @@
 package net.carmgate.morph.model.events;
 
-import net.carmgate.morph.model.entities.Animation;
+import net.carmgate.morph.model.animations.Animation;
 
 public class AnimationStart implements WorldEvent {
 

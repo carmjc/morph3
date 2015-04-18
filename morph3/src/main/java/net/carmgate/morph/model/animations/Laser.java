@@ -1,4 +1,6 @@
-package net.carmgate.morph.model.entities;
+package net.carmgate.morph.model.animations;
+
+import net.carmgate.morph.model.entities.physical.Ship;
 
 
 public class Laser implements Animation {

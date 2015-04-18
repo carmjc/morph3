@@ -11,8 +11,8 @@ import javax.inject.Singleton;
 
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.entities.PhysicalEntity;
-import net.carmgate.morph.model.entities.Ship;
+import net.carmgate.morph.model.entities.physical.PhysicalEntity;
+import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
@@ -162,16 +162,6 @@ public class Main {
 						entity.getSpeed().add(tmpAccel);
 						entity.getPos().add(entity.getSpeed());
 					}
-					//					for (final ShipUpdated worldEvent : world.getWorldEvents()) {
-					//						if (worldEvent instanceof ShipHit) {
-					//							final Ship ship = ((ShipHit) worldEvent).getShip();
-					//							ship.damage(((ShipHit) worldEvent).getDamage());
-					//							if (ship.getHealth() <= 0) {
-					//								world.remove(ship);
-					//							}
-					//						}
-					//					}
-					//					world.getWorldEvents().clear();
 
 					// handle window resize
 					if (Display.wasResized()) {

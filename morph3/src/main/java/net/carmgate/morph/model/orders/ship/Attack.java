@@ -3,8 +3,8 @@ package net.carmgate.morph.model.orders.ship;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-import net.carmgate.morph.model.entities.Laser;
-import net.carmgate.morph.model.entities.Ship;
+import net.carmgate.morph.model.animations.Laser;
+import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.events.AnimationStart;
 import net.carmgate.morph.model.events.ShipHit;
 import net.carmgate.morph.model.events.WorldEvent;
