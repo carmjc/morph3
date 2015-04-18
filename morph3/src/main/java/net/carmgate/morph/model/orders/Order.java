@@ -1,38 +1,44 @@
 package net.carmgate.morph.model.orders;
 
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.entities.Ship;
 
 public abstract class Order {
 
-	private World world;
-	private long nextEvalTime = 0;
+   private World world;
+   private long nextEvalTime = 0;
+   protected Ship orderee;
 
-	public Order() {
-	}
+   public Order() {
+   }
 
-	public void eval() {
-		if (world.getTime() > nextEvalTime) {
-			evaluate();
-		}
-	}
+   public void setOrderee(Ship orderee) {
+      this.orderee = orderee;
+   }
 
-	protected abstract void evaluate();
+   public void eval() {
+      if (world.getTime() > nextEvalTime) {
+         evaluate();
+      }
+   }
 
-	public long getNextEvalTime() {
-		return nextEvalTime;
-	}
+   protected abstract void evaluate();
 
-	public World getWorld() {
-		return world;
-	}
+   public long getNextEvalTime() {
+      return nextEvalTime;
+   }
 
-	protected void setNextEvalTime(long nextEvalTime) {
-		this.nextEvalTime = nextEvalTime;
-	}
+   public World getWorld() {
+      return world;
+   }
 
-	public void setWorld(World world) {
-		this.world = world;
-		nextEvalTime = world.getTime();
-	}
+   protected void setNextEvalTime(long nextEvalTime) {
+      this.nextEvalTime = nextEvalTime;
+   }
+
+   public void setWorld(World world) {
+      this.world = world;
+      nextEvalTime = world.getTime();
+   }
 
 }

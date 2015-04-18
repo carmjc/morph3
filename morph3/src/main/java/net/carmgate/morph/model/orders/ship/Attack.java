@@ -1,28 +1,37 @@
 package net.carmgate.morph.model.orders.ship;
 
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+
 import net.carmgate.morph.model.entities.Laser;
 import net.carmgate.morph.model.entities.Ship;
+import net.carmgate.morph.model.events.AnimationStart;
 import net.carmgate.morph.model.events.ShipHit;
+import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.orders.Order;
 
 public class Attack extends Order {
 
-	private final Ship source;
-	private final Ship target;
+   @Inject
+   private Event<WorldEvent> worldEventMgr;
 
-	public Attack(Ship source, Ship target) {
-		this.source = source;
-		this.target = target;
-	}
+   private Ship target;
 
-	@Override
-	protected void evaluate() {
-		final Laser laser = new Laser(source, target);
-		getWorld().add(laser);
+   @Override
+   protected void evaluate() {
+      // Create animation
+      final Laser laser = new Laser(orderee, target);
+      worldEventMgr.fire(new AnimationStart(laser));
 
-		target.fireShipUpdate(new ShipHit(target, 1));
+      // Create the event
+      worldEventMgr.fire(new ShipHit(target, 1));
 
-		setNextEvalTime(getNextEvalTime() + 1000);
-	}
+      setNextEvalTime(getNextEvalTime() + 1000);
+   }
+
+   public void setAttributes(Ship target) {
+      this.target = target;
+
+   }
 
 }
