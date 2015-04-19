@@ -100,7 +100,7 @@ public class Ship implements Renderable, PhysicalEntity {
          LOGGER.debug("Ship hit. Health: " + health);
          if (health <= 0) {
             ShipDead shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEAD);
-            shipDead.setAttributes(this);
+            shipDead.setDeadShip(this);
             worldEventMgr.fire(shipDead);
          }
       } else {

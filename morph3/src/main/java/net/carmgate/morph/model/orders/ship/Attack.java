@@ -26,9 +26,9 @@ public class Attack extends Order {
    protected void evaluate() {
       // Create animation
       final Laser laser = animationFactory.newInstance(AnimationType.LASER);
-      laser.setAttributes(orderee, target);
+      laser.init(orderee, target);
       AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
-      animationStart.setAttributes(laser);
+      animationStart.setAnimation(laser);
       worldEventMgr.fire(animationStart);
 
       // Create the event
@@ -39,7 +39,7 @@ public class Attack extends Order {
       setNextEvalTime(getNextEvalTime() + 1000);
    }
 
-   public void setAttributes(Ship target) {
+   public void setTarget(Ship target) {
       this.target = target;
 
    }

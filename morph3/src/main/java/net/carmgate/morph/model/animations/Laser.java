@@ -8,7 +8,7 @@ public class Laser implements Animation {
    private Ship target;
    private Ship source;
 
-   public void setAttributes(Ship source, Ship target) {
+   public void init(Ship source, Ship target) {
       this.source = source;
       this.target = target;
    }

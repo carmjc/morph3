@@ -11,18 +11,18 @@ me.color = [1, 0.5, 0.5, 1];
 other = new Player("Other");
 other.color = [0.2, 1, 0.5, 1];
 
-ship1 = entityFactory.createEntity(PhysicalEntityType.valueOf("SHIP"));
+ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship1.init(new Vector2f(0, 0), 10);
 ship1.mass = 0.2;
 ship1.owner = me;
 world.add(ship1);
 
-ship2 = entityFactory.createEntity(PhysicalEntityType.valueOf("SHIP"));
+ship2 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship2.init(new Vector2f(100, 0), 10);
 ship2.mass = 0.5;
 ship2.owner = other;
 world.add(ship2);
 
-attack = orderFactory.createOrder(OrderType.valueOf("ATTACK"));
-attack.setAttributes(ship1);
+attack = orderFactory.newInstance(OrderType.valueOf("ATTACK"));
+attack.setTarget(ship1);
 ship2.add(attack);

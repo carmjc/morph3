@@ -5,7 +5,7 @@ import net.carmgate.morph.model.entities.physical.Ship;
 public class ShipAdded implements WorldEvent {
    private Ship ship;
 
-   public void setAttributes(Ship ship) {
+   public void setAddedShip(Ship ship) {
       this.ship = ship;
    }
 

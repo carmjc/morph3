@@ -76,7 +76,7 @@ public class World {
 
       // update surroundings of the awares
       ShipAdded shipAdded = worldEventFactory.newInstance(WorldEventType.SHIP_ADDED);
-      shipAdded.setAttributes(ship);
+      shipAdded.setAddedShip(ship);
       worldEventMgr.fire(shipAdded);
    }
 

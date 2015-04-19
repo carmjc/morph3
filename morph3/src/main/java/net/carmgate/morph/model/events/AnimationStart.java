@@ -6,7 +6,7 @@ public class AnimationStart implements WorldEvent {
 
    private Animation animation;
 
-   public void setAttributes(Animation animation) {
+   public void setAnimation(Animation animation) {
       this.animation = animation;
    }
 
