@@ -4,13 +4,13 @@ import net.carmgate.morph.model.entities.physical.Ship;
 
 public abstract class ShipUpdated implements WorldEvent {
 
-	private final Ship ship;
+   private Ship ship;
 
-	public ShipUpdated(Ship ship) {
-		this.ship = ship;
-	}
+   protected void setAttributes(Ship ship) {
+      this.ship = ship;
+   }
 
-	public Ship getShip() {
-		return ship;
-	}
+   public Ship getShip() {
+      return ship;
+   }
 }

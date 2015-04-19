@@ -5,16 +5,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import net.carmgate.morph.eventmgt.MEvent;
+import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Surroundings;
 import net.carmgate.morph.model.events.ShipDead;
 import net.carmgate.morph.model.events.ShipHit;
 import net.carmgate.morph.model.events.WorldEvent;
+import net.carmgate.morph.model.events.WorldEventFactory;
+import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
@@ -24,12 +26,10 @@ import org.slf4j.Logger;
 
 public class Ship implements Renderable, PhysicalEntity {
 
-   @Inject
-   private World world;
-   @Inject
-   private MEvent<WorldEvent> worldEventMgr;
-   @Inject
-   private Logger LOGGER;
+   @Inject private World world;
+   @Inject private MEvent<WorldEvent> worldEventMgr;
+   @Inject private Logger LOGGER;
+   @Inject private WorldEventFactory worldEventFactory;
 
    private final Vector2f pos = new Vector2f();
    private final Vector2f speed = new Vector2f();
@@ -94,12 +94,14 @@ public class Ship implements Renderable, PhysicalEntity {
       this.pos.copy(pos);
    }
 
-   public void onShipHit(@Observes ShipHit event) {
+   public void onShipHit(@MObserves ShipHit event) {
       if (event.getShip() == this) {
          health -= event.getDamage();
          LOGGER.debug("Ship hit. Health: " + health);
          if (health <= 0) {
-            worldEventMgr.fire(new ShipDead(this));
+            ShipDead shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEAD);
+            shipDead.setAttributes(this);
+            worldEventMgr.fire(shipDead);
          }
       } else {
          LOGGER.debug("Ship hit. Not this ship");

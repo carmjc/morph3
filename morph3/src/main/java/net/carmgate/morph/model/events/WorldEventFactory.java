@@ -4,15 +4,22 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import net.carmgate.morph.eventmgt.MEventManager;
+
 @Singleton
 public class WorldEventFactory {
 
-	@Inject
-	Instance<WorldEvent> worldEventInstances;
+   @Inject
+   Instance<WorldEvent> worldEventInstances;
 
-	@SuppressWarnings("unchecked")
-	public <U extends WorldEvent> U createWorldEvent(WorldEventType type) {
-		return (U) worldEventInstances.select(type.getClazz()).get();
-	}
+   @Inject
+   private MEventManager eventManager;
+
+   @SuppressWarnings("unchecked")
+   public <U extends WorldEvent> U newInstance(WorldEventType type) {
+      U u = (U) worldEventInstances.select(type.getClazz()).get();
+      eventManager.scanAndRegister(u);
+      return u;
+   }
 
 }

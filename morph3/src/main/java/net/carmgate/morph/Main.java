@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.eventmgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.Ship;
@@ -35,6 +36,9 @@ import org.slf4j.Logger;
 @Singleton
 public class Main {
 
+   @Inject
+   private MEventManager eventManager;
+
    public void loop(@Observes GameLoaded gameLoaded) {
       // init OpenGL context
       initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
@@ -56,12 +60,19 @@ public class Main {
 
          // update model
          world.updateTime();
+
+         // Update world
          for (final Ship ship : world.getShips()) {
             final Order order = ship.getCurrentOrder();
             if (order != null) {
                order.eval();
             }
          }
+
+         // Handle deferred events
+         eventManager.deferredFire();
+
+         // Update kinematics
          for (final PhysicalEntity entity : world.getPhysicalEntities()) {
             tmpAccel.copy(Vector2f.NULL);
 

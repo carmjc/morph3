@@ -4,9 +4,9 @@ import net.carmgate.morph.model.animations.Animation;
 
 public class AnimationStart implements WorldEvent {
 
-   private final Animation animation;
+   private Animation animation;
 
-   public AnimationStart(Animation animation) {
+   public void setAttributes(Animation animation) {
       this.animation = animation;
    }
 

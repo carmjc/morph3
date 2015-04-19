@@ -25,6 +25,8 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.events.ShipAdded;
 import net.carmgate.morph.model.events.WorldEvent;
+import net.carmgate.morph.model.events.WorldEventFactory;
+import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.ui.renderers.api.Renderable;
 
@@ -39,20 +41,12 @@ public class World {
       return new String(encoded, encoding);
    }
 
-   @Inject
-   private Logger LOGGER;
-
-   @Inject
-   private Event<WorldEvent> worldEventMgr;
-
-   @Inject
-   private Event<GameLoaded> gameLoadedEvent;
-
-   @Inject
-   private OrderFactory orderFactory;
-
-   @Inject
-   private PhysicalEntityFactory entityFactory;
+   @Inject private Logger LOGGER;
+   @Inject private Event<WorldEvent> worldEventMgr;
+   @Inject private Event<GameLoaded> gameLoadedEvent;
+   @Inject private OrderFactory orderFactory;
+   @Inject private PhysicalEntityFactory entityFactory;
+   @Inject private WorldEventFactory worldEventFactory;
 
    private final List<Ship> ships = new ArrayList<>();
    // private final List<WorldUpdateListener> worldChangeListeners = new ArrayList<>();
@@ -81,7 +75,9 @@ public class World {
       physicalEntities.add(ship);
 
       // update surroundings of the awares
-      worldEventMgr.fire(new ShipAdded(ship));
+      ShipAdded shipAdded = worldEventFactory.newInstance(WorldEventType.SHIP_ADDED);
+      shipAdded.setAttributes(ship);
+      worldEventMgr.fire(shipAdded);
    }
 
    public Set<Renderable> getAnimations() {

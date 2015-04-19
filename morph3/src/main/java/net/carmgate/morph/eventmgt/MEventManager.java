@@ -1,7 +1,7 @@
 package net.carmgate.morph.eventmgt;
 
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,126 +14,145 @@ import javax.inject.Singleton;
 
 @Singleton
 public class MEventManager {
-	private final Map<Type, Set<Method>> observingMethodsMapByOwnerClass = new HashMap<>();
-	private final Map<Type, Set<Method>> observingMethodsMapByEvent = new HashMap<>();
-	private final Map<Type, Set<Object>> instances = new HashMap<>();
-	private final List<Object> tmp = new ArrayList<>();
-	private boolean firingEvent;
-	private boolean scanning;
-	private final Map<Type, List<Object>> deferredEvents = new HashMap<>();
+   private final Map<Type, Set<Method>> observingMethodsMapByOwnerClass = new HashMap<>();
+   private final Map<Type, Set<Method>> observingMethodsMapByEvent = new HashMap<>();
+   private final Map<Type, Set<Object>> instances = new HashMap<>();
+   private final List<Object> tmp = new ArrayList<>();
+   private boolean firingEvent;
+   private boolean scanning;
+   private Map<Type, List<Object>> deferredEvents = new HashMap<>();
+   private Map<Type, List<Object>> deferredEventsBeingHandled = new HashMap<>();
 
-	public void addEvent(Object o) {
-		List<Object> list = deferredEvents.get(o.getClass());
-		if (list == null) {
-			list = new ArrayList<>();
-			deferredEvents.put(o.getClass(), list);
-		}
-		list.add(o);
-	}
+   public void addEvent(Object o) {
+      List<Object> list = deferredEvents.get(o.getClass());
+      if (list == null) {
+         list = new ArrayList<>();
+         deferredEvents.put(o.getClass(), list);
+      }
+      list.add(o);
+   }
 
-	public void deferredFire() {
-		setFiringEvent(true);
-		final Set<Type> keySet = deferredEvents.keySet();
-		for (final Type type : keySet) {
-			// for each observing method
-			observingMethodsMapByEvent.get(type).forEach(method -> {
-				// for each observing bean
-				instances.get(type).forEach(object -> {
-					// for each event
-					deferredEvents.get(type).forEach(event -> {
-						try {
-							method.invoke(object, event);
-						} catch (final Exception e) {
-							throw new EventManagementException(e);
-						}
-					});
-				});
-			});
-		}
-		setFiringEvent(false);
+   public void deferredFire() {
+      setFiringEvent(true);
 
-		// Once we're done firing, scan and register events that were not registered because of the firing
-		getTmp().forEach(o -> {
-			scanAndRegister(o);
-		});
-	}
+      synchronized (deferredEvents) {
+         Map<Type, List<Object>> tmp = deferredEventsBeingHandled;
+         deferredEventsBeingHandled = deferredEvents;
+         deferredEvents = tmp;
+      }
 
-	public Map<Type, List<Object>> getDeferredEvents() {
-		return deferredEvents;
-	}
+      final Set<Type> keySet = deferredEventsBeingHandled.keySet();
+      for (final Type type : keySet) {
+         // for each observing method
+         Set<Method> observingMethods = observingMethodsMapByEvent.get(type);
+         if (observingMethods == null) {
+            continue;
+         }
+         observingMethods.forEach(method -> {
+            // for each observing bean
+            instances.get(method.getDeclaringClass()).forEach(object -> {
+               // for each event
+               deferredEventsBeingHandled.get(type).forEach(event -> {
+                  try {
+                     method.invoke(object, event);
+                  } catch (final Exception e) {
+                     throw new EventManagementException(e);
+                  }
+               });
+            });
+         });
+      }
+      setFiringEvent(false);
 
-	public Map<Type, Set<Object>> getInstances() {
-		return instances;
-	}
+      deferredEventsBeingHandled.clear();
+      // TODO call the deferredFiring again if there were new events while we are handling old one
+      // But we should not do the scanAndRegister twice ..
 
-	public Map<Type, Set<Method>> getObservingMethodsMapByEvent() {
-		return observingMethodsMapByEvent;
-	}
+      // Once we're done firing, scan and register events that were not registered because of the firing
+      getTmp().forEach(o -> {
+         scanAndRegister(o);
+      });
+      getTmp().clear();
+   }
 
-	public Map<Type, Set<Method>> getObservingMethodsMapByOwnerClass() {
-		return observingMethodsMapByOwnerClass;
-	}
+   public Map<Type, List<Object>> getDeferredEvents() {
+      return deferredEvents;
+   }
 
-	public List<Object> getTmp() {
-		return tmp;
-	}
+   public Map<Type, Set<Object>> getInstances() {
+      return instances;
+   }
 
-	public boolean isFiringEvent() {
-		return firingEvent;
-	}
+   public Map<Type, Set<Method>> getObservingMethodsMapByEvent() {
+      return observingMethodsMapByEvent;
+   }
 
-	public boolean isScanning() {
-		return scanning;
-	}
+   public Map<Type, Set<Method>> getObservingMethodsMapByOwnerClass() {
+      return observingMethodsMapByOwnerClass;
+   }
 
-	public void scanAndRegister(Object o) {
-		if (firingEvent) {
-			tmp.add(o);
-			return;
-		}
+   public List<Object> getTmp() {
+      return tmp;
+   }
 
-		// Look for @MObserves
-		Set<Method> observingMethods = observingMethodsMapByOwnerClass.get(o.getClass());
-		if (observingMethods == null) {
-			observingMethods = new HashSet<>();
-			final Method[] declaredMethods = o.getClass().getDeclaredMethods();
-			for (final Method method : declaredMethods) {
-				if (method.getAnnotatedParameterTypes().length > 0) {
-					observingMethods.add(method);
-				}
-			}
+   public boolean isFiringEvent() {
+      return firingEvent;
+   }
 
-			observingMethodsMapByOwnerClass.put(o.getClass(), observingMethods);
+   public boolean isScanning() {
+      return scanning;
+   }
 
-			observingMethods.forEach(m -> {
-				for (final AnnotatedType type : m.getAnnotatedParameterTypes()) {
-					if (type.isAnnotationPresent(MObserves.class)) {
-						Set<Method> methods = observingMethodsMapByEvent.get(type.getType());
-						if (methods == null) {
-							methods = new HashSet<>();
-							observingMethodsMapByEvent.put(type.getType(), methods);
-						}
-						methods.add(m);
-					}
-				}
-			});
-		}
+   public void scanAndRegister(Object o) {
+      if (firingEvent) {
+         tmp.add(o);
+         return;
+      }
 
-		// add the object to the observers
-		Set<Object> oTypeInstances = instances.get(o.getClass());
-		if (oTypeInstances == null) {
-			oTypeInstances = new HashSet<>();
-			instances.put(o.getClass(), oTypeInstances);
-		}
-		oTypeInstances.add(o);
-	}
+      // Look for @MObserves
+      Set<Method> observingMethods = observingMethodsMapByOwnerClass.get(o.getClass());
+      if (observingMethods == null) {
+         observingMethods = new HashSet<>();
+         final Method[] declaredMethods = o.getClass().getDeclaredMethods();
+         for (final Method method : declaredMethods) {
+            for (Parameter param : method.getParameters()) {
+               if (param.isAnnotationPresent(MObserves.class)) {
+                  observingMethods.add(method);
+               }
+            }
+         }
 
-	public void setFiringEvent(boolean firingEvent) {
-		this.firingEvent = firingEvent;
-	}
+         observingMethodsMapByOwnerClass.put(o.getClass(), observingMethods);
 
-	public void setScanning(boolean scanning) {
-		this.scanning = scanning;
-	}
+         observingMethods.forEach(m -> {
+            for (final Parameter param : m.getParameters()) {
+               if (param.isAnnotationPresent(MObserves.class)) {
+                  Set<Method> methods = observingMethodsMapByEvent.get(param.getType());
+                  if (methods == null) {
+                     methods = new HashSet<>();
+                     observingMethodsMapByEvent.put(param.getType(), methods);
+                  }
+                  methods.add(m);
+               }
+            }
+         });
+      }
+
+      // add the object to the observers
+      Set<Object> oTypeInstances = instances.get(o.getClass());
+      if (oTypeInstances == null) {
+         oTypeInstances = new HashSet<>();
+         instances.put(o.getClass(), oTypeInstances);
+      }
+      oTypeInstances.add(o);
+   }
+
+   public void setFiringEvent(boolean firingEvent) {
+      this.firingEvent = firingEvent;
+   }
+
+   public void setScanning(boolean scanning) {
+      this.scanning = scanning;
+   }
 
 }

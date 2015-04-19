@@ -16,7 +16,7 @@ public class PhysicalEntityFactory {
    private MEventManager eventManager;
 
    @SuppressWarnings("unchecked")
-   public <U extends PhysicalEntity> U createEntity(PhysicalEntityType type) {
+   public <U extends PhysicalEntity> U newInstance(PhysicalEntityType type) {
       final U u = (U) physicalEntities.select(type.getClazz()).get();
       eventManager.scanAndRegister(u);
       return u;

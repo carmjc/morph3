@@ -4,8 +4,9 @@ import net.carmgate.morph.model.entities.physical.Ship;
 
 public class ShipDead extends ShipUpdated {
 
-	public ShipDead(Ship ship) {
-		super(ship);
-	}
+   @Override
+   public void setAttributes(Ship ship) {
+      super.setAttributes(ship);
+   }
 
 }
