@@ -20,6 +20,7 @@ public class MEventManager {
    private final List<Object> tmp = new ArrayList<>();
    private boolean firingEvent;
    private boolean scanning;
+   private Map<Type, List<Object>> deferredEvents = new HashMap<>();
 
    public void scanAndRegister(Object o) {
       if (firingEvent) {
@@ -61,6 +62,36 @@ public class MEventManager {
          instances.put(o.getClass(), oTypeInstances);
       }
       oTypeInstances.add(o);
+   }
+
+   public void addEvent(Object o) {
+      List<Object> list = deferredEvents.get(o.getClass());
+      if (list == null) {
+         list = new ArrayList<>();
+         deferredEvents.put(o.getClass(), list);
+      }
+      list.add(o);
+   }
+
+   public void deferredFire() {
+      for (Type type : deferredEvents.keySet()) {
+
+         setFiringEvent(true);
+         getObservingMethodsMapByEvent().get(event.getClass()).forEach(method -> {
+            eventManager.getInstances().get(method.getClass()).forEach(object -> {
+               try {
+                  method.invoke(object, event);
+               } catch (Exception e) {
+                  throw new EventManagementException(e);
+               }
+            });
+         });
+         setFiringEvent(false);
+      }
+
+      getTmp().forEach(o -> {
+         scanAndRegister(o);
+      });
    }
 
    public boolean isFiringEvent() {
