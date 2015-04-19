@@ -1,8 +1,8 @@
 package net.carmgate.morph.model.orders.ship;
 
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.model.animations.Laser;
 import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.events.AnimationStart;
@@ -13,7 +13,7 @@ import net.carmgate.morph.model.orders.Order;
 public class Attack extends Order {
 
    @Inject
-   private Event<WorldEvent> worldEventMgr;
+   private MEvent<WorldEvent> worldEventMgr;
 
    private Ship target;
 
