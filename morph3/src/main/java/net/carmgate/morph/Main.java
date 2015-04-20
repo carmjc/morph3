@@ -60,44 +60,18 @@ public class Main {
 
          // Renders everything
          renderAnimation();
-         render();
-
-         // update model
-         world.updateTime();
-
-         // Update world
-         for (final Ship ship : world.getShips()) {
-            final Order order = ship.getCurrentOrder();
-            if (order != null) {
-               order.eval();
-               if (order.isDone()) {
-                  ship.removeCurrentOrder();
-               }
-            }
-         }
+         renderPhysical();
+         updateWorld();
 
          // Fire deferred events
          eventManager.deferredFire();
 
          // Update kinematics
-         for (final PhysicalEntity entity : world.getPhysicalEntities()) {
-            tmpAccel.copy(Vector2f.NULL);
-
-            for (final ForceSource source : entity.getForceSources()) {
-               tmpAccel.add(source.getForce());
-            }
-
-            // kinematics
-            entity.getSpeed().add(tmpAccel);
-            entity.getPos().add(entity.getSpeed());
-         }
-
-         // RenderUtils.renderLine(new Vector2f(100, 0), new Vector2f(0, 0), 1, 2,
-         // new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+         updateKinematics();
 
          // updates display and sets frame rate
          Display.update();
-         Display.sync(200);
+         Display.sync(100);
 
          // handle window resize
          if (Display.wasResized()) {
@@ -123,6 +97,33 @@ public class Main {
 
          mouseManager.handleMouseEvent();
          keyboardManager.handleKeyboardEvent();
+      }
+   }
+
+   public void updateKinematics() {
+      for (final PhysicalEntity entity : world.getPhysicalEntities()) {
+         tmpAccel.copy(Vector2f.NULL);
+
+         for (final ForceSource source : entity.getForceSources()) {
+            tmpAccel.add(source.getForce());
+         }
+
+         // kinematics
+         entity.getSpeed().add(tmpAccel);
+         entity.getPos().add(entity.getSpeed());
+      }
+   }
+
+   public void updateWorld() {
+      world.updateTime();
+      for (final Ship ship : world.getShips()) {
+         final Order order = ship.getCurrentOrder();
+         if (order != null) {
+            order.eval();
+            if (order.isDone()) {
+               ship.removeCurrentOrder();
+            }
+         }
       }
    }
 
@@ -254,7 +255,7 @@ public class Main {
       }
    }
 
-   private void render() {
+   private void renderPhysical() {
       final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
       final float zoomFactor = uiContext.getViewport().getZoomFactor();
       GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
@@ -262,17 +263,17 @@ public class Main {
 
       switch (uiContext.getRenderMode()) {
          case SELECT:
-            renderSelect();
+            renderPhysicalSelect();
             break;
          default:
-            renderNormal();
+            renderPhysicalNormal();
       }
 
       GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
       GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
    }
 
-   private void renderNormal() {
+   private void renderPhysicalNormal() {
       final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
       if (shipRenderer != null) {
          for (final Ship ship : world.getShips()) {
@@ -284,7 +285,7 @@ public class Main {
       }
    }
 
-   private void renderSelect() {
+   private void renderPhysicalSelect() {
       final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
       if (shipRenderer != null) {
          for (final Ship ship : world.getShips()) {

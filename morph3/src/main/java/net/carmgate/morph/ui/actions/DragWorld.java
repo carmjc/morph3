@@ -53,8 +53,8 @@ public class DragWorld implements MouseListener {
          if (oldFP != null) {
             final ViewPort viewport = uiContext.getViewport();
             final Vector2f fp = viewport.getFocalPoint();
-            fp.x = oldFP.x - (gameMouse.getX() - oldMousePosInWindow.x);
-            fp.y = oldFP.y + (gameMouse.getY() - oldMousePosInWindow.y);
+            fp.x = (oldFP.x * uiContext.getViewport().getZoomFactor() - (gameMouse.getX() - oldMousePosInWindow.x)) / uiContext.getViewport().getZoomFactor();
+            fp.y = (oldFP.y * uiContext.getViewport().getZoomFactor() + (gameMouse.getY() - oldMousePosInWindow.y)) / uiContext.getViewport().getZoomFactor();
          }
          inputHistory.consumeLastEvents(2);
       }
@@ -66,8 +66,8 @@ public class DragWorld implements MouseListener {
          if (oldFP != null) {
             final ViewPort viewport = uiContext.getViewport();
             final Vector2f fp = viewport.getFocalPoint();
-            fp.x = oldFP.x - (gameMouse.getX() - oldMousePosInWindow.x);
-            fp.y = oldFP.y + (gameMouse.getY() - oldMousePosInWindow.y);
+            fp.x = (oldFP.x * uiContext.getViewport().getZoomFactor() - (gameMouse.getX() - oldMousePosInWindow.x)) / uiContext.getViewport().getZoomFactor();
+            fp.y = (oldFP.y * uiContext.getViewport().getZoomFactor() + (gameMouse.getY() - oldMousePosInWindow.y)) / uiContext.getViewport().getZoomFactor();
          }
 
          inputHistory.consumeLastEvents(1);
