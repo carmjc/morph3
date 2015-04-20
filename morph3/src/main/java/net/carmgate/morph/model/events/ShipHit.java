@@ -6,8 +6,8 @@ public class ShipHit extends ShipUpdated {
 
    private float damage;
 
-   public void setAttributes(Ship ship, float damage) {
-      super.setDeadShip(ship);
+   public void init(Ship ship, float damage) {
+      super.setShip(ship);
       this.damage = damage;
    }
 

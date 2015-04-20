@@ -19,10 +19,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import net.carmgate.morph.GameLoaded;
+import net.carmgate.morph.eventmgt.MEventManager;
+import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.events.DeadShip;
 import net.carmgate.morph.model.events.ShipAdded;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
@@ -47,6 +50,7 @@ public class World {
    @Inject private OrderFactory orderFactory;
    @Inject private PhysicalEntityFactory entityFactory;
    @Inject private WorldEventFactory worldEventFactory;
+   @Inject private MEventManager eventManager;
 
    private final List<Ship> ships = new ArrayList<>();
    // private final List<WorldUpdateListener> worldChangeListeners = new ArrayList<>();
@@ -63,6 +67,10 @@ public class World {
 
    public void add(Animation renderable) {
       animations.add(renderable);
+   }
+
+   protected void onDeadShip(@MObserves DeadShip deadShip) {
+      remove(deadShip.getShip());
    }
 
    public void add(Ship ship) {
@@ -101,6 +109,8 @@ public class World {
 
    @PostConstruct
    private void init() {
+      eventManager.scanAndRegister(this);
+
       new Thread((Runnable) () -> {
          final ScriptEngineManager manager = new ScriptEngineManager();
          final ScriptEngine engine = manager.getEngineByName("nashorn");

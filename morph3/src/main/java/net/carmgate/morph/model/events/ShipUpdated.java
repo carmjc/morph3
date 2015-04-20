@@ -6,7 +6,7 @@ public abstract class ShipUpdated implements WorldEvent {
 
    private Ship ship;
 
-   protected void setDeadShip(Ship ship) {
+   protected void setShip(Ship ship) {
       this.ship = ship;
    }
 

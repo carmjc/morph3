@@ -66,6 +66,9 @@ public class Main {
             final Order order = ship.getCurrentOrder();
             if (order != null) {
                order.eval();
+               if (order.isDone()) {
+                  ship.removeCurrentOrder();
+               }
             }
          }
 

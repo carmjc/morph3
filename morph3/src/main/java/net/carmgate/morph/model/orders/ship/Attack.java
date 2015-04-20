@@ -3,11 +3,13 @@ package net.carmgate.morph.model.orders.ship;
 import javax.inject.Inject;
 
 import net.carmgate.morph.eventmgt.MEvent;
+import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.Laser;
 import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.events.AnimationStart;
+import net.carmgate.morph.model.events.DeadShip;
 import net.carmgate.morph.model.events.ShipHit;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
@@ -22,6 +24,12 @@ public class Attack extends Order {
 
    private Ship target;
 
+   protected void onDeadShip(@MObserves DeadShip deadShip) {
+      if (deadShip.getShip() == target) {
+         setDone(true);
+      }
+   }
+
    @Override
    protected void evaluate() {
       // Create animation
@@ -33,7 +41,7 @@ public class Attack extends Order {
 
       // Create the event
       ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
-      shipHit.setAttributes(target, 1);
+      shipHit.init(target, 1);
       worldEventMgr.fire(shipHit);
 
       setNextEvalTime(getNextEvalTime() + 1000);

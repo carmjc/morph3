@@ -8,6 +8,7 @@ public abstract class Order {
    private World world;
    private long nextEvalTime = 0;
    protected Ship orderee;
+   private boolean done = false;
 
    public Order() {
    }
@@ -39,6 +40,14 @@ public abstract class Order {
    public void setWorld(World world) {
       this.world = world;
       nextEvalTime = world.getTime();
+   }
+
+   public boolean isDone() {
+      return done;
+   }
+
+   protected void setDone(boolean done) {
+      this.done = done;
    }
 
 }

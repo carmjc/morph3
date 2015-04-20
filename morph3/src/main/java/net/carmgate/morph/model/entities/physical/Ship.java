@@ -12,7 +12,7 @@ import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Surroundings;
-import net.carmgate.morph.model.events.ShipDead;
+import net.carmgate.morph.model.events.DeadShip;
 import net.carmgate.morph.model.events.ShipHit;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
@@ -99,7 +99,7 @@ public class Ship implements Renderable, PhysicalEntity {
          health -= event.getDamage();
          LOGGER.debug("Ship hit. Health: " + health);
          if (health <= 0) {
-            ShipDead shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEAD);
+            DeadShip shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEAD);
             shipDead.setDeadShip(this);
             worldEventMgr.fire(shipDead);
          }
@@ -108,42 +108,16 @@ public class Ship implements Renderable, PhysicalEntity {
       }
    }
 
-   // FIXME
-   // @Override
-   // public void onWorldUpdate(@Observes WorldEvent event) {
-   // if (event instanceof ShipAdded) {
-   // final Ship ship = ((ShipAdded) event).getShip();
-   // if (ship == this) {
-   // // add the other ships
-   // // TODO we should do this otherwise
-   // for (final Ship tmpShip : world.getShips()) {
-   // if (tmpShip != this) {
-   // surroundings.addShip(tmpShip);
-   // }
-   // }
-   // } else {
-   // // add the ship
-   // surroundings.addShip(ship);
-   // }
-   // }
-   // if (event instanceof ShipHit) {
-   // final ShipHit shipHit = (ShipHit) event;
-   // if (shipHit.getShip() == this) {
-   // health -= shipHit.getDamage();
-   // if (health <= 0) {
-   // worldEventMgr.fire(new ShipDead(this));
-   // }
-   // }
-   //
-   // }
-   // }
-   //
    public void setMass(float mass) {
       this.mass = mass;
    }
 
    public void setOwner(Player owner) {
       this.owner = owner;
+   }
+
+   public void removeCurrentOrder() {
+      orders.remove(getCurrentOrder());
    }
 
 }

@@ -10,7 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
+
+import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.events.DeadShip;
 
 @Singleton
 public class MEventManager {
@@ -30,6 +34,15 @@ public class MEventManager {
          deferredEvents.put(o.getClass(), list);
       }
       list.add(o);
+   }
+
+   @PostConstruct
+   protected void registerWithMEventManager() {
+      scanAndRegister(this);
+   }
+
+   protected void onDeadShip(@MObserves DeadShip deadShip) {
+      instances.get(Ship.class).remove(deadShip.getShip());
    }
 
    public void deferredFire() {
@@ -54,7 +67,10 @@ public class MEventManager {
                // for each event
                deferredEventsBeingHandled.get(type).forEach(event -> {
                   try {
+                     boolean isAccessible = method.isAccessible();
+                     method.setAccessible(true);
                      method.invoke(object, event);
+                     method.setAccessible(isAccessible);
                   } catch (final Exception e) {
                      throw new EventManagementException(e);
                   }
