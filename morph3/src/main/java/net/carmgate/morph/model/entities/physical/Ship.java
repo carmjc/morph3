@@ -97,14 +97,11 @@ public class Ship implements Renderable, PhysicalEntity {
    public void onShipHit(@MObserves ShipHit event) {
       if (event.getShip() == this) {
          health -= event.getDamage();
-         LOGGER.debug("Ship hit. Health: " + health);
          if (health <= 0) {
             DeadShip shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEAD);
             shipDead.setDeadShip(this);
             worldEventMgr.fire(shipDead);
          }
-      } else {
-         LOGGER.debug("Ship hit. Not this ship");
       }
    }
 
