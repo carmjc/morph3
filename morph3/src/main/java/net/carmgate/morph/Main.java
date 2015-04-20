@@ -2,7 +2,9 @@ package net.carmgate.morph;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.event.Observes;
@@ -12,6 +14,8 @@ import javax.inject.Singleton;
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.eventmgt.MEventManager;
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.animations.Animation;
+import net.carmgate.morph.model.animations.Laser;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -21,6 +25,7 @@ import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
+import net.carmgate.morph.ui.renderers.LaserRenderer;
 import net.carmgate.morph.ui.renderers.api.Renderable;
 import net.carmgate.morph.ui.renderers.api.Renderer;
 import net.carmgate.morph.ui.renderers.api.SelectRenderer;
@@ -50,13 +55,28 @@ public class Main {
       // Rendering loop
       while (true) {
 
-         // Renders everything
+         // Reset
          GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-         render();
 
-         // updates display and sets frame rate
-         Display.update();
-         Display.sync(200);
+         final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+         final float zoomFactor = uiContext.getViewport().getZoomFactor();
+         GL11.glScalef(zoomFactor, zoomFactor, 1);
+         GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+         world.getAnimations().forEach(anim -> {
+            ((LaserRenderer) renderers.get(anim.getClass())).render((Laser) anim);
+            if (anim.getAnimationEnd() < world.getTime()) {
+               finishedAnimations.add(anim);
+            }
+         });
+         finishedAnimations.forEach(a -> {
+            world.remove(a);
+         });
+         finishedAnimations.clear();
+         GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+         GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+
+         // Renders everything
+         render();
 
          // update model
          world.updateTime();
@@ -72,7 +92,7 @@ public class Main {
             }
          }
 
-         // Handle deferred events
+         // Fire deferred events
          eventManager.deferredFire();
 
          // Update kinematics
@@ -87,6 +107,13 @@ public class Main {
             entity.getSpeed().add(tmpAccel);
             entity.getPos().add(entity.getSpeed());
          }
+
+         // RenderUtils.renderLine(new Vector2f(100, 0), new Vector2f(0, 0), 1, 2,
+         // new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+
+         // updates display and sets frame rate
+         Display.update();
+         Display.sync(200);
 
          // handle window resize
          if (Display.wasResized()) {
@@ -136,6 +163,8 @@ public class Main {
 
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
+
+   private List<Animation> finishedAnimations = new ArrayList<>();
 
    /**
     * Initialise the GL display

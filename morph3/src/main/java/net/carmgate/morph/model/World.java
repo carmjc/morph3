@@ -19,33 +19,34 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import net.carmgate.morph.GameLoaded;
+import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.eventmgt.MEventManager;
 import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.Ship;
-import net.carmgate.morph.model.events.DeadShip;
+import net.carmgate.morph.model.events.AnimationStart;
 import net.carmgate.morph.model.events.ShipAdded;
+import net.carmgate.morph.model.events.ShipDeath;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.orders.OrderFactory;
-import net.carmgate.morph.ui.renderers.api.Renderable;
 
 import org.slf4j.Logger;
 
 @Singleton
 public class World {
 
-   static String readFile(String path, Charset encoding)
+   public static String readFile(String path, Charset encoding)
          throws IOException {
       final byte[] encoded = Files.readAllBytes(Paths.get(path));
       return new String(encoded, encoding);
    }
 
    @Inject private Logger LOGGER;
-   @Inject private Event<WorldEvent> worldEventMgr;
+   @Inject private MEvent<WorldEvent> worldEventMgr;
    @Inject private Event<GameLoaded> gameLoadedEvent;
    @Inject private OrderFactory orderFactory;
    @Inject private PhysicalEntityFactory entityFactory;
@@ -55,7 +56,7 @@ public class World {
    private final List<Ship> ships = new ArrayList<>();
    // private final List<WorldUpdateListener> worldChangeListeners = new ArrayList<>();
    private final Set<PhysicalEntity> physicalEntities = new HashSet<>();
-   private final Set<Renderable> animations = new HashSet<>();
+   private final Set<Animation> animations = new HashSet<>();
    private final long initialTime;
    private long time = 0;
 
@@ -69,7 +70,7 @@ public class World {
       animations.add(renderable);
    }
 
-   protected void onDeadShip(@MObserves DeadShip deadShip) {
+   protected void onDeadShip(@MObserves ShipDeath deadShip) {
       remove(deadShip.getShip());
    }
 
@@ -88,7 +89,7 @@ public class World {
       worldEventMgr.fire(shipAdded);
    }
 
-   public Set<Renderable> getAnimations() {
+   public Set<Animation> getAnimations() {
       return animations;
    }
 
@@ -125,6 +126,10 @@ public class World {
             LOGGER.error("Cannot open init file", e);
          }
       }, "model init").start();
+   }
+
+   protected void onAnimationStart(@MObserves AnimationStart animationStart) {
+      animations.add(animationStart.getAnimation());
    }
 
    public void remove(Animation animation) {

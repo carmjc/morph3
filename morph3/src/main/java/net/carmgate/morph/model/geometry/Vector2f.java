@@ -1,5 +1,6 @@
 package net.carmgate.morph.model.geometry;
 
+@SuppressWarnings("serial")
 public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<Vector2f> {
 
    public static final Vector2f NULL = new Vector2f();
@@ -10,6 +11,13 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 
    public Vector2f(float x, float y) {
       super(x, y);
+   }
+
+   public Vector2f rotateOrtho() {
+      float t = x;
+      x = -y;
+      y = t;
+      return this;
    }
 
    public Vector2f(Vector2f v) {

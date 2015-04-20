@@ -14,7 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.model.entities.physical.Ship;
-import net.carmgate.morph.model.events.DeadShip;
+import net.carmgate.morph.model.events.ShipDeath;
 
 @Singleton
 public class MEventManager {
@@ -41,7 +41,7 @@ public class MEventManager {
       scanAndRegister(this);
    }
 
-   protected void onDeadShip(@MObserves DeadShip deadShip) {
+   protected void onDeadShip(@MObserves ShipDeath deadShip) {
       instances.get(Ship.class).remove(deadShip.getShip());
    }
 
@@ -143,12 +143,16 @@ public class MEventManager {
          observingMethods.forEach(m -> {
             for (final Parameter param : m.getParameters()) {
                if (param.isAnnotationPresent(MObserves.class)) {
-                  Set<Method> methods = observingMethodsMapByEvent.get(param.getType());
-                  if (methods == null) {
-                     methods = new HashSet<>();
-                     observingMethodsMapByEvent.put(param.getType(), methods);
+                  Class<?> type = param.getType();
+                  while (type != Object.class) {
+                     Set<Method> methods = observingMethodsMapByEvent.get(type);
+                     if (methods == null) {
+                        methods = new HashSet<>();
+                        observingMethodsMapByEvent.put(type, methods);
+                     }
+                     methods.add(m);
+                     type = ((Class<?>) type).getSuperclass();
                   }
-                  methods.add(m);
                }
             }
          });

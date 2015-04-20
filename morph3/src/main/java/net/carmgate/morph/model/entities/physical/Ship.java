@@ -12,13 +12,17 @@ import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Surroundings;
-import net.carmgate.morph.model.events.DeadShip;
+import net.carmgate.morph.model.events.ShipAdded;
+import net.carmgate.morph.model.events.ShipDeath;
 import net.carmgate.morph.model.events.ShipHit;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
+import net.carmgate.morph.model.orders.OrderFactory;
+import net.carmgate.morph.model.orders.OrderType;
+import net.carmgate.morph.model.orders.ship.Attack;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.renderers.api.Renderable;
 
@@ -30,6 +34,7 @@ public class Ship implements Renderable, PhysicalEntity {
    @Inject private MEvent<WorldEvent> worldEventMgr;
    @Inject private Logger LOGGER;
    @Inject private WorldEventFactory worldEventFactory;
+   @Inject private OrderFactory orderFactory;
 
    private final Vector2f pos = new Vector2f();
    private final Vector2f speed = new Vector2f();
@@ -94,11 +99,23 @@ public class Ship implements Renderable, PhysicalEntity {
       this.pos.copy(pos);
    }
 
+   public void onShipAdded(@MObserves ShipAdded event) {
+      if (event.getShip() != this) {
+         if (event.getShip().getPlayer() != getPlayer()) {
+            Attack attack = orderFactory.newInstance(OrderType.ATTACK);
+            attack.setOrderee(this);
+            attack.setTarget(event.getShip());
+            add(attack);
+         }
+      }
+   }
+
    public void onShipHit(@MObserves ShipHit event) {
       if (event.getShip() == this) {
          health -= event.getDamage();
+         LOGGER.debug("Ship hit");
          if (health <= 0) {
-            DeadShip shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEAD);
+            ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
             shipDead.setDeadShip(this);
             worldEventMgr.fire(shipDead);
          }

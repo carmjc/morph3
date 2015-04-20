@@ -3,7 +3,7 @@ package net.carmgate.morph.model.events;
 public enum WorldEventType {
 	ANIMATION_START(AnimationStart.class),
 	SHIP_ADDED(ShipAdded.class),
-	SHIP_DEAD(DeadShip.class),
+	SHIP_DEATH(ShipDeath.class),
 	SHIP_HIT(ShipHit.class);
 
 	private final Class<? extends WorldEvent> clazz;

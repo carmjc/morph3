@@ -39,20 +39,20 @@ public class ShipRenderer implements Renderer<Ship> {
 
       GL11.glScalef(massScale, massScale, 0);
       GL11.glColor4f(1f, 1f, 1f, 0.6f);
+      RenderUtils.renderCircle(width / 2f - 2 / zoom / massScale,
+            width / 2f + 2 / zoom / massScale,
+            1 / zoom / massScale,
+            1 / zoom / massScale,
+            new float[] { 0f, 0f, 0f, 1f },
+            ship.getPlayer().getColor(),
+            new float[] { 0f, 0f, 0f, 0f });
       RenderUtils.renderCircle(0,
             width / 2f - 2 / zoom / massScale,
             0,
             1 / zoom / massScale,
             new float[] { 1f, 1f, 1f, 0.2f },
             new float[] { 0.7f, 0.7f, 0.7f, 1f },
-            new float[] { 1f, 1f, 1f, 0f });
-      RenderUtils.renderCircle(width / 2f - 2 / zoom / massScale,
-            width / 2f + 2 / zoom / massScale,
-            1 / zoom / massScale,
-            1 / zoom / massScale,
-            new float[] { 1f, 1f, 1f, 0f },
-            ship.getPlayer().getColor(),
-            new float[] { 0f, 0f, 0f, 0f });
+            new float[] { 0f, 0f, 0f, 1f });
 
       GL11.glScalef(1f / massScale, 1f / massScale, 0);
    }

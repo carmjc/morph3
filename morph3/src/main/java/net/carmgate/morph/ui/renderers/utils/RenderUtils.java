@@ -2,15 +2,23 @@ package net.carmgate.morph.ui.renderers.utils;
 
 import java.nio.FloatBuffer;
 
+import net.carmgate.morph.model.geometry.Vector2f;
+
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.TextureImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RenderUtils {
+
+   private static final Logger LOGGER = LoggerFactory.getLogger(RenderUtils.class);
 
    private static final int nbSegments = 100;
    private static final double deltaAngle = (float) (2 * Math.PI / nbSegments);
    private static final float cos = (float) Math.cos(deltaAngle);
    private static final float sin = (float) Math.sin(deltaAngle);
+
+   private static final Vector2f ortho = new Vector2f();
 
    public static void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt) {
 
@@ -119,6 +127,38 @@ public class RenderUtils {
          yIntBackup = yInt;
          yExtBackup = yExt;
       }
+   }
+
+   public static void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
+      TextureImpl.bindNone();
+      ortho.copy(to).sub(from);
+      float orthoLength = ortho.length();
+      ortho.scale(1 / orthoLength).rotateOrtho();
+
+      GL11.glBegin(GL11.GL_QUADS);
+      GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
+      GL11.glVertex2f(to.x - ortho.x * width / 2 - ortho.x * blurWidth, to.y - ortho.y * width / 2 - ortho.y * blurWidth);
+      GL11.glVertex2f(from.x - ortho.x * width / 2 - ortho.x * blurWidth, from.y - ortho.y * width / 2 - ortho.y * blurWidth);
+      GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
+      GL11.glVertex2f(from.x - ortho.x * width / 2, from.y - ortho.y * width / 2);
+      GL11.glVertex2f(to.x - ortho.x * width / 2, to.y - ortho.y * width / 2);
+
+      GL11.glVertex2f(from.x - ortho.x * width / 2, from.y - ortho.y * width / 2);
+      GL11.glVertex2f(to.x - ortho.x * width / 2, to.y - ortho.y * width / 2);
+      // GL11.glVertex2f(to.x, to.y);
+      // GL11.glVertex2f(0, 0);
+      //
+      // GL11.glVertex2f(to.x, to.y);
+      // GL11.glVertex2f(0, 0);
+      GL11.glVertex2f(to.x + ortho.x * width / 2, to.y + ortho.y * width / 2);
+      GL11.glVertex2f(from.x + ortho.x * width / 2, from.y + ortho.y * width / 2);
+
+      GL11.glVertex2f(from.x + ortho.x * width / 2, from.y + ortho.y * width / 2);
+      GL11.glVertex2f(to.x + ortho.x * width / 2, to.y + ortho.y * width / 2);
+      GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
+      GL11.glVertex2f(to.x + ortho.x * width / 2 + ortho.x * blurWidth, to.y + ortho.y * width / 2 + ortho.y * blurWidth);
+      GL11.glVertex2f(from.x + ortho.x * width / 2 + ortho.x * blurWidth, from.y + ortho.y * width / 2 + ortho.y * blurWidth);
+      GL11.glEnd();
    }
 
 }

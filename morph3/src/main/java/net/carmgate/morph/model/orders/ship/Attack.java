@@ -9,7 +9,7 @@ import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.Laser;
 import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.events.AnimationStart;
-import net.carmgate.morph.model.events.DeadShip;
+import net.carmgate.morph.model.events.ShipDeath;
 import net.carmgate.morph.model.events.ShipHit;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
@@ -24,7 +24,7 @@ public class Attack extends Order {
 
    private Ship target;
 
-   protected void onDeadShip(@MObserves DeadShip deadShip) {
+   protected void onDeadShip(@MObserves ShipDeath deadShip) {
       if (deadShip.getShip() == target) {
          setDone(true);
       }
@@ -49,7 +49,6 @@ public class Attack extends Order {
 
    public void setTarget(Ship target) {
       this.target = target;
-
    }
 
 }

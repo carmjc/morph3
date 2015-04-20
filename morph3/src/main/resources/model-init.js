@@ -17,12 +17,14 @@ ship1.mass = 0.2;
 ship1.owner = me;
 world.add(ship1);
 
-ship2 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
-ship2.init(new Vector2f(100, 0), 10);
-ship2.mass = 0.5;
-ship2.owner = other;
-world.add(ship2);
+ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
+ship.init(new Vector2f(100, 0), 10);
+ship.mass = 0.5;
+ship.owner = other;
+world.add(ship);
 
-attack = orderFactory.newInstance(OrderType.valueOf("ATTACK"));
-attack.setTarget(ship1);
-ship2.add(attack);
+ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
+ship.init(new Vector2f(150, 250), 10);
+ship.mass = 0.5;
+ship.owner = other;
+world.add(ship);
