@@ -58,24 +58,8 @@ public class Main {
          // Reset
          GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
-         final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-         final float zoomFactor = uiContext.getViewport().getZoomFactor();
-         GL11.glScalef(zoomFactor, zoomFactor, 1);
-         GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
-         world.getAnimations().forEach(anim -> {
-            ((LaserRenderer) renderers.get(anim.getClass())).render((Laser) anim);
-            if (anim.getAnimationEnd() < world.getTime()) {
-               finishedAnimations.add(anim);
-            }
-         });
-         finishedAnimations.forEach(a -> {
-            world.remove(a);
-         });
-         finishedAnimations.clear();
-         GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
-         GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
-
          // Renders everything
+         renderAnimation();
          render();
 
          // update model
@@ -140,6 +124,25 @@ public class Main {
          mouseManager.handleMouseEvent();
          keyboardManager.handleKeyboardEvent();
       }
+   }
+
+   public void renderAnimation() {
+      final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+      final float zoomFactor = uiContext.getViewport().getZoomFactor();
+      GL11.glScalef(zoomFactor, zoomFactor, 1);
+      GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+      world.getAnimations().forEach(anim -> {
+         ((LaserRenderer) renderers.get(anim.getClass())).render((Laser) anim);
+         if (anim.getAnimationEnd() < world.getTime()) {
+            finishedAnimations.add(anim);
+         }
+      });
+      finishedAnimations.forEach(a -> {
+         world.remove(a);
+      });
+      finishedAnimations.clear();
+      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+      GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
    }
 
    @Inject
