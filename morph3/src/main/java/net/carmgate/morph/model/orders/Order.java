@@ -5,49 +5,53 @@ import net.carmgate.morph.model.entities.physical.Ship;
 
 public abstract class Order {
 
-   private World world;
-   private long nextEvalTime = 0;
-   protected Ship orderee;
-   private boolean done = false;
+	private World world;
+	private long nextEvalTime = 0;
+	private Ship orderee;
+	private boolean done = false;
 
-   public Order() {
-   }
+	public Order() {
+	}
 
-   public void setOrderee(Ship orderee) {
-      this.orderee = orderee;
-   }
+	public void eval() {
+		if (world.getTime() > nextEvalTime) {
+			evaluate();
+		}
+	}
 
-   public void eval() {
-      if (world.getTime() > nextEvalTime) {
-         evaluate();
-      }
-   }
+	protected abstract void evaluate();
 
-   protected abstract void evaluate();
+	public long getNextEvalTime() {
+		return nextEvalTime;
+	}
 
-   public long getNextEvalTime() {
-      return nextEvalTime;
-   }
+	public Ship getOrderee() {
+		return orderee;
+	}
 
-   public World getWorld() {
-      return world;
-   }
+	public World getWorld() {
+		return world;
+	}
 
-   protected void setNextEvalTime(long nextEvalTime) {
-      this.nextEvalTime = nextEvalTime;
-   }
+	public boolean isDone() {
+		return done;
+	}
 
-   public void setWorld(World world) {
-      this.world = world;
-      nextEvalTime = world.getTime();
-   }
+	protected void setDone(boolean done) {
+		this.done = done;
+	}
 
-   public boolean isDone() {
-      return done;
-   }
+	protected void setNextEvalTime(long nextEvalTime) {
+		this.nextEvalTime = nextEvalTime;
+	}
 
-   protected void setDone(boolean done) {
-      this.done = done;
-   }
+	public void setOrderee(Ship orderee) {
+		this.orderee = orderee;
+	}
+
+	public void setWorld(World world) {
+		this.world = world;
+		nextEvalTime = world.getTime();
+	}
 
 }

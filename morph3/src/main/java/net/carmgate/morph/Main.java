@@ -41,259 +41,266 @@ import org.slf4j.Logger;
 @Singleton
 public class Main {
 
-   @Inject
-   private MEventManager eventManager;
+	@Inject
+	private MEventManager eventManager;
 
-   public void loop(@Observes GameLoaded gameLoaded) {
-      // init OpenGL context
-      initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
+	@Inject
+	private Logger LOGGER;
 
-      for (final Renderer<?> renderer : renderers.values()) {
-         renderer.init();
-      }
+	@Inject
+	private Conf conf;
 
-      // Rendering loop
-      while (true) {
+	@Inject
+	private World world;
 
-         // Reset
-         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+	@Inject
+	private UIContext uiContext;
 
-         // Renders everything
-         renderAnimation();
-         renderPhysical();
-         updateWorld();
+	@Inject
+	private MouseManager mouseManager;
 
-         // Fire deferred events
-         eventManager.deferredFire();
+	@Inject
+	private KeyboardManager keyboardManager;
+	@Inject
+	private InputHistory inputHistory;
+	// Computation attributes
+	private final Vector2f tmpAccel = new Vector2f();
+	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
+	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
+	private final List<Animation> finishedAnimations = new ArrayList<>();
 
-         // Update kinematics
-         updateKinematics();
+	/**
+	 * Initialise the GL display
+	 *
+	 * @param width
+	 *           The width of the display
+	 * @param height
+	 *           The height of the display
+	 */
+	private void initGL(int width, int height) {
+		try {
+			Display.setDisplayMode(new DisplayMode(width, height));
+			Display.create();
+			Display.setTitle("Morph 3");
+			// Display.setVSyncEnabled(true);
+			Display.setResizable(true);
+		} catch (final LWJGLException e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
 
-         // updates display and sets frame rate
-         Display.update();
-         Display.sync(100);
+		LOGGER.debug("init view: " + width + "x" + height);
 
-         // handle window resize
-         if (Display.wasResized()) {
-            initView();
-         }
+		initView();
+	}
 
-         GL11.glMatrixMode(GL11.GL_PROJECTION);
-         GL11.glLoadIdentity();
+	/**
+	 * Inits the view, viewport, window, etc.
+	 * This should be called at init and when the view changes (window is resized for instance).
+	 */
+	private void initView() {
 
-         final int width = Display.getWidth();
-         final int height = Display.getHeight();
-         GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
-         GL11.glViewport(0, 0, width, height);
+		final int width = Display.getWidth();
+		final int height = Display.getHeight();
+		LOGGER.debug("init view: " + width + "x" + height);
 
-         GL11.glMatrixMode(GL11.GL_MODELVIEW);
-         GL11.glLoadIdentity();
+		// init the window
+		// model.getWindow().setWidth(width);
+		// model.getWindow().setHeight(height);
 
-         // Handles the window close requested event
-         if (Display.isCloseRequested()) {
-            Display.destroy();
-            System.exit(0);
-         }
+		// set clear color - Wont be needed once we have a background
+		GL11.glClearColor(0f, 0f, 0f, 0f);
 
-         mouseManager.handleMouseEvent();
-         keyboardManager.handleKeyboardEvent();
-      }
-   }
+		// enable alpha blending
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-   public void updateKinematics() {
-      for (final PhysicalEntity entity : world.getPhysicalEntities()) {
-         tmpAccel.copy(Vector2f.NULL);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
 
-         for (final ForceSource source : entity.getForceSources()) {
-            tmpAccel.add(source.getForce());
-         }
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
 
-         // kinematics
-         entity.getSpeed().add(tmpAccel);
-         entity.getPos().add(entity.getSpeed());
-      }
-   }
+		GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
+		GL11.glViewport(0, 0, width, height);
 
-   public void updateWorld() {
-      world.updateTime();
-      for (final Ship ship : world.getShips()) {
-         final Order order = ship.getCurrentOrder();
-         if (order != null) {
-            order.eval();
-            if (order.isDone()) {
-               ship.removeCurrentOrder();
-            }
-         }
-      }
-   }
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
+	}
+	public void loop(@Observes GameLoaded gameLoaded) {
+		// init OpenGL context
+		initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
 
-   public void renderAnimation() {
-      final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      final float zoomFactor = uiContext.getViewport().getZoomFactor();
-      GL11.glScalef(zoomFactor, zoomFactor, 1);
-      GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
-      world.getAnimations().forEach(anim -> {
-         ((LaserRenderer) renderers.get(anim.getClass())).render((Laser) anim);
-         if (anim.getAnimationEnd() < world.getTime()) {
-            finishedAnimations.add(anim);
-         }
-      });
-      finishedAnimations.forEach(a -> {
-         world.remove(a);
-      });
-      finishedAnimations.clear();
-      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
-      GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
-   }
+		for (final Renderer<?> renderer : renderers.values()) {
+			renderer.init();
+		}
 
-   @Inject
-   private Logger LOGGER;
+		// Rendering loop
+		while (true) {
 
-   @Inject
-   private Conf conf;
-   @Inject
-   private World world;
-   @Inject
-   private UIContext uiContext;
-   @Inject
-   private MouseManager mouseManager;
-   @Inject
-   private KeyboardManager keyboardManager;
-   @Inject
-   private InputHistory inputHistory;
+			// Reset
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
-   // Computation attributes
-   private final Vector2f tmpAccel = new Vector2f();
+			// Renders everything
+			renderAnimation();
+			renderPhysical();
+			updateWorld();
 
-   private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
-   private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
+			// Fire deferred events
+			eventManager.deferredFire();
 
-   private List<Animation> finishedAnimations = new ArrayList<>();
+			// Update kinematics
+			updateKinematics();
 
-   /**
-    * Initialise the GL display
-    *
-    * @param width
-    *           The width of the display
-    * @param height
-    *           The height of the display
-    */
-   private void initGL(int width, int height) {
-      try {
-         Display.setDisplayMode(new DisplayMode(width, height));
-         Display.create();
-         Display.setTitle("Morph 3");
-         // Display.setVSyncEnabled(true);
-         Display.setResizable(true);
-      } catch (final LWJGLException e) {
-         e.printStackTrace();
-         System.exit(0);
-      }
+			// updates display and sets frame rate
+			Display.update();
+			Display.sync(100);
 
-      LOGGER.debug("init view: " + width + "x" + height);
+			// handle window resize
+			if (Display.wasResized()) {
+				initView();
+			}
 
-      initView();
-   }
+			GL11.glMatrixMode(GL11.GL_PROJECTION);
+			GL11.glLoadIdentity();
 
-   /**
-    * Inits the view, viewport, window, etc.
-    * This should be called at init and when the view changes (window is resized for instance).
-    */
-   private void initView() {
+			final int width = Display.getWidth();
+			final int height = Display.getHeight();
+			GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
+			GL11.glViewport(0, 0, width, height);
 
-      final int width = Display.getWidth();
-      final int height = Display.getHeight();
-      LOGGER.debug("init view: " + width + "x" + height);
+			GL11.glMatrixMode(GL11.GL_MODELVIEW);
+			GL11.glLoadIdentity();
 
-      // init the window
-      // model.getWindow().setWidth(width);
-      // model.getWindow().setHeight(height);
+			// Handles the window close requested event
+			if (Display.isCloseRequested()) {
+				Display.destroy();
+				System.exit(0);
+			}
 
-      // set clear color - Wont be needed once we have a background
-      GL11.glClearColor(0f, 0f, 0f, 0f);
+			mouseManager.handleMouseEvent();
+			keyboardManager.handleKeyboardEvent();
+		}
+	}
 
-      // enable alpha blending
-      GL11.glEnable(GL11.GL_BLEND);
-      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+	@SuppressWarnings({ "unused" })
+	private void registerRenderer(@Observes NewRendererFound event) {
+		try {
+			final Renderer<? extends Renderable> renderer = event.getRenderer();
+			final Type[] interfaces = renderer.getClass().getGenericInterfaces();
+			for (final Type interf : interfaces) {
+				if (interf instanceof ParameterizedType) {
+					final ParameterizedType paramType = (ParameterizedType) interf;
+					if (paramType.getRawType().equals(Renderer.class)) {
+						final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
+						renderers.put(type, renderer);
+						LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName());
+					}
+					if (paramType.getRawType().equals(SelectRenderer.class)) {
+						final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
+						selectRenderers.put(type, renderer);
+						LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName());
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error", e);
+		}
+	}
 
-      GL11.glDisable(GL11.GL_DEPTH_TEST);
-      GL11.glEnable(GL11.GL_LINE_SMOOTH);
-      GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+	public void renderAnimation() {
+		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final float zoomFactor = uiContext.getViewport().getZoomFactor();
+		GL11.glScalef(zoomFactor, zoomFactor, 1);
+		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+		world.getAnimations().forEach(anim -> {
+			((LaserRenderer) renderers.get(anim.getClass())).render((Laser) anim);
+			if (anim.getAnimationEnd() < world.getTime()) {
+				finishedAnimations.add(anim);
+			}
+		});
+		finishedAnimations.forEach(a -> {
+			world.remove(a);
+		});
+		finishedAnimations.clear();
+		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+		GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+	}
 
-      GL11.glMatrixMode(GL11.GL_PROJECTION);
-      GL11.glLoadIdentity();
+	private void renderPhysical() {
+		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final float zoomFactor = uiContext.getViewport().getZoomFactor();
+		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+		GL11.glScalef(zoomFactor, zoomFactor, 1);
 
-      GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
-      GL11.glViewport(0, 0, width, height);
+		switch (uiContext.getRenderMode()) {
+		case SELECT:
+			renderPhysicalSelect();
+			break;
+		default:
+			renderPhysicalNormal();
+		}
 
-      GL11.glMatrixMode(GL11.GL_MODELVIEW);
-      GL11.glLoadIdentity();
-   }
+		GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
+		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+	}
 
-   @SuppressWarnings({ "unused" })
-   private void registerRenderer(@Observes NewRendererFound event) {
-      try {
-         final Renderer<? extends Renderable> renderer = event.getRenderer();
-         final Type[] interfaces = renderer.getClass().getGenericInterfaces();
-         for (final Type interf : interfaces) {
-            if (interf instanceof ParameterizedType) {
-               final ParameterizedType paramType = (ParameterizedType) interf;
-               if (paramType.getRawType().equals(Renderer.class)) {
-                  final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
-                  renderers.put(type, renderer);
-                  LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName());
-               }
-               if (paramType.getRawType().equals(SelectRenderer.class)) {
-                  final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
-                  selectRenderers.put(type, renderer);
-                  LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName());
-               }
-            }
-         }
-      } catch (final Exception e) {
-         LOGGER.error("Error", e);
-      }
-   }
+	private void renderPhysicalNormal() {
+		final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
+		if (shipRenderer != null) {
+			for (final Ship ship : world.getShips()) {
+				final Vector2f pos = ship.getPos();
+				GL11.glTranslatef(pos.x, pos.y, 0);
+				shipRenderer.render(ship);
+				GL11.glTranslatef(-pos.x, -pos.y, 0);
+			}
+		}
+	}
 
-   private void renderPhysical() {
-      final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      final float zoomFactor = uiContext.getViewport().getZoomFactor();
-      GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
-      GL11.glScalef(zoomFactor, zoomFactor, 1);
+	private void renderPhysicalSelect() {
+		final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
+		if (shipRenderer != null) {
+			for (final Ship ship : world.getShips()) {
+				final Vector2f pos = ship.getPos();
+				GL11.glTranslatef(pos.x, pos.y, 0);
+				shipRenderer.render(ship);
+				GL11.glTranslatef(-pos.x, -pos.y, 0);
+			}
+		}
+	}
 
-      switch (uiContext.getRenderMode()) {
-         case SELECT:
-            renderPhysicalSelect();
-            break;
-         default:
-            renderPhysicalNormal();
-      }
+	public void updateKinematics() {
+		for (final PhysicalEntity entity : world.getPhysicalEntities()) {
+			tmpAccel.copy(Vector2f.NULL);
 
-      GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
-      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
-   }
+			for (final ForceSource source : entity.getForceSources()) {
+				tmpAccel.add(source.getForce());
+			}
 
-   private void renderPhysicalNormal() {
-      final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
-      if (shipRenderer != null) {
-         for (final Ship ship : world.getShips()) {
-            final Vector2f pos = ship.getPos();
-            GL11.glTranslatef(pos.x, pos.y, 0);
-            shipRenderer.render(ship);
-            GL11.glTranslatef(-pos.x, -pos.y, 0);
-         }
-      }
-   }
+			// kinematics
+			entity.getSpeed().add(tmpAccel);
+			entity.getSpeed().scale(0.95f); // drag
+			entity.getPos().add(entity.getSpeed());
+		}
+	}
 
-   private void renderPhysicalSelect() {
-      final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
-      if (shipRenderer != null) {
-         for (final Ship ship : world.getShips()) {
-            final Vector2f pos = ship.getPos();
-            GL11.glTranslatef(pos.x, pos.y, 0);
-            shipRenderer.render(ship);
-            GL11.glTranslatef(-pos.x, -pos.y, 0);
-         }
-      }
-   }
+	private void updateWorld() {
+		world.updateTime();
+		for (final Ship ship : world.getShips()) {
+			// move order
+			if (ship.getMoveOrder() != null) {
+				ship.getMoveOrder().eval();
+			}
+
+			// action order
+			final Order order = ship.getCurrentOrder();
+			if (order != null) {
+				order.eval();
+				if (order.isDone()) {
+					ship.removeCurrentOrder();
+				}
+			}
+		}
+	}
 }

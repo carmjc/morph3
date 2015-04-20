@@ -23,6 +23,7 @@ import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.model.orders.OrderType;
 import net.carmgate.morph.model.orders.ship.Attack;
+import net.carmgate.morph.model.orders.ship.move.MoveOrder;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.renderers.api.Renderable;
 
@@ -30,108 +31,119 @@ import org.slf4j.Logger;
 
 public class Ship implements Renderable, PhysicalEntity {
 
-   @Inject private World world;
-   @Inject private MEvent<WorldEvent> worldEventMgr;
-   @Inject private Logger LOGGER;
-   @Inject private WorldEventFactory worldEventFactory;
-   @Inject private OrderFactory orderFactory;
+	public static final float MAX_PROPULSOR_FORCE = 0.05f;
 
-   private final Vector2f pos = new Vector2f();
-   private final Vector2f speed = new Vector2f();
-   private float mass;
-   private Player owner;
-   private final Surroundings surroundings = new Surroundings();
-   private final Set<ForceSource> forceSources = new HashSet<>();
-   private final List<Order> orders = new ArrayList<>();
-   private float health;
+	@Inject private World world;
+	@Inject private MEvent<WorldEvent> worldEventMgr;
+	@Inject private Logger LOGGER;
+	@Inject private WorldEventFactory worldEventFactory;
+	@Inject private OrderFactory orderFactory;
 
-   public void add(Order order) {
-      order.setWorld(world);
+	private final Vector2f pos = new Vector2f();
+	private final Vector2f speed = new Vector2f();
+	private float mass;
+	private Player owner;
+	private final Surroundings surroundings = new Surroundings();
+	private final Set<ForceSource> forceSources = new HashSet<>();
+	private final List<Order> orders = new ArrayList<>();
+	private MoveOrder moveOrder;
+	private float health;
 
-      orders.add(order);
+	public void add(Order order) {
+		order.setWorld(world);
 
-      if (order instanceof ForceSource) {
-         forceSources.add((ForceSource) order);
-      }
-   }
+		if (order instanceof MoveOrder) {
+			moveOrder = (MoveOrder) order;
+		} else {
+			orders.add(order);
+		}
 
-   public Order getCurrentOrder() {
-      if (orders.size() > 0) {
-         return orders.get(0);
-      }
-      return null;
-   }
+		if (order instanceof ForceSource) {
+			forceSources.add((ForceSource) order);
+		}
+	}
 
-   @Override
-   public Set<ForceSource> getForceSources() {
-      return forceSources;
-   }
+	public Order getCurrentOrder() {
+		if (orders.size() > 0) {
+			return orders.get(0);
+		}
+		return null;
+	}
 
-   public float getHealth() {
-      return health;
-   }
+	@Override
+	public Set<ForceSource> getForceSources() {
+		return forceSources;
+	}
 
-   @Override
-   public float getMass() {
-      return mass;
-   }
+	public float getHealth() {
+		return health;
+	}
 
-   public Player getPlayer() {
-      return owner;
-   }
+	@Override
+	public float getMass() {
+		return mass;
+	}
 
-   @Override
-   public Vector2f getPos() {
-      return pos;
-   }
+	public MoveOrder getMoveOrder() {
+		return moveOrder;
+	}
 
-   @Override
-   public Vector2f getSpeed() {
-      return speed;
-   }
+	public Player getPlayer() {
+		return owner;
+	}
 
-   public Surroundings getSurroundings() {
-      return surroundings;
-   }
+	@Override
+	public Vector2f getPos() {
+		return pos;
+	}
 
-   public void init(Vector2f pos, float health) {
-      this.health = health;
-      this.pos.copy(pos);
-   }
+	@Override
+	public Vector2f getSpeed() {
+		return speed;
+	}
 
-   public void onShipAdded(@MObserves ShipAdded event) {
-      if (event.getShip() != this) {
-         if (event.getShip().getPlayer() != getPlayer()) {
-            Attack attack = orderFactory.newInstance(OrderType.ATTACK);
-            attack.setOrderee(this);
-            attack.setTarget(event.getShip());
-            add(attack);
-         }
-      }
-   }
+	public Surroundings getSurroundings() {
+		return surroundings;
+	}
 
-   public void onShipHit(@MObserves ShipHit event) {
-      if (event.getShip() == this) {
-         health -= event.getDamage();
-         LOGGER.debug("Ship hit");
-         if (health <= 0) {
-            ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
-            shipDead.setDeadShip(this);
-            worldEventMgr.fire(shipDead);
-         }
-      }
-   }
+	public void init(Vector2f pos, float health) {
+		this.health = health;
+		this.pos.copy(pos);
+	}
 
-   public void setMass(float mass) {
-      this.mass = mass;
-   }
+	public void onShipAdded(@MObserves ShipAdded event) {
+		if (event.getShip() != this) {
+			if (event.getShip().getPlayer() != getPlayer()) {
+				final Attack attack = orderFactory.newInstance(OrderType.ATTACK);
+				attack.setOrderee(this);
+				attack.setTarget(event.getShip());
+				add(attack);
+			}
+		}
+	}
 
-   public void setOwner(Player owner) {
-      this.owner = owner;
-   }
+	public void onShipHit(@MObserves ShipHit event) {
+		if (event.getShip() == this) {
+			health -= event.getDamage();
+			LOGGER.debug("Ship hit");
+			if (health <= 0) {
+				final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
+				shipDead.setDeadShip(this);
+				worldEventMgr.fire(shipDead);
+			}
+		}
+	}
 
-   public void removeCurrentOrder() {
-      orders.remove(getCurrentOrder());
-   }
+	public void removeCurrentOrder() {
+		orders.remove(getCurrentOrder());
+	}
+
+	public void setMass(float mass) {
+		this.mass = mass;
+	}
+
+	public void setPlayer(Player owner) {
+		this.owner = owner;
+	}
 
 }

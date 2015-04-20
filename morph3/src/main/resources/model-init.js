@@ -14,17 +14,17 @@ other.color = [0.2, 1, 0.5, 1];
 ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship1.init(new Vector2f(0, 0), 10);
 ship1.mass = 0.2;
-ship1.owner = me;
+ship1.player = me;
 world.add(ship1);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship.init(new Vector2f(100, 0), 10);
 ship.mass = 0.5;
-ship.owner = other;
+ship.player = other;
 world.add(ship);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship.init(new Vector2f(150, 250), 10);
 ship.mass = 0.5;
-ship.owner = other;
+ship.player = other;
 world.add(ship);

@@ -14,41 +14,65 @@ import net.carmgate.morph.model.events.ShipHit;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
+import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
+import net.carmgate.morph.model.orders.OrderFactory;
+import net.carmgate.morph.model.orders.OrderType;
+import net.carmgate.morph.model.orders.ship.move.CloseIn;
 
 public class Attack extends Order {
 
-   @Inject private MEvent<WorldEvent> worldEventMgr;
-   @Inject private AnimationFactory animationFactory;
-   @Inject private WorldEventFactory worldEventFactory;
+	private static final float MAX_DISTANCE = 200;
 
-   private Ship target;
+	@Inject private MEvent<WorldEvent> worldEventMgr;
+	@Inject private AnimationFactory animationFactory;
+	@Inject private WorldEventFactory worldEventFactory;
+	@Inject private OrderFactory orderFactory;
 
-   protected void onDeadShip(@MObserves ShipDeath deadShip) {
-      if (deadShip.getShip() == target) {
-         setDone(true);
-      }
-   }
+	private Ship target;
+	private final Vector2f tmpVect = new Vector2f();
 
-   @Override
-   protected void evaluate() {
-      // Create animation
-      final Laser laser = animationFactory.newInstance(AnimationType.LASER);
-      laser.init(orderee, target);
-      AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
-      animationStart.setAnimation(laser);
-      worldEventMgr.fire(animationStart);
+	@Override
+	protected void evaluate() {
+		setNextEvalTime(getNextEvalTime() + 1000);
 
-      // Create the event
-      ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
-      shipHit.init(target, 1);
-      worldEventMgr.fire(shipHit);
+		// Is the target ship close enough ?
+		tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
+		final float distance = tmpVect.length();
 
-      setNextEvalTime(getNextEvalTime() + 1000);
-   }
+		if (distance > 0.8f * MAX_DISTANCE) {
+			final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN);
+			closeInOrder.setDistance(MAX_DISTANCE * 0.5f);
+			closeInOrder.setTarget(target);
+			closeInOrder.setOrderee(getOrderee());
+			getOrderee().add(closeInOrder);
+		}
 
-   public void setTarget(Ship target) {
-      this.target = target;
-   }
+		if (distance > MAX_DISTANCE) {
+			return;
+		}
+
+		// Create animation
+		final Laser laser = animationFactory.newInstance(AnimationType.LASER);
+		laser.init(getOrderee(), target);
+		final AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
+		animationStart.setAnimation(laser);
+		worldEventMgr.fire(animationStart);
+
+		// Create the event
+		final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
+		shipHit.init(target, 1);
+		worldEventMgr.fire(shipHit);
+	}
+
+	protected void onDeadShip(@MObserves ShipDeath deadShip) {
+		if (deadShip.getShip() == target) {
+			setDone(true);
+		}
+	}
+
+	public void setTarget(Ship target) {
+		this.target = target;
+	}
 
 }
