@@ -6,8 +6,6 @@ import java.util.NoSuchElementException;
 
 import javax.inject.Singleton;
 
-import net.carmgate.morph.ui.inputs.api.UIEvent;
-
 @Singleton
 public class InputHistory {
    private static final int STACK_SIZE = 100;

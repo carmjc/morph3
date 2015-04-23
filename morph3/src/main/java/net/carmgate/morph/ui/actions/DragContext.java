@@ -3,7 +3,7 @@ package net.carmgate.morph.ui.actions;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.ui.inputs.api.UIEvent;
+import net.carmgate.morph.ui.inputs.UIEvent;
 
 @Singleton
 public class DragContext {

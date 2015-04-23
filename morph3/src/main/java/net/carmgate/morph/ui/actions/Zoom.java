@@ -9,9 +9,9 @@ import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.ViewPort;
 import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.inputs.InputHistory;
+import net.carmgate.morph.ui.inputs.MouseListener;
 import net.carmgate.morph.ui.inputs.MouseManager;
-import net.carmgate.morph.ui.inputs.api.MouseListener;
-import net.carmgate.morph.ui.inputs.api.UIEvent.EventType;
+import net.carmgate.morph.ui.inputs.UIEvent.EventType;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.input.Keyboard;

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
-import net.carmgate.morph.ui.renderers.api.Renderable;
+import net.carmgate.morph.ui.renderers.Renderable;
 
 public abstract class PhysicalEntity implements Renderable {
 

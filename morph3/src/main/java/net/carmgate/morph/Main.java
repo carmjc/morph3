@@ -25,12 +25,12 @@ import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
-import net.carmgate.morph.ui.renderers.LaserRenderer;
-import net.carmgate.morph.ui.renderers.api.Renderable;
-import net.carmgate.morph.ui.renderers.api.Renderer;
-import net.carmgate.morph.ui.renderers.api.SelectRenderer;
+import net.carmgate.morph.ui.renderers.Renderable;
+import net.carmgate.morph.ui.renderers.Renderer;
+import net.carmgate.morph.ui.renderers.SelectRenderer;
+import net.carmgate.morph.ui.renderers.animations.LaserRenderer;
+import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
-import net.carmgate.morph.ui.renderers.ship.ShipRenderer;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;

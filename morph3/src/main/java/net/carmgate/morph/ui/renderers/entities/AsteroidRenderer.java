@@ -1,4 +1,4 @@
-package net.carmgate.morph.ui.renderers;
+package net.carmgate.morph.ui.renderers.entities;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import net.carmgate.morph.model.entities.physical.Asteroid;
-import net.carmgate.morph.ui.renderers.api.Renderer;
+import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;

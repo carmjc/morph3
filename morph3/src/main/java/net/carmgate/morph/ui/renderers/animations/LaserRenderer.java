@@ -1,4 +1,4 @@
-package net.carmgate.morph.ui.renderers;
+package net.carmgate.morph.ui.renderers.animations;
 
 import java.util.Random;
 
@@ -6,7 +6,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 
 import net.carmgate.morph.model.animations.Laser;
-import net.carmgate.morph.ui.renderers.api.Renderer;
+import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 

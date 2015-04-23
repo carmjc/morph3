@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.entities.physical.Ship;
-import net.carmgate.morph.model.events.ShipDeath;
+import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;

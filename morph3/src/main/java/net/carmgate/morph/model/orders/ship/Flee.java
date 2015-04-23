@@ -7,6 +7,7 @@ import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
 
+// FIXME Refactor in move order
 public class Flee extends Order implements ForceSource {
 
    private List<Ship> ships;

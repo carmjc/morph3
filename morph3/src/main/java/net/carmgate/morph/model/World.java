@@ -28,12 +28,12 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.Ship;
-import net.carmgate.morph.model.events.AnimationStart;
-import net.carmgate.morph.model.events.ShipAdded;
-import net.carmgate.morph.model.events.ShipDeath;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
+import net.carmgate.morph.model.events.animations.AnimationStart;
+import net.carmgate.morph.model.events.entities.ship.ShipAdded;
+import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.orders.OrderFactory;
 
 import org.slf4j.Logger;

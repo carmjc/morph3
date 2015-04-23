@@ -1,4 +1,4 @@
-package net.carmgate.morph.ui.inputs.api;
+package net.carmgate.morph.ui.inputs;
 
 public interface MouseListener {
 
