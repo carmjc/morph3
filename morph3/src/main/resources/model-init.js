@@ -11,20 +11,36 @@ me.color = [1, 0.5, 0.5, 1];
 other = new Player("Other");
 other.color = [0.2, 1, 0.5, 1];
 
-ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
-ship1.init(new Vector2f(0, 0), 10);
-ship1.mass = 0.2;
-ship1.player = me;
-world.add(ship1);
+asteroid = entityFactory.newInstance(PhysicalEntityType.valueOf("ASTEROID"));
+asteroid.getPos().copy(-200, -80);
+asteroid.mass = 2;
+asteroid.rotateSpeed = 5;
+world.add(asteroid);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
-ship.init(new Vector2f(100, 0), 10);
+ship.getPos().copy(550, 250);
+ship.setHealth(5);
 ship.mass = 0.5;
 ship.player = other;
+ship.getSpeed().copy(0, 0)
 world.add(ship);
 
-ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
-ship.init(new Vector2f(150, 250), 10);
-ship.mass = 0.5;
-ship.player = other;
-world.add(ship);
+//ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
+//ship1.getPos().copy(0, 0);
+//ship1.setHealth(10);
+//ship1.mass = 0.2;
+//ship1.player = me;
+//ship1.getSpeed().copy(100, -100)
+//closein = orderFactory.newInstance(OrderType.CLOSE_IN);
+//closein.setOrderee(ship1);
+//closein.setTarget(ship);
+//closein.setDistance(100);
+//ship1.add(closein);
+//world.add(ship1);
+
+//ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
+//ship.getPos().copy(100, 0);
+//ship.setHealth(10);
+//ship.mass = 0.5;
+//ship.player = other;
+//world.add(ship);

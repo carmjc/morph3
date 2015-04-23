@@ -20,59 +20,61 @@ import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.model.orders.OrderType;
 import net.carmgate.morph.model.orders.ship.move.CloseIn;
 
+import org.slf4j.Logger;
+
 public class Attack extends Order {
 
-	private static final float MAX_DISTANCE = 200;
+   private static final float MAX_DISTANCE = 200;
 
-	@Inject private MEvent<WorldEvent> worldEventMgr;
-	@Inject private AnimationFactory animationFactory;
-	@Inject private WorldEventFactory worldEventFactory;
-	@Inject private OrderFactory orderFactory;
+   @Inject private MEvent<WorldEvent> worldEventMgr;
+   @Inject private AnimationFactory animationFactory;
+   @Inject private WorldEventFactory worldEventFactory;
+   @Inject private OrderFactory orderFactory;
+   @Inject private Logger LOGGER;
 
-	private Ship target;
-	private final Vector2f tmpVect = new Vector2f();
+   private Ship target;
+   private final Vector2f tmpVect = new Vector2f();
 
-	@Override
-	protected void evaluate() {
-		setNextEvalTime(getNextEvalTime() + 1000);
+   @Override
+   protected void evaluate() {
+      setNextEvalTime(getNextEvalTime() + 1000);
 
-		// Is the target ship close enough ?
-		tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
-		final float distance = tmpVect.length();
+      if (getOrderee().getMoveOrder() == null || getOrderee().getMoveOrder().getParentOrder() != this) {
+         final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN);
+         closeInOrder.setDistance(MAX_DISTANCE * 0.5f);
+         closeInOrder.setTarget(target);
+         closeInOrder.setOrderee(getOrderee());
+         getOrderee().add(closeInOrder);
+      }
 
-		if (distance > 0.8f * MAX_DISTANCE) {
-			final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN);
-			closeInOrder.setDistance(MAX_DISTANCE * 0.5f);
-			closeInOrder.setTarget(target);
-			closeInOrder.setOrderee(getOrderee());
-			getOrderee().add(closeInOrder);
-		}
+      // Is the target ship close enough ?
+      tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
+      final float distance = tmpVect.length();
+      if (distance > MAX_DISTANCE) {
+         return;
+      }
 
-		if (distance > MAX_DISTANCE) {
-			return;
-		}
+      // Create animation
+      final Laser laser = animationFactory.newInstance(AnimationType.LASER);
+      laser.init(getOrderee(), target);
+      final AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
+      animationStart.setAnimation(laser);
+      worldEventMgr.fire(animationStart);
 
-		// Create animation
-		final Laser laser = animationFactory.newInstance(AnimationType.LASER);
-		laser.init(getOrderee(), target);
-		final AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
-		animationStart.setAnimation(laser);
-		worldEventMgr.fire(animationStart);
+      // Create the event
+      final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
+      shipHit.init(target, 1);
+      worldEventMgr.fire(shipHit);
+   }
 
-		// Create the event
-		final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
-		shipHit.init(target, 1);
-		worldEventMgr.fire(shipHit);
-	}
+   protected void onDeadShip(@MObserves ShipDeath deadShip) {
+      if (deadShip.getShip() == target) {
+         setDone(true);
+      }
+   }
 
-	protected void onDeadShip(@MObserves ShipDeath deadShip) {
-		if (deadShip.getShip() == target) {
-			setDone(true);
-		}
-	}
-
-	public void setTarget(Ship target) {
-		this.target = target;
-	}
+   public void setTarget(Ship target) {
+      this.target = target;
+   }
 
 }

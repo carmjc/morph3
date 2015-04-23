@@ -57,4 +57,9 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
       this.y = y;
       return this;
    }
+
+   @Override
+   public String toString() {
+      return "[" + x + "," + y + "]";
+   }
 }

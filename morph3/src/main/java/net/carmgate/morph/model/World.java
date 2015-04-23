@@ -34,7 +34,6 @@ import net.carmgate.morph.model.events.ShipDeath;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
-import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.OrderFactory;
 
 import org.slf4j.Logger;
@@ -42,117 +41,136 @@ import org.slf4j.Logger;
 @Singleton
 public class World {
 
-	public static String readFile(String path, Charset encoding)
-			throws IOException {
-		final byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, encoding);
-	}
+   public static String readFile(String path, Charset encoding)
+         throws IOException {
+      final byte[] encoded = Files.readAllBytes(Paths.get(path));
+      return new String(encoded, encoding);
+   }
 
-	@Inject private Logger LOGGER;
-	@Inject private MEvent<WorldEvent> worldEventMgr;
-	@Inject private Event<GameLoaded> gameLoadedEvent;
-	@Inject private OrderFactory orderFactory;
-	@Inject private PhysicalEntityFactory entityFactory;
-	@Inject private WorldEventFactory worldEventFactory;
-	@Inject private MEventManager eventManager;
+   @Inject private Logger LOGGER;
+   @Inject private MEvent<WorldEvent> worldEventMgr;
+   @Inject private Event<GameLoaded> gameLoadedEvent;
+   @Inject private OrderFactory orderFactory;
+   @Inject private PhysicalEntityFactory entityFactory;
+   @Inject private WorldEventFactory worldEventFactory;
+   @Inject private MEventManager eventManager;
 
-	private final List<Ship> ships = new ArrayList<>();
-	// private final List<WorldUpdateListener> worldChangeListeners = new ArrayList<>();
-	private final Set<PhysicalEntity> physicalEntities = new HashSet<>();
-	private final Set<Animation> animations = new HashSet<>();
-	private final long initialTime;
-	private long time = 0;
+   private final List<Ship> ships = new ArrayList<>();
+   private final List<PhysicalEntity> nonShipsPhysicalEntities = new ArrayList<>();
+   // private final List<WorldUpdateListener> worldChangeListeners = new ArrayList<>();
+   private final Set<PhysicalEntity> physicalEntities = new HashSet<>();
+   private final Set<Animation> animations = new HashSet<>();
+   private long lastUpdateTime = 0;
+   private long time = 0;
 
-	// private final Set<ShipUpdated> worldEvents = new HashSet<>();
 
-	public World() {
-		initialTime = new Date().getTime();
-	}
+   // private final Set<ShipUpdated> worldEvents = new HashSet<>();
 
-	public void add(Animation renderable) {
-		animations.add(renderable);
-	}
+   public void add(Animation renderable) {
+      animations.add(renderable);
+   }
 
-	public void add(Ship ship) {
-		// TODO modify this so that ships have limited line of sight
-		// Fill the ship
-		ship.getPlayer().add(ship);
+   public void add(PhysicalEntity entity) {
+      if (entity instanceof Ship) {
+         add((Ship) entity);
+         return;
+      }
 
-		// Update world
-		ships.add(ship);
-		physicalEntities.add(ship);
+      nonShipsPhysicalEntities.add(entity);
+      physicalEntities.add(entity);
+   }
 
-		// update surroundings of the awares
-		final ShipAdded shipAdded = worldEventFactory.newInstance(WorldEventType.SHIP_ADDED);
-		shipAdded.setAddedShip(ship);
-		worldEventMgr.fire(shipAdded);
-	}
+   private void add(Ship ship) {
+      // TODO modify this so that ships have limited line of sight
+      // Fill the ship
+      ship.getPlayer().add(ship);
 
-	public Set<Animation> getAnimations() {
-		return animations;
-	}
+      // Update world
+      ships.add(ship);
+      physicalEntities.add(ship);
 
-	public Set<PhysicalEntity> getPhysicalEntities() {
-		return physicalEntities;
-	}
+      // update surroundings of the awares
+      final ShipAdded shipAdded = worldEventFactory.newInstance(WorldEventType.SHIP_ADDED);
+      shipAdded.setAddedShip(ship);
+      worldEventMgr.fire(shipAdded);
+   }
 
-	/**
-	 * Do not use this method if you intend to modify this list.
-	 */
-	public List<Ship> getShips() {
-		return ships;
-	}
+   public Set<Animation> getAnimations() {
+      return animations;
+   }
 
-	public long getTime() {
-		return time;
-	}
+   public Set<PhysicalEntity> getPhysicalEntities() {
+      return physicalEntities;
+   }
 
-	@PostConstruct
-	private void init() {
-		eventManager.scanAndRegister(this);
+   /**
+    * Do not use this method if you intend to modify this list.
+    */
+   public List<Ship> getShips() {
+      return ships;
+   }
 
-		new Thread((Runnable) () -> {
-			final ScriptEngineManager manager = new ScriptEngineManager();
-			final ScriptEngine engine = manager.getEngineByName("nashorn");
-			try {
-				final FileReader reader = new FileReader(getClass().getResource("/model-init.js").getPath());
-				engine.put("world", World.this);
-				engine.put("orderFactory", orderFactory);
-				engine.put("entityFactory", entityFactory);
-				engine.eval(reader);
-				gameLoadedEvent.fire(new GameLoaded());
-			} catch (final Exception e) {
-				LOGGER.error("Cannot open init file", e);
-			}
-		}, "model init").start();
-	}
+   public long getTime() {
+      return time;
+   }
 
-	protected void onAnimationStart(@MObserves AnimationStart animationStart) {
-		animations.add(animationStart.getAnimation());
-	}
+   @PostConstruct
+   private void init() {
+      eventManager.scanAndRegister(this);
 
-	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
-		remove(shipDeath.getShip());
+      new Thread((Runnable) () -> {
+         final ScriptEngineManager manager = new ScriptEngineManager();
+         final ScriptEngine engine = manager.getEngineByName("nashorn");
+         try {
+            final FileReader reader = new FileReader(getClass().getResource("/model-init.js").getPath());
+            engine.put("world", World.this);
+            engine.put("orderFactory", orderFactory);
+            engine.put("entityFactory", entityFactory);
+            engine.eval(reader);
+            gameLoadedEvent.fire(new GameLoaded());
+         } catch (final Exception e) {
+            LOGGER.error("Cannot open init file", e);
+         }
+      }, "model init").start();
+   }
 
-		final Ship ship = entityFactory.newInstance(PhysicalEntityType.SHIP);
-		ship.setPlayer(shipDeath.getShip().getPlayer());
-		final Random random = new Random();
-		ship.setMass(random.nextFloat());
-		ship.init(new Vector2f(random.nextFloat() * 400 - 200, random.nextFloat() * 400 - 200), 10);
-		add(ship);
-	}
+   protected void onAnimationStart(@MObserves AnimationStart animationStart) {
+      animations.add(animationStart.getAnimation());
+   }
 
-	public void remove(Animation animation) {
-		animations.remove(animation);
-	}
+   protected void onShipDeath(@MObserves ShipDeath shipDeath) {
+      LOGGER.debug("Ship death: " + shipDeath.getShip());
+      remove(shipDeath.getShip());
 
-	public void remove(Ship ship) {
-		ships.remove(ship);
-		physicalEntities.remove(ship);
-		// TODO send event
-	}
+      final Ship ship = entityFactory.newInstance(PhysicalEntityType.SHIP);
+      ship.setPlayer(shipDeath.getShip().getPlayer());
+      final Random random = new Random();
+      ship.setMass(random.nextFloat() / 2 + 0.5f);
+      ship.getPos().copy(random.nextFloat() * 400 - 200, random.nextFloat() * 400 - 200);
+      ship.setHealth(10);
+      add(ship);
+   }
 
-	public void updateTime() {
-		time = new Date().getTime() - initialTime;
-	}
+   public void remove(Animation animation) {
+      animations.remove(animation);
+   }
+
+   public void remove(Ship ship) {
+      ships.remove(ship);
+      physicalEntities.remove(ship);
+      // TODO send event
+   }
+
+   public void updateTime() {
+      long newUpdateTime = new Date().getTime();
+      if (lastUpdateTime != 0) {
+         time += (newUpdateTime - lastUpdateTime) / 1;
+      }
+      lastUpdateTime = newUpdateTime;
+   }
+
+   public List<PhysicalEntity> getNonShipsPhysicalEntities() {
+      return nonShipsPhysicalEntities;
+   }
+
 }

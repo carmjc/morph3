@@ -41,7 +41,7 @@ public class MEventManager {
       scanAndRegister(this);
    }
 
-   protected void onDeadShip(@MObserves ShipDeath deadShip) {
+   protected void onShipDeath(@MObserves ShipDeath deadShip) {
       instances.get(Ship.class).remove(deadShip.getShip());
    }
 
