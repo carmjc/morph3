@@ -15,7 +15,6 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.eventmgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
-import net.carmgate.morph.model.animations.Laser;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -28,7 +27,6 @@ import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.renderers.Renderable;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
-import net.carmgate.morph.ui.renderers.animations.LaserRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 
@@ -204,7 +202,8 @@ public class Main {
       GL11.glScalef(zoomFactor, zoomFactor, 1);
       GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
       world.getAnimations().forEach(anim -> {
-         ((LaserRenderer) renderers.get(anim.getClass())).render((Laser) anim);
+         Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
+         renderer.render(anim);
          if (anim.getAnimationEnd() < world.getTime()) {
             finishedAnimations.add(anim);
          }

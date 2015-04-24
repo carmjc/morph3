@@ -32,6 +32,7 @@ import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.events.animations.AnimationStart;
+import net.carmgate.morph.model.events.entities.ship.PhysicalEntityToBeRemoved;
 import net.carmgate.morph.model.events.entities.ship.ShipAdded;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.orders.OrderFactory;
@@ -62,6 +63,8 @@ public class World {
    private final Set<Animation> animations = new HashSet<>();
    private long lastUpdateTime = 0;
    private long time = 0;
+   private int timeFactor = 1;
+   private boolean timeFrozen;
 
 
    // private final Set<ShipUpdated> worldEvents = new HashSet<>();
@@ -151,11 +154,26 @@ public class World {
       add(ship);
    }
 
+   protected void onEntityRemovel(@MObserves PhysicalEntityToBeRemoved event) {
+      LOGGER.debug("Removing " + event.getEntity().getClass().getName());
+      remove(event.getEntity());
+   }
+
+   private void remove(PhysicalEntity entity) {
+      if (entity instanceof Ship) {
+         remove((Ship) entity);
+         return;
+      }
+
+      nonShipsPhysicalEntities.remove(entity);
+      physicalEntities.remove(entity);
+   }
+
    public void remove(Animation animation) {
       animations.remove(animation);
    }
 
-   public void remove(Ship ship) {
+   private void remove(Ship ship) {
       ships.remove(ship);
       physicalEntities.remove(ship);
       // TODO send event
@@ -164,13 +182,26 @@ public class World {
    public void updateTime() {
       long newUpdateTime = new Date().getTime();
       if (lastUpdateTime != 0) {
-         time += (newUpdateTime - lastUpdateTime) / 1;
+         int timeFactor = timeFrozen ? 0 : this.timeFactor;
+         time += (newUpdateTime - lastUpdateTime) * timeFactor;
       }
       lastUpdateTime = newUpdateTime;
    }
 
    public List<PhysicalEntity> getNonShipsPhysicalEntities() {
       return nonShipsPhysicalEntities;
+   }
+
+   public void setTimeFactor(int timeFactor) {
+      this.timeFactor = timeFactor;
+   }
+
+   public boolean isTimeFrozen() {
+      return timeFrozen;
+   }
+
+   public void toggleTimeFrozen() {
+      timeFrozen = !timeFrozen;
    }
 
 }

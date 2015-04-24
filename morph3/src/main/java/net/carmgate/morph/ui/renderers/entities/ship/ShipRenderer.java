@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.model.entities.physical.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
@@ -59,10 +58,10 @@ public class ShipRenderer implements Renderer<Ship> {
 
       // Render kinematics
       // Accel
-      Vector2f accel = new Vector2f(ship.getAccel());
-      RenderUtils.renderLine(Vector2f.NULL, accel, 2, 2, new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
-      // Accel
-      Vector2f speed = new Vector2f(ship.getSpeed());
-      RenderUtils.renderLine(Vector2f.NULL, speed, 2, 2, new float[] { 0f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+      // Vector2f accel = new Vector2f(ship.getAccel());
+      // RenderUtils.renderLine(Vector2f.NULL, accel, 2, 2, new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+      // // Accel
+      // Vector2f speed = new Vector2f(ship.getSpeed());
+      // RenderUtils.renderLine(Vector2f.NULL, speed, 2, 2, new float[] { 0f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
    }
 }

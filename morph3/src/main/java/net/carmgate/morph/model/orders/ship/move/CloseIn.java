@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.eventmgt.MObserves;
+import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.Ship;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -20,7 +21,7 @@ public class CloseIn extends MoveOrder implements ForceSource {
    @Inject private OrderFactory orderFactory;
    @Inject private Logger LOGGER;
 
-   private Ship target;
+   private PhysicalEntity target;
    private float desiredDistance;
    private final Vector2f force = new Vector2f();
    private final Vector2f tmpVect = new Vector2f();
@@ -62,7 +63,7 @@ public class CloseIn extends MoveOrder implements ForceSource {
             LOGGER.debug("force: " + force);
          }
       } else {
-         LOGGER.debug("Breaking");
+         // LOGGER.debug("Breaking");
          // We need to break
          force.copy(getOrderee().getSpeed());
          if (force.length() > 0) {
@@ -80,7 +81,7 @@ public class CloseIn extends MoveOrder implements ForceSource {
       return force;
    }
 
-   public Ship getTarget() {
+   public PhysicalEntity getTarget() {
       return target;
    }
 
@@ -95,7 +96,7 @@ public class CloseIn extends MoveOrder implements ForceSource {
       desiredDistance = distance;
    }
 
-   public void setTarget(Ship target) {
+   public void setTarget(PhysicalEntity target) {
       this.target = target;
    }
 

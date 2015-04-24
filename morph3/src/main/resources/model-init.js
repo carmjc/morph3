@@ -23,6 +23,10 @@ ship.setHealth(5);
 ship.mass = 0.5;
 ship.player = other;
 ship.getSpeed().copy(0, 0)
+order = orderFactory.newInstance(OrderType.MINE_ASTEROID);
+order.setOrderee(ship);
+order.setAsteroid(asteroid);
+ship.add(order);
 world.add(ship);
 
 //ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));

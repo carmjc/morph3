@@ -19,18 +19,12 @@ import org.slf4j.Logger;
 
 public class Zoom implements MouseListener {
 
-   @Inject
-   private Logger LOGGER;
-   @Inject
-   private MouseManager mouseManager;
-   @Inject
-   private InputHistory inputHistory;
-   @Inject
-   private UIContext uiContext;
-   @Inject
-   private GameMouse gameMouse;
-   @Inject
-   private Conf conf;
+   @Inject private Logger LOGGER;
+   @Inject private MouseManager mouseManager;
+   @Inject private InputHistory inputHistory;
+   @Inject private UIContext uiContext;
+   @Inject private GameMouse gameMouse;
+   @Inject private Conf conf;
 
    private float ZOOM_VARIATION;
    private float ZOOM_MAX;
@@ -44,10 +38,10 @@ public class Zoom implements MouseListener {
 
    @Override
    public void onMouseEvent() {
-      while (inputHistory.getLastEvent().getButton() == Keyboard.KEY_UP
-            && inputHistory.getLastEvent().getEventType() == EventType.KEYBOARD_UP
-            || inputHistory.getLastEvent().getEventType() == EventType.MOUSE_WHEEL
-            && inputHistory.getLastEvent().getButton() > 0) {
+      while (inputHistory.getLastMouseEvent().getButton() == Keyboard.KEY_UP
+            && inputHistory.getLastMouseEvent().getEventType() == EventType.KEYBOARD_UP
+            || inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_WHEEL
+            && inputHistory.getLastMouseEvent().getButton() > 0) {
 
          ViewPort viewport = uiContext.getViewport();
 
@@ -61,15 +55,15 @@ public class Zoom implements MouseListener {
          Vector2f fromWindowCenterToMouse = new Vector2f(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
                -uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
          uiContext.getViewport().getFocalPoint().add(new Vector2f(fromWindowCenterToMouse).scale(1f / zoomVariation)).scale(zoomVariation)
-               .sub(new Vector2f(fromWindowCenterToMouse).scale(zoomVariation));
+         .sub(new Vector2f(fromWindowCenterToMouse).scale(zoomVariation));
 
-         inputHistory.consumeLastEvents(1);
+         inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }
 
-      while (inputHistory.getLastEvent().getButton() == Keyboard.KEY_DOWN
-            && inputHistory.getLastEvent().getEventType() == EventType.KEYBOARD_UP
-            || inputHistory.getLastEvent().getEventType() == EventType.MOUSE_WHEEL
-            && inputHistory.getLastEvent().getButton() < 0) {
+      while (inputHistory.getLastMouseEvent().getButton() == Keyboard.KEY_DOWN
+            && inputHistory.getLastMouseEvent().getEventType() == EventType.KEYBOARD_UP
+            || inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_WHEEL
+            && inputHistory.getLastMouseEvent().getButton() < 0) {
 
          ViewPort viewport = uiContext.getViewport();
 
@@ -83,9 +77,9 @@ public class Zoom implements MouseListener {
          Vector2f fromWindowCenterToMouse = new Vector2f(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
                -uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
          uiContext.getViewport().getFocalPoint().add(new Vector2f(fromWindowCenterToMouse).scale(1f / zoomVariation)).scale(zoomVariation)
-               .sub(new Vector2f(fromWindowCenterToMouse).scale(zoomVariation));
+         .sub(new Vector2f(fromWindowCenterToMouse).scale(zoomVariation));
 
-         inputHistory.consumeLastEvents(1);
+         inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }
    }
 }

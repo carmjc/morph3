@@ -56,7 +56,8 @@ public class Attack extends Order {
 
       // Create animation
       final Laser laser = animationFactory.newInstance(AnimationType.LASER);
-      laser.init(getOrderee(), target);
+      laser.setSource(getOrderee());
+      laser.setTarget(target);
       final AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
       animationStart.setAnimation(laser);
       worldEventMgr.fire(animationStart);

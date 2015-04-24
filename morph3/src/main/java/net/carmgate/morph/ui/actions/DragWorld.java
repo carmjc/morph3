@@ -19,18 +19,12 @@ import org.slf4j.Logger;
 @Singleton
 public class DragWorld implements MouseListener {
 
-   @Inject
-   private Logger LOGGER;
-   @Inject
-   private MouseManager mouseManager;
-   @Inject
-   private InputHistory inputHistory;
-   @Inject
-   private UIContext uiContext;
-   @Inject
-   private GameMouse gameMouse;
-   @Inject
-   private DragContext dragContext;
+   @Inject private Logger LOGGER;
+   @Inject private MouseManager mouseManager;
+   @Inject private InputHistory inputHistory;
+   @Inject private UIContext uiContext;
+   @Inject private GameMouse gameMouse;
+   @Inject private DragContext dragContext;
 
    @SuppressWarnings("unused")
    private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
@@ -39,9 +33,9 @@ public class DragWorld implements MouseListener {
 
    @Override
    public void onMouseEvent() {
-      if (inputHistory.getLastEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
-            && inputHistory.getLastEvent(1).getButton() == 0
-            && inputHistory.getLastEvent().getEventType() == EventType.MOUSE_MOVE) {
+      if (inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
+            && inputHistory.getLastMouseEvent(1).getButton() == 0
+            && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE) {
 
          // Model.getModel().getViewport().setLockedOnEntity(null);
 
@@ -56,9 +50,9 @@ public class DragWorld implements MouseListener {
             fp.x = (oldFP.x * uiContext.getViewport().getZoomFactor() - (gameMouse.getX() - oldMousePosInWindow.x)) / uiContext.getViewport().getZoomFactor();
             fp.y = (oldFP.y * uiContext.getViewport().getZoomFactor() + (gameMouse.getY() - oldMousePosInWindow.y)) / uiContext.getViewport().getZoomFactor();
          }
-         inputHistory.consumeLastEvents(2);
+         inputHistory.consumeEvents(inputHistory.getLastMouseEvent(), inputHistory.getLastMouseEvent(1));
       }
-      while (inputHistory.getLastEvent().getEventType() == EventType.MOUSE_MOVE
+      while (inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
             && dragContext.dragInProgress()) {
 
          final Vector2f oldFP = dragContext.getOldFP();
@@ -70,13 +64,13 @@ public class DragWorld implements MouseListener {
             fp.y = (oldFP.y * uiContext.getViewport().getZoomFactor() + (gameMouse.getY() - oldMousePosInWindow.y)) / uiContext.getViewport().getZoomFactor();
          }
 
-         inputHistory.consumeLastEvents(1);
+         inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }
-      if (inputHistory.getLastEvent().getEventType() == EventType.MOUSE_BUTTON_UP
+      if (inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP
             && dragContext.dragInProgress()) {
          LOGGER.debug("dragContext reset");
          dragContext.reset();
-         inputHistory.consumeLastEvents(1);
+         inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }
    }
 }
