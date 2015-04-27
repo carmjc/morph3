@@ -6,22 +6,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.eventmgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Component;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.events.WorldEvent;
+import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.UIContext;
-import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.renderers.Renderable;
@@ -46,7 +51,8 @@ public class Main {
    @Inject private UIContext uiContext;
    @Inject private MouseManager mouseManager;
    @Inject private KeyboardManager keyboardManager;
-   @Inject private InputHistory inputHistory;
+   @Inject private MEvent<WorldEvent> worldEvtMgr;
+   @Inject private WorldEventFactory worldEventFactory;
 
    // Computation attributes
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
@@ -89,20 +95,16 @@ public class Main {
       final int height = Display.getHeight();
       LOGGER.debug("init view: " + width + "x" + height);
 
-      // init the window
-      // model.getWindow().setWidth(width);
-      // model.getWindow().setHeight(height);
-
       // set clear color - Wont be needed once we have a background
-      GL11.glClearColor(0f, 0f, 0f, 0f);
+      GL11.glClearColor(0.2f, 0.2f, 0.2f, 0f);
 
       // enable alpha blending
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
       GL11.glDisable(GL11.GL_DEPTH_TEST);
-      GL11.glEnable(GL11.GL_LINE_SMOOTH);
       GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+      GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
       GL11.glMatrixMode(GL11.GL_PROJECTION);
       GL11.glLoadIdentity();
@@ -268,12 +270,18 @@ public class Main {
 
    private void updateKinematics() {
       for (final PhysicalEntity entity : world.getPhysicalEntities()) {
+         if (entity instanceof Ship && ((Ship) entity).isForceStop()) {
+            entity.getAccel().copy(Vector2f.NULL);
+            entity.getSpeed().copy(Vector2f.NULL);
+            continue;
+         }
+
          Vector2f tmpEntityAccel = new Vector2f();
          Vector2f tmpAccel = new Vector2f();
          Vector2f tmp = new Vector2f();
 
          for (final ForceSource source : entity.getForceSources()) {
-            tmpAccel.copy(source.getForce()).scale(1 / entity.getMass());
+            tmpAccel.copy(source.getForce()).scale(1 / entity.getMass()); // FIXME This is only using one force ... :(
             tmpEntityAccel.add(tmpAccel);
          }
 
@@ -308,6 +316,40 @@ public class Main {
             ship.removeCurrentOrder();
          }
 
+         // economics management
+         updateShipEconomics(ship);
+      }
+   }
+
+   private void updateShipEconomics(final Ship ship) {
+      // Economics updates from components
+      float energyDt = 0;
+      float resourcesDt = 0;
+
+      Set<Component> energySet = new TreeSet<>((o1, o2) -> (int) (o2.getEnergyDt() - o1.getEnergyDt()));
+      Set<Component> resourcesSet = new TreeSet<>((o1, o2) -> (int) (o2.getResourcesDt() - o1.getResourcesDt()));
+
+      for (Component comp : ship.getComponents().values()) {
+         energySet.add(comp);
+         resourcesSet.add(comp);
+         energyDt += comp.getEnergyDt();
+         resourcesDt += comp.getResourcesDt();
+      }
+      ship.setEnergydt(energyDt);
+      ship.setResourcesdt(resourcesDt);
+
+      // Energy and resources evolution with time
+      float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
+      if (ship.getEnergy() + energyDelta < 0) {
+         ship.setEnergy(0);
+      } else {
+         ship.addEnergy(energyDelta);
+      }
+      float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
+      if (ship.getResources() + resourcesDelta < 0) {
+         ship.setResources(0);
+      } else {
+         ship.addResources(resourcesDelta);
       }
    }
 }

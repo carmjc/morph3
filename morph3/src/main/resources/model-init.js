@@ -1,5 +1,6 @@
 load("nashorn:mozilla_compat.js");
 importPackage(Packages.net.carmgate.morph.model)
+importPackage(Packages.net.carmgate.morph.model.entities.physical.ship)
 importPackage(Packages.net.carmgate.morph.model.entities.physical)
 importPackage(Packages.net.carmgate.morph.model.geometry)
 importPackage(Packages.net.carmgate.morph.model.orders)
@@ -12,19 +13,22 @@ other = new Player("Other");
 other.color = [0.2, 1, 0.5, 1];
 
 asteroid = entityFactory.newInstance(PhysicalEntityType.valueOf("ASTEROID"));
-asteroid.getPos().copy(-200, -80);
+asteroid.getPos().copy(-500, -80);
 asteroid.mass = 2;
 asteroid.rotateSpeed = 5;
 world.add(asteroid);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
-ship.getPos().copy(550, 250);
+ship.getPos().copy(100, 100);
 ship.setHealth(5);
 ship.mass = 0.5;
 ship.player = other;
-ship.getSpeed().copy(0, 0)
-order = orderFactory.newInstance(OrderType.MINE_ASTEROID);
-order.setOrderee(ship);
+ship.energy = 1000;
+ship.getSpeed().copy(-100, -100)
+ship.getComponents().put(ComponentType.MINING_LASERS, new MiningLaser(ship));
+ship.getComponents().put(ComponentType.PROPULSORS, new SimplePropulsor(ship));
+ship.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship));
+order = orderFactory.newInstance(OrderType.MINE_ASTEROID, ship);
 order.setAsteroid(asteroid);
 ship.add(order);
 world.add(ship);

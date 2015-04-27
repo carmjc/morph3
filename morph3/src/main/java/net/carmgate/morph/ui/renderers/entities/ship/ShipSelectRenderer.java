@@ -5,7 +5,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;

@@ -1,6 +1,6 @@
 package net.carmgate.morph.model.events.entities.ship;
 
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 public class ShipHit extends ShipUpdated {
 

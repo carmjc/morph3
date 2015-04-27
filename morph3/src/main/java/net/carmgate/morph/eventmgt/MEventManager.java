@@ -13,7 +13,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 
 @Singleton

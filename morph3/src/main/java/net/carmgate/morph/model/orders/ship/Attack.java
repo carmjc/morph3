@@ -6,8 +6,8 @@ import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
-import net.carmgate.morph.model.animations.Laser;
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.animations.LaserAnim;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
@@ -40,10 +40,9 @@ public class Attack extends Order {
       setNextEvalTime(getNextEvalTime() + 1000);
 
       if (getOrderee().getMoveOrder() == null || getOrderee().getMoveOrder().getParentOrder() != this) {
-         final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN);
+         final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN, getOrderee());
          closeInOrder.setDistance(MAX_DISTANCE * 0.5f);
          closeInOrder.setTarget(target);
-         closeInOrder.setOrderee(getOrderee());
          getOrderee().add(closeInOrder);
       }
 
@@ -55,7 +54,7 @@ public class Attack extends Order {
       }
 
       // Create animation
-      final Laser laser = animationFactory.newInstance(AnimationType.LASER);
+      final LaserAnim laser = animationFactory.newInstance(AnimationType.LASER);
       laser.setSource(getOrderee());
       laser.setTarget(target);
       final AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);

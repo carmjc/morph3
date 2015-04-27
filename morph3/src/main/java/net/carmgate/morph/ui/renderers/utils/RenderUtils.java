@@ -5,6 +5,8 @@ import java.nio.FloatBuffer;
 import net.carmgate.morph.model.geometry.Vector2f;
 
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.TextureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,4 +163,9 @@ public class RenderUtils {
       GL11.glEnd();
    }
 
+   // TODO The "line" parameter should not be necessary
+   // The method should adapt to the number of lines printed so far
+   public static void renderText(TrueTypeFont font, float x, float y, String str, int line) {
+      font.drawString(x, y + font.getHeight() * (line - 1), str, Color.white);
+   }
 }

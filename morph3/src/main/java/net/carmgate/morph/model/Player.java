@@ -3,7 +3,7 @@ package net.carmgate.morph.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 public class Player {
    private String name;

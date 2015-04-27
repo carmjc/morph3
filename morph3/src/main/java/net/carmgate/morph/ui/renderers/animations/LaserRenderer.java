@@ -5,14 +5,14 @@ import java.util.Random;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 
-import net.carmgate.morph.model.animations.Laser;
+import net.carmgate.morph.model.animations.LaserAnim;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 
-public class LaserRenderer implements Renderer<Laser> {
+public class LaserRenderer implements Renderer<LaserAnim> {
 
    private Random rand = new Random();
 
@@ -26,7 +26,7 @@ public class LaserRenderer implements Renderer<Laser> {
    }
 
    @Override
-   public void render(Laser laser) {
+   public void render(LaserAnim laser) {
       RenderUtils.renderLine(laser.getSource().getPos(), laser.getTarget().getPos(), 1f, rand.nextFloat() * 5 + 3,
             new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
    }

@@ -27,7 +27,7 @@ import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
@@ -63,8 +63,8 @@ public class World {
    private final Set<Animation> animations = new HashSet<>();
    private long lastUpdateTime = 0;
    private long time = 0;
-   private int timeFactor = 1;
-   private boolean timeFrozen;
+   private float timeFactor = 1f;
+   private boolean timeFrozen = true;
 
 
    // private final Set<ShipUpdated> worldEvents = new HashSet<>();
@@ -182,7 +182,7 @@ public class World {
    public void updateTime() {
       long newUpdateTime = new Date().getTime();
       if (lastUpdateTime != 0) {
-         int timeFactor = timeFrozen ? 0 : this.timeFactor;
+         float timeFactor = timeFrozen ? 0 : this.timeFactor;
          time += (newUpdateTime - lastUpdateTime) * timeFactor;
       }
       lastUpdateTime = newUpdateTime;

@@ -1,5 +1,7 @@
 package net.carmgate.morph.model.entities.physical;
 
+import net.carmgate.morph.model.entities.physical.ship.Ship;
+
 public enum PhysicalEntityType {
    SHIP(Ship.class),
    ASTEROID(Asteroid.class);

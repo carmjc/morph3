@@ -5,8 +5,9 @@ import javax.inject.Inject;
 import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
-import net.carmgate.morph.model.animations.MiningLaser;
+import net.carmgate.morph.model.animations.MiningLaserAnim;
 import net.carmgate.morph.model.entities.physical.Asteroid;
+import net.carmgate.morph.model.entities.physical.ship.ComponentType;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.events.animations.AnimationStart;
@@ -35,10 +36,10 @@ public class MineAsteroid extends Order {
       setNextEvalTime(getNextEvalTime() + 1000);
 
       if (getOrderee().getMoveOrder() == null || getOrderee().getMoveOrder().getParentOrder() != this) {
-         final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN);
+         final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN, getOrderee());
          closeInOrder.setDistance(MAX_DISTANCE * 0.9f);
          closeInOrder.setTarget(asteroid);
-         closeInOrder.setOrderee(getOrderee());
+         closeInOrder.setParentOrder(this);
          getOrderee().add(closeInOrder);
       }
 
@@ -46,11 +47,13 @@ public class MineAsteroid extends Order {
       tmpVect.copy(asteroid.getPos()).sub(getOrderee().getPos());
       final float distance = tmpVect.length();
       if (distance > MAX_DISTANCE) {
+         getOrderee().getComponents().get(ComponentType.MINING_LASERS).setEnergyDt(0);
+         getOrderee().getComponents().get(ComponentType.MINING_LASERS).setResourcesDt(0);
          return;
       }
 
       // Create animation
-      final MiningLaser laser = animationFactory.newInstance(AnimationType.MINING_LASER);
+      final MiningLaserAnim laser = animationFactory.newInstance(AnimationType.MINING_LASER);
       laser.setSource(getOrderee());
       laser.setTarget(asteroid);
       final AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
@@ -63,12 +66,15 @@ public class MineAsteroid extends Order {
          PhysicalEntityToBeRemoved removalEvent = new PhysicalEntityToBeRemoved();
          removalEvent.setEntity(asteroid);
          removalEventMgr.fire(removalEvent);
-         getOrderee().add(orderFactory.newInstance(OrderType.NO_MOVE));
+         getOrderee().add(orderFactory.newInstance(OrderType.NO_MOVE, getOrderee()));
          setDone(true);
       } else {
          getOrderee().setMass(getOrderee().getMass() + MASS_MINED);
          asteroid.setMass(asteroid.getMass() - MASS_MINED);
       }
+
+      getOrderee().getComponents().get(ComponentType.MINING_LASERS).setEnergyDt(-0.001f);
+      getOrderee().getComponents().get(ComponentType.MINING_LASERS).setResourcesDt(0.1f);
    }
 
    public Asteroid getAsteroid() {

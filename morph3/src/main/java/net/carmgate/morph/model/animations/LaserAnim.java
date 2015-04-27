@@ -5,15 +5,15 @@ import javax.inject.Inject;
 
 import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.entities.physical.Asteroid;
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 
-public class MiningLaser extends Animation {
+
+public class LaserAnim extends Animation {
 
    @Inject private World world;
 
-   private Asteroid target;
+   private Ship target;
    private Ship source;
 
    @PostConstruct
@@ -30,11 +30,11 @@ public class MiningLaser extends Animation {
       return source;
    }
 
-   public Asteroid getTarget() {
+   public Ship getTarget() {
       return target;
    }
 
-   public void setTarget(Asteroid target) {
+   public void setTarget(Ship target) {
       this.target = target;
    }
 

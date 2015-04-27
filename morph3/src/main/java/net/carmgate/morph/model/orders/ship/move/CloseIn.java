@@ -2,22 +2,20 @@ package net.carmgate.morph.model.orders.ship.move;
 
 import javax.inject.Inject;
 
-import net.carmgate.morph.eventmgt.MEvent;
 import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.Ship;
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.model.orders.OrderType;
-import net.carmgate.morph.model.physics.ForceSource;
 
 import org.slf4j.Logger;
 
-public class CloseIn extends MoveOrder implements ForceSource {
+public class CloseIn extends MoveOrder {
 
-   @Inject private MEvent<Order> orderMgr;
+   private static final float EPSILON = 0.05f;
+
    @Inject private OrderFactory orderFactory;
    @Inject private Logger LOGGER;
 
@@ -27,49 +25,49 @@ public class CloseIn extends MoveOrder implements ForceSource {
    private final Vector2f tmpVect = new Vector2f();
 
    @Override
-   protected void evaluate() {
+   protected void evaluateMove() {
       // LOGGER.debug("Closing in on (" + target.getPos() + ") from (" + getOrderee().getPos() + ")");
 
+      // target offset
       tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
-      float actualDistance = tmpVect.length();
+      float actualDistance = tmpVect.length() - getDistance();
+
+      if (actualDistance < EPSILON && getOrderee().getSpeed().lengthSquared() < EPSILON) {
+         if (!getOrderee().isForceStop()) {
+            getOrderee().setForceStop(true);
+         }
+         return;
+      }
 
       float maxAccel = Ship.MAX_PROPULSOR_FORCE / getOrderee().getMass();
-      Vector2f speedDiff = new Vector2f(getOrderee().getSpeed()).sub(target.getSpeed());
-      float speedDiffLength = speedDiff.length();
-      float breakingAccel = speedDiffLength * speedDiffLength / (2 * (actualDistance - desiredDistance));
 
-      if (desiredDistance < actualDistance) {
-         if (breakingAccel > 0.99f * maxAccel) {
-            // LOGGER.debug("Breaking");
-            // We need to break
-            force.copy(getOrderee().getSpeed());
-            if (force.length() > 0) {
-               force.scale(-1f * Ship.MAX_PROPULSOR_FORCE / force.length());
-            }
-         } else {
-            LOGGER.debug("Breaking Accel: " + breakingAccel + " - maxAccel: " + maxAccel + " - distance: " + actualDistance + " - speed: " + getOrderee().getSpeed().length());
-            // No need to break now
-            force.copy(target.getPos()).sub(getOrderee().getPos());
-            LOGGER.debug("dist: " + force.length());
-            // force.scale(getOrderee().getSpeed().length() * 2 / force.length());
-            Vector2f tmp = new Vector2f(getOrderee().getSpeed()).scale(getOrderee().getSpeed().length() / maxAccel);
-            // Vector2f tmp = new Vector2f(getOrderee().getSpeed());
-            force.sub(tmp); // .add(target.getSpeed())
-            LOGGER.debug("speed: " + getOrderee().getSpeed().length());
-            LOGGER.debug("speediff: " + speedDiff.length());
-            if (force.length() > 0) {
-               force.scale(Ship.MAX_PROPULSOR_FORCE / force.length());
-            }
-            LOGGER.debug("force: " + force);
-         }
+      if (actualDistance < 0) {
+         force.copy(getOrderee().getSpeed()).scale(-1);
+         // getOrderee().debug1.copy(Vector2f.NULL);
+         // getOrderee().debug2.copy(Vector2f.NULL);
+         // getOrderee().debug3.copy(Vector2f.NULL);
+         // getOrderee().debug4.copy(Vector2f.NULL);
       } else {
-         // LOGGER.debug("Breaking");
-         // We need to break
-         force.copy(getOrderee().getSpeed());
-         if (force.length() > 0) {
-            force.scale(-1f * Ship.MAX_PROPULSOR_FORCE / force.length());
-         }
+         LOGGER.debug("dist: " + actualDistance);
+         force.copy(target.getPos()).sub(getOrderee().getPos());
+         // getOrderee().debug1.copy(force);
+         // LOGGER.debug("toTarget: " + force.length());
+         tmpVect.copy(getOrderee().getSpeed()).scale(getOrderee().getSpeed().length() / maxAccel);
+         // getOrderee().debug2.copy(tmpVect);
+         // LOGGER.debug("adjusted speed: " + tmpVect.length());
+         force.sub(tmpVect); // .add(target.getSpeed())
+         // getOrderee().debug3.copy(force);
+         // LOGGER.debug("desiredSpeed: " + force.length());
+         force.scale(getOrderee().getSpeed().lengthSquared() / (2 * actualDistance + getOrderee().getSpeed().length()));
+         // getOrderee().debug4.copy(force);
       }
+      // LOGGER.debug(force.length() + " - " + Ship.MAX_PROPULSOR_FORCE);
+      float length = force.length();
+      if (length > Ship.MAX_PROPULSOR_FORCE) {
+         // LOGGER.debug("scaling ... ");
+         force.scale(Ship.MAX_PROPULSOR_FORCE / length);
+      }
+
    }
 
    public float getDistance() {
@@ -87,8 +85,8 @@ public class CloseIn extends MoveOrder implements ForceSource {
 
    protected void onShipDeath(@MObserves ShipDeath shipDeath) {
       if (target == shipDeath.getShip()) {
-         final NoMoveOrder noMoveOrder = orderFactory.newInstance(OrderType.NO_MOVE);
-         orderMgr.fire(noMoveOrder);
+         final NoMoveOrder noMoveOrder = orderFactory.newInstance(OrderType.NO_MOVE, getOrderee());
+         getOrderee().add(noMoveOrder);
       }
    }
 

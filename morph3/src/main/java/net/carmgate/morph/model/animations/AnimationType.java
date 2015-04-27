@@ -1,8 +1,8 @@
 package net.carmgate.morph.model.animations;
 
 public enum AnimationType {
-   LASER(Laser.class),
-   MINING_LASER(MiningLaser.class);
+   LASER(LaserAnim.class),
+   MINING_LASER(MiningLaserAnim.class);
 
    private final Class<? extends Animation> clazz;
 
