@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.orders.ship;
+package net.carmgate.morph.model.orders.ship.action;
 
 import javax.inject.Inject;
 
@@ -13,12 +13,11 @@ import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.events.animations.AnimationStart;
 import net.carmgate.morph.model.events.entities.ship.PhysicalEntityToBeRemoved;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.model.orders.OrderType;
 import net.carmgate.morph.model.orders.ship.move.CloseIn;
 
-public class MineAsteroid extends Order {
+public class MineAsteroid extends ActionOrder {
 
    @Inject private OrderFactory orderFactory;
    @Inject private AnimationFactory animationFactory;
@@ -73,8 +72,8 @@ public class MineAsteroid extends Order {
          asteroid.setMass(asteroid.getMass() - MASS_MINED);
       }
 
-      getOrderee().getComponents().get(ComponentType.MINING_LASERS).setEnergyDt(-0.001f);
-      getOrderee().getComponents().get(ComponentType.MINING_LASERS).setResourcesDt(0.1f);
+      getOrderee().getComponents().get(ComponentType.MINING_LASERS).setEnergyDt(-0.5f);
+      getOrderee().getComponents().get(ComponentType.MINING_LASERS).setResourcesDt(1f);
    }
 
    public Asteroid getAsteroid() {
@@ -83,6 +82,16 @@ public class MineAsteroid extends Order {
 
    public void setAsteroid(Asteroid asteroid) {
       this.asteroid = asteroid;
+   }
+
+   @Override
+   public ComponentType[] getComponentTypes() {
+      return new ComponentType[] { ComponentType.MINING_LASERS };
+   }
+
+   @Override
+   public int getCriticity() {
+      return 40;
    }
 
 }

@@ -165,7 +165,7 @@ public class RenderUtils {
 
    // TODO The "line" parameter should not be necessary
    // The method should adapt to the number of lines printed so far
-   public static void renderText(TrueTypeFont font, float x, float y, String str, int line) {
-      font.drawString(x, y + font.getHeight() * (line - 1), str, Color.white);
+   public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color) {
+      font.drawString(x, y + font.getHeight() * (line - 1), str, color);
    }
 }

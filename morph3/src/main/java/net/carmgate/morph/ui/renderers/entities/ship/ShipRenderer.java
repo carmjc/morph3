@@ -20,6 +20,7 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.util.ResourceLoader;
 
@@ -99,16 +100,20 @@ public class ShipRenderer implements Renderer<Ship> {
 
       // render textual information
       GL11.glScalef(1 / zoom, 1 / zoom, 1);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), -4);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), -3);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), -2);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Health: {0,number,#.###}", ship.getHealth()), -1);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), 0);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), 1);
+      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), -4, Color.white);
+      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), -3, Color.white);
+      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), -2, Color.white);
+      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Health: {0,number,#.###}", ship.getHealth()), -1, Color.white);
+      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), 0, Color.white);
+      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), 1, Color.white);
       int i = 2;
       for (Component c : ship.getComponents().values()) {
+         Color color = Color.white;
+         if (!c.isActive()) {
+            color = Color.red;
+         }
          RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0,
-               MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), i++);
+               MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), i++, color);
       }
       GL11.glScalef(zoom, zoom, 1);
 

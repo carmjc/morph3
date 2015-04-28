@@ -4,10 +4,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -19,7 +21,9 @@ import net.carmgate.morph.eventmgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
+import net.carmgate.morph.model.entities.physical.ship.Background;
 import net.carmgate.morph.model.entities.physical.ship.Component;
+import net.carmgate.morph.model.entities.physical.ship.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
@@ -301,23 +305,23 @@ public class Main {
    private void updateWorld() {
       world.updateTime();
       for (final Ship ship : world.getShips()) {
+         // economics management
+         updateShipEconomics(ship);
+
          // move order
          if (ship.getMoveOrder() != null) {
             ship.getMoveOrder().eval();
          }
 
          // action order
-         final Order order = ship.getCurrentOrder();
+         final Order order = ship.getActionOrder();
          if (order != null && !order.isDone()) {
             order.eval();
          }
          if (order != null && order.isDone()) {
             LOGGER.debug("order removed: " + order);
-            ship.removeCurrentOrder();
+            ship.removeActionOrder();
          }
-
-         // economics management
-         updateShipEconomics(ship);
       }
    }
 
@@ -326,17 +330,51 @@ public class Main {
       float energyDt = 0;
       float resourcesDt = 0;
 
-      Set<Component> energySet = new TreeSet<>((o1, o2) -> (int) (o2.getEnergyDt() - o1.getEnergyDt()));
-      Set<Component> resourcesSet = new TreeSet<>((o1, o2) -> (int) (o2.getResourcesDt() - o1.getResourcesDt()));
-
-      for (Component comp : ship.getComponents().values()) {
-         energySet.add(comp);
-         resourcesSet.add(comp);
-         energyDt += comp.getEnergyDt();
-         resourcesDt += comp.getResourcesDt();
+      Map<ComponentType, Integer> componentCriticities = new HashMap<>();
+      if (ship.getMoveOrder() != null) {
+         for (ComponentType compType : ship.getMoveOrder().getComponentTypes()) {
+            if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getMoveOrder().getCriticity()) {
+               componentCriticities.put(compType, ship.getMoveOrder().getCriticity());
+            }
+         }
       }
-      ship.setEnergydt(energyDt);
-      ship.setResourcesdt(resourcesDt);
+      if (ship.getActionOrder() != null) {
+         for (ComponentType compType : ship.getActionOrder().getComponentTypes()) {
+            if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getActionOrder().getCriticity()) {
+               componentCriticities.put(compType, ship.getActionOrder().getCriticity());
+            }
+         }
+      }
+      for (Entry<ComponentType, Component> entry : ship.getComponents().entrySet()) {
+         if (entry.getValue().getClass().isAnnotationPresent(Background.class)) {
+            componentCriticities.put(entry.getKey(), 0);
+         }
+      }
+
+      Map<Integer, Set<ComponentType>> map = new TreeMap<>((o1, o2) -> o2 - o1);
+      for (Map.Entry<ComponentType, Integer> entry : componentCriticities.entrySet()) {
+         Set<ComponentType> set = map.get(entry.getValue());
+         if (set == null) {
+            set = new HashSet<>();
+            map.put(entry.getValue(), set);
+         }
+         set.add(entry.getKey());
+      }
+
+      ship.setEnergyDt(0);
+      ship.setResourcesDt(0);
+      for (Set<ComponentType> set : map.values()) {
+         for (ComponentType cp : set) {
+            if (ship.getEnergy() + ship.getEnergyDt() + ship.getComponents().get(cp).getEnergyDt() >= 0 &&
+                  ship.getResources() + ship.getResourcesDt() + ship.getComponents().get(cp).getResourcesDt() >= 0) {
+               ship.getComponents().get(cp).setActive(true);
+               ship.setEnergyDt(ship.getEnergyDt() + ship.getComponents().get(cp).getEnergyDt());
+               ship.setResourcesDt(ship.getResourcesDt() + ship.getComponents().get(cp).getResourcesDt());
+            } else {
+               ship.getComponents().get(cp).setActive(false);
+            }
+         }
+      }
 
       // Energy and resources evolution with time
       float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;

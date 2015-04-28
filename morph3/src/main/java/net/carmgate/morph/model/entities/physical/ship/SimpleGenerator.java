@@ -1,5 +1,6 @@
 package net.carmgate.morph.model.entities.physical.ship;
 
+@Background
 public class SimpleGenerator extends Component {
 
    public SimpleGenerator(Ship ship) {
@@ -14,7 +15,7 @@ public class SimpleGenerator extends Component {
 
    @Override
    public float getResourcesDt() {
-      return -1;
+      return -0.5f;
    }
 
 }

@@ -64,10 +64,7 @@ public class World {
    private long lastUpdateTime = 0;
    private long time = 0;
    private float timeFactor = 1f;
-   private boolean timeFrozen = true;
-
-
-   // private final Set<ShipUpdated> worldEvents = new HashSet<>();
+   private boolean timeFrozen = false;
 
    public void add(Animation renderable) {
       animations.add(renderable);

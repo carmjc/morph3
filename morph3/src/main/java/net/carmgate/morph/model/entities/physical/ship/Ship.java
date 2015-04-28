@@ -1,8 +1,6 @@
 package net.carmgate.morph.model.entities.physical.ship;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -22,6 +20,7 @@ import net.carmgate.morph.model.events.entities.ship.ShipHit;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;
+import net.carmgate.morph.model.orders.ship.action.ActionOrder;
 import net.carmgate.morph.model.orders.ship.move.MoveOrder;
 import net.carmgate.morph.model.physics.ForceSource;
 
@@ -39,7 +38,7 @@ public class Ship extends PhysicalEntity {
 
    private Player owner;
    private final Surroundings surroundings = new Surroundings();
-   private final List<Order> orders = new ArrayList<>();
+   private Order actionOrder;
    private MoveOrder moveOrder;
    private float health;
    private final Map<ComponentType, Component> components = new HashMap<>();
@@ -62,13 +61,19 @@ public class Ship extends PhysicalEntity {
 
       if (order instanceof MoveOrder) {
          LOGGER.debug("CloseIn order added: " + order);
-         if (moveOrder instanceof ForceSource) {
+         if (moveOrder != null && moveOrder instanceof ForceSource) {
             getForceSources().remove(moveOrder);
          }
          moveOrder = (MoveOrder) order;
-      } else {
+      } else if (order instanceof ActionOrder) {
          LOGGER.debug("Attack order added: " + order);
-         orders.add(order);
+         if (actionOrder != null && actionOrder instanceof ForceSource) {
+            getForceSources().remove(actionOrder);
+         }
+         actionOrder = order;
+      } else {
+         LOGGER.error("Could not add unknown order type: " + order.getClass().getSimpleName());
+         return;
       }
 
       if (order instanceof ForceSource) {
@@ -76,11 +81,8 @@ public class Ship extends PhysicalEntity {
       }
    }
 
-   public Order getCurrentOrder() {
-      if (orders.size() > 0) {
-         return orders.get(0);
-      }
-      return null;
+   public Order getActionOrder() {
+      return actionOrder;
    }
 
    public float getHealth() {
@@ -138,12 +140,11 @@ public class Ship extends PhysicalEntity {
       }
    }
 
-   public void removeCurrentOrder() {
-      Order currentOrder = getCurrentOrder();
-      if (currentOrder instanceof ForceSource) {
-         getForceSources().remove(currentOrder);
+   public void removeActionOrder() {
+      if (actionOrder instanceof ForceSource) {
+         getForceSources().remove(actionOrder);
       }
-      orders.remove(currentOrder);
+      actionOrder = null;
    }
 
    public void setPlayer(Player owner) {
@@ -170,7 +171,7 @@ public class Ship extends PhysicalEntity {
       return energydt;
    }
 
-   public void setEnergydt(float energydt) {
+   public void setEnergyDt(float energydt) {
       this.energydt = energydt;
    }
 
@@ -194,7 +195,7 @@ public class Ship extends PhysicalEntity {
       return resourcesdt;
    }
 
-   public void setResourcesdt(float resourcesdt) {
+   public void setResourcesDt(float resourcesdt) {
       this.resourcesdt = resourcesdt;
    }
 
@@ -213,5 +214,4 @@ public class Ship extends PhysicalEntity {
    public boolean isForceStop() {
       return forceStop;
    }
-
 }

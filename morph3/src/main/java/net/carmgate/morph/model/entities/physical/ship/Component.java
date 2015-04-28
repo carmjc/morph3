@@ -3,6 +3,7 @@ package net.carmgate.morph.model.entities.physical.ship;
 public abstract class Component {
    private float energyDt;
    private float resourcesDt;
+   private boolean active;
 
    private final Ship ship;
 
@@ -28,5 +29,13 @@ public abstract class Component {
 
    public Ship getShip() {
       return ship;
+   }
+
+   public boolean isActive() {
+      return active;
+   }
+
+   public void setActive(boolean active) {
+      this.active = active;
    }
 }

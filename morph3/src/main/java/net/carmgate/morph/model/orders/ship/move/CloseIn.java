@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
+import net.carmgate.morph.model.entities.physical.ship.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -35,6 +36,7 @@ public class CloseIn extends MoveOrder {
       if (actualDistance < EPSILON && getOrderee().getSpeed().lengthSquared() < EPSILON) {
          if (!getOrderee().isForceStop()) {
             getOrderee().setForceStop(true);
+            getForce().copy(Vector2f.NULL);
          }
          return;
       }
@@ -96,6 +98,16 @@ public class CloseIn extends MoveOrder {
 
    public void setTarget(PhysicalEntity target) {
       this.target = target;
+   }
+
+   @Override
+   public ComponentType[] getComponentTypes() {
+      return new ComponentType[] { ComponentType.PROPULSORS };
+   }
+
+   @Override
+   public int getCriticity() {
+      return (int) (tmpVect.copy(target.getPos()).sub(getOrderee().getPos()).length() - getDistance());
    }
 
 }

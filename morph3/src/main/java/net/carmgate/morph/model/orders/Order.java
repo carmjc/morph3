@@ -1,6 +1,7 @@
 package net.carmgate.morph.model.orders;
 
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.entities.physical.ship.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 public abstract class Order {
@@ -53,5 +54,9 @@ public abstract class Order {
       this.world = world;
       nextEvalTime = world.getTime();
    }
+
+   public abstract ComponentType[] getComponentTypes();
+
+   public abstract int getCriticity();
 
 }

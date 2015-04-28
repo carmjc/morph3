@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.orders.ship;
+package net.carmgate.morph.model.orders.ship.action;
 
 import javax.inject.Inject;
 
@@ -7,6 +7,7 @@ import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.LaserAnim;
+import net.carmgate.morph.model.entities.physical.ship.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
@@ -15,14 +16,13 @@ import net.carmgate.morph.model.events.animations.AnimationStart;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.events.entities.ship.ShipHit;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.model.orders.OrderType;
 import net.carmgate.morph.model.orders.ship.move.CloseIn;
 
 import org.slf4j.Logger;
 
-public class Attack extends Order {
+public class Attack extends ActionOrder {
 
    private static final float MAX_DISTANCE = 200;
 
@@ -75,6 +75,16 @@ public class Attack extends Order {
 
    public void setTarget(Ship target) {
       this.target = target;
+   }
+
+   @Override
+   public ComponentType[] getComponentTypes() {
+      return new ComponentType[] { ComponentType.LASERS };
+   }
+
+   @Override
+   public int getCriticity() {
+      return 50;
    }
 
 }

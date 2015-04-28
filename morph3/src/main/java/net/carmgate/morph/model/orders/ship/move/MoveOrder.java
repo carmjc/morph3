@@ -25,7 +25,7 @@ public abstract class MoveOrder extends Order implements ForceSource {
       // Consume energy and resources amount linked to force generated and the kind of propulsor (propulsors are of varying efficiency)
       // TODO This is only a basic implementation
       if (!(this instanceof NoMoveOrder)) {
-         getOrderee().getComponents().get(ComponentType.PROPULSORS).setEnergyDt(-getForce().length());
+         getOrderee().getComponents().get(ComponentType.PROPULSORS).setEnergyDt(-getForce().length() / 40);
       }
    }
 

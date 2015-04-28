@@ -1,8 +1,8 @@
 package net.carmgate.morph.model.orders;
 
-import net.carmgate.morph.model.orders.ship.Attack;
 import net.carmgate.morph.model.orders.ship.Flee;
-import net.carmgate.morph.model.orders.ship.MineAsteroid;
+import net.carmgate.morph.model.orders.ship.action.Attack;
+import net.carmgate.morph.model.orders.ship.action.MineAsteroid;
 import net.carmgate.morph.model.orders.ship.move.CloseIn;
 import net.carmgate.morph.model.orders.ship.move.NoMoveOrder;
 
