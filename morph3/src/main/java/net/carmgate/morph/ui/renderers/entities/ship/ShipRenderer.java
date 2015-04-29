@@ -95,31 +95,7 @@ public class ShipRenderer implements Renderer<Ship> {
             new float[] { 0f, 0f, 0f, 1f });
 
       // render components and their states
-      if (uiContext.getSelectedShip() == ship) {
-         Collection<Component> components = ship.getComponents().values();
-         int cmpNb = components.size();
-         float i = 0;
-         for (Component cmp : components) {
-            GL11.glRotatef(i * 360 / cmpNb, 0, 0, 1);
-            GL11.glTranslatef(0, -width / 2 - 13 / massScale, 0);
-            GL11.glRotatef(-i * 360 / cmpNb, 0, 0, 1);
-            GL11.glScalef(1f / massScale, 1f / massScale, 0);
-
-            String str = cmp.getClass().getSimpleName();
-            CharSequence ss = str.subSequence(0, 1);
-            Color color = Color.white;
-            if (!cmp.isActive()) {
-               color = new Color(1.0f, 1.0f, 1.0f, 0.3f);
-            }
-            RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 0, color);
-
-            GL11.glScalef(massScale, massScale, 0);
-            GL11.glRotatef(i * 360 / cmpNb, 0, 0, 1);
-            GL11.glTranslatef(0, +width / 2 + 13 / massScale, 0);
-            GL11.glRotatef(-i * 360 / cmpNb, 0, 0, 1);
-            i++;
-         }
-      }
+      renderComponents(ship);
 
       GL11.glScalef(1f / massScale, 1f / massScale, 0);
 
@@ -136,6 +112,43 @@ public class ShipRenderer implements Renderer<Ship> {
          RenderUtils.renderLine(Vector2f.NULL, ship.debug3, 2, 2, new float[] { 1f, 1f, 1f, 1f }, new float[] { 0f, 0f, 0f, 0f });
          RenderUtils.renderLine(Vector2f.NULL, ship.debug4, 2, 2, new float[] { 1f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
       }
+   }
+
+   /**
+    * @param ship
+    * @param massScale
+    * @param width
+    */
+   private void renderComponents(Ship ship) {
+      final float massScale = ship.getMass();
+      final float width = 128;
+
+      Collection<Component> components = ship.getComponents().values();
+      int cmpNb = components.size();
+      float i = 0;
+      float rotSpeed = 1f / 100 * ship.getSpeed().length() / 20;
+      GL11.glRotatef(rotSpeed * world.getTime(), 0, 0, 1);
+      for (Component cmp : components) {
+         GL11.glRotatef(i * 360 / cmpNb, 0, 0, 1);
+         GL11.glTranslatef(0, -width / 2 - 13 / massScale, 0);
+         GL11.glRotatef(-i * 360 / cmpNb - rotSpeed * world.getTime(), 0, 0, 1);
+         GL11.glScalef(1f / massScale, 1f / massScale, 0);
+
+         String str = cmp.getClass().getSimpleName();
+         CharSequence ss = str.subSequence(0, 1);
+         Color color = Color.white;
+         if (!cmp.isActive()) {
+            color = new Color(1.0f, 1.0f, 1.0f, 0.3f);
+         }
+         RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 0, color);
+
+         GL11.glScalef(massScale, massScale, 0);
+         GL11.glRotatef(i * 360 / cmpNb + rotSpeed * world.getTime(), 0, 0, 1);
+         GL11.glTranslatef(0, +width / 2 + 13 / massScale, 0);
+         GL11.glRotatef(-i * 360 / cmpNb, 0, 0, 1);
+         i++;
+      }
+      GL11.glRotatef(-rotSpeed * world.getTime(), 0, 0, 1);
    }
 
 }

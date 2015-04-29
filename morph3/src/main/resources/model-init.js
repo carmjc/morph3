@@ -28,7 +28,7 @@ ship1.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship1));
 world.add(ship1);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
-ship.getPos().copy(100, 100);
+ship.getPos().copy(-200, 200);
 ship.health = 10;
 ship.mass = 0.5;
 ship.player = other;
