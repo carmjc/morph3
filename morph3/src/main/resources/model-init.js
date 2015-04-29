@@ -20,15 +20,16 @@ world.add(asteroid);
 
 ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship1.getPos().copy(100, 0);
-ship1.setHealth(50);
+ship1.health = 10;
 ship1.mass = 2;
 ship1.player = me;
 ship1.energy = 100;
+ship1.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship1));
 world.add(ship1);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship.getPos().copy(100, 100);
-ship.setHealth(10);
+ship.health = 10;
 ship.mass = 0.5;
 ship.player = other;
 ship.energy = 10;

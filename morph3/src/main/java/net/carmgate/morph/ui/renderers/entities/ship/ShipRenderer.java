@@ -3,7 +3,7 @@ package net.carmgate.morph.ui.renderers.entities.ship;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
-import java.text.MessageFormat;
+import java.util.Collection;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -15,6 +15,7 @@ import net.carmgate.morph.model.entities.physical.ship.Component;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
@@ -44,8 +45,8 @@ public class ShipRenderer implements Renderer<Ship> {
          //      Font awtFont = new Font("Verdana", Font.PLAIN, 11);
          Font awtFont;
          try {
-            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream("fonts/jagw____.ttf"));
-            awtFont = awtFont.deriveFont(12f); // set font size
+            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream("fonts/Rock_Elegance.otf"));
+            awtFont = awtFont.deriveFont(20f); // set font size
             font = new TrueTypeFont(awtFont, true);
          } catch (FontFormatException | IOException e) {
             // TODO Auto-generated catch block
@@ -92,13 +93,37 @@ public class ShipRenderer implements Renderer<Ship> {
             new float[] { 1f, 1f, 1f, 0.2f },
             new float[] { 0.7f, 0.7f, 0.7f, 1f },
             new float[] { 0f, 0f, 0f, 1f });
-      GL11.glScalef(1f / massScale, 1f / massScale, 0);
 
-      if (ship == uiContext.getSelectedShip()) {
-         // renderText(ship);
+      // render components and their states
+      if (uiContext.getSelectedShip() == ship) {
+         Collection<Component> components = ship.getComponents().values();
+         int cmpNb = components.size();
+         float i = 0;
+         for (Component cmp : components) {
+            GL11.glRotatef(i * 360 / cmpNb, 0, 0, 1);
+            GL11.glTranslatef(0, -width / 2 - 13 / massScale, 0);
+            GL11.glRotatef(-i * 360 / cmpNb, 0, 0, 1);
+            GL11.glScalef(1f / massScale, 1f / massScale, 0);
+
+            String str = cmp.getClass().getSimpleName();
+            CharSequence ss = str.subSequence(0, 1);
+            Color color = Color.white;
+            if (!cmp.isActive()) {
+               color = new Color(1.0f, 1.0f, 1.0f, 0.3f);
+            }
+            RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 0, color);
+
+            GL11.glScalef(massScale, massScale, 0);
+            GL11.glRotatef(i * 360 / cmpNb, 0, 0, 1);
+            GL11.glTranslatef(0, +width / 2 + 13 / massScale, 0);
+            GL11.glRotatef(-i * 360 / cmpNb, 0, 0, 1);
+            i++;
+         }
       }
 
-      if (ship == uiContext.getSelectedShip()) {
+      GL11.glScalef(1f / massScale, 1f / massScale, 0);
+
+      if (uiContext.getRenderMode() == RenderMode.DEBUG) {
          // Accel
          Vector2f accel = new Vector2f(ship.getAccel());
          RenderUtils.renderLine(Vector2f.NULL, accel, 2, 2, new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
@@ -113,28 +138,4 @@ public class ShipRenderer implements Renderer<Ship> {
       }
    }
 
-   public void renderText(Ship ship) {
-      float zoom = uiContext.getViewport().getZoomFactor();
-      final float massScale = ship.getMass();
-
-      // render textual information
-      GL11.glScalef(1 / zoom, 1 / zoom, 1);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), -4, Color.white);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), -3, Color.white);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), -2, Color.white);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Health: {0,number,#.###}", ship.getHealth()), -1, Color.white);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), 0, Color.white);
-      RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), 1, Color.white);
-      int i = 2;
-      for (Component c : ship.getComponents().values()) {
-         Color color = Color.white;
-         if (!c.isActive()) {
-            color = Color.red;
-         }
-         RenderUtils.renderText(font, Math.round(80 * massScale * zoom), 0,
-               MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), i++, color);
-      }
-      GL11.glScalef(zoom, zoom, 1);
-
-   }
 }

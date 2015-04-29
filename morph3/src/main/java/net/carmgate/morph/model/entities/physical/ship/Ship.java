@@ -14,7 +14,6 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
-import net.carmgate.morph.model.events.entities.ship.ShipAdded;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.events.entities.ship.ShipHit;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -101,37 +100,10 @@ public class Ship extends PhysicalEntity {
       return surroundings;
    }
 
-   public void onShipAdded(@MObserves ShipAdded event) {
-      // if (event.getShip() != this) {
-      // if (event.getShip().getPlayer() != getPlayer()) {
-      // final Attack attack = orderFactory.newInstance(OrderType.ATTACK);
-      // // final CloseIn attack = orderFactory.newInstance(OrderType.CLOSE_IN);
-      // // attack.setDistance(100);
-      // attack.setOrderee(this);
-      // attack.setTarget(event.getShip());
-      // add(attack);
-      // LOGGER.debug("Attack order added");
-      // }
-      // } else {
-      // for (Ship ship : world.getShips()) {
-      // if (ship.getPlayer() != getPlayer()) {
-      // final Attack attack = orderFactory.newInstance(OrderType.ATTACK);
-      // // final CloseIn attack = orderFactory.newInstance(OrderType.CLOSE_IN);
-      // // attack.setDistance(100);
-      // attack.setOrderee(this);
-      // attack.setTarget(ship);
-      // add(attack);
-      // LOGGER.debug("Attack order added");
-      // }
-      // }
-      // }
-   }
-
-   // This will occur too regularly, event should be used only for non periodic events
+   // FIXME This will occur too regularly, event should be used only for non periodic events
    public void onShipHit(@MObserves ShipHit event) {
       if (event.getShip() == this && health > 0) {
          health -= event.getDamage();
-         // LOGGER.debug("Ship hit");
          if (health <= 0) {
             LOGGER.debug("Dying");
             final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);

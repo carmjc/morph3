@@ -154,6 +154,8 @@ public class Select implements MouseListener {
 
       if (pickedShip != null) {
          uiContext.setSelectedShip(pickedShip);
+      } else {
+         uiContext.setSelectedShip(null);
       }
    }
 

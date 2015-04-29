@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -26,7 +25,6 @@ import net.carmgate.morph.eventmgt.MObserves;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
-import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
@@ -142,13 +140,13 @@ public class World {
       LOGGER.debug("Ship death: " + shipDeath.getShip());
       remove(shipDeath.getShip());
 
-      final Ship ship = entityFactory.newInstance(PhysicalEntityType.SHIP);
-      ship.setPlayer(shipDeath.getShip().getPlayer());
-      final Random random = new Random();
-      ship.setMass(random.nextFloat() / 2 + 0.5f);
-      ship.getPos().copy(random.nextFloat() * 400 - 200, random.nextFloat() * 400 - 200);
-      ship.setHealth(10);
-      add(ship);
+      // final Ship ship = entityFactory.newInstance(PhysicalEntityType.SHIP);
+      // ship.setPlayer(shipDeath.getShip().getPlayer());
+      // final Random random = new Random();
+      // ship.setMass(random.nextFloat() / 2 + 0.5f);
+      // ship.getPos().copy(random.nextFloat() * 400 - 200, random.nextFloat() * 400 - 200);
+      // ship.setHealth(10);
+      // add(ship);
    }
 
    protected void onEntityRemovel(@MObserves PhysicalEntityToBeRemoved event) {
