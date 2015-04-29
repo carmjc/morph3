@@ -33,13 +33,18 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 
    @Override
    public void render(Ship ship) {
-      final float mass = 2;
-      final float massScale = mass / 10 * uiContext.getViewport().getZoomFactor();
+      final float massScale = ship.getMass();
       final float width = 128;
 
       GL11.glScalef(massScale, massScale, 0);
-      GL11.glColor4f(1f, 1f, 1f, 0.6f);
-      RenderUtils.renderDisc(width / 2f);
+      RenderUtils.renderCircle(0,
+            width / 2f,
+            0,
+            0,
+            new float[] { 1f, 1f, 1f, 1f },
+            new float[] { 1f, 1f, 1f, 1f },
+            new float[] { 1f, 1f, 1f, 1f });
+      GL11.glScalef(1f / massScale, 1f / massScale, 0);
    }
 
 }

@@ -127,10 +127,11 @@ public class Ship extends PhysicalEntity {
       // }
    }
 
+   // This will occur too regularly, event should be used only for non periodic events
    public void onShipHit(@MObserves ShipHit event) {
       if (event.getShip() == this && health > 0) {
          health -= event.getDamage();
-         LOGGER.debug("Ship hit");
+         // LOGGER.debug("Ship hit");
          if (health <= 0) {
             LOGGER.debug("Dying");
             final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);

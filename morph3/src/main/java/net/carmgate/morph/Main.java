@@ -1,7 +1,11 @@
 package net.carmgate.morph;
 
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +35,7 @@ import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.renderers.Renderable;
@@ -38,11 +43,15 @@ import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
+import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
 @Singleton
@@ -63,6 +72,7 @@ public class Main {
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
    private final List<Animation> finishedAnimations = new ArrayList<>();
    private long lastUpdateTime = 0;
+   private static TrueTypeFont font;
 
    /**
     * Initialise the GL display
@@ -118,7 +128,21 @@ public class Main {
 
       GL11.glMatrixMode(GL11.GL_MODELVIEW);
       GL11.glLoadIdentity();
+
+      if (font == null) {
+         // Font awtFont = new Font("Verdana", Font.PLAIN, 11);
+         Font awtFont;
+         try {
+            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream("fonts/Rock_Elegance.otf"));
+            awtFont = awtFont.deriveFont(12f); // set font size
+            font = new TrueTypeFont(awtFont, true);
+         } catch (FontFormatException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+      }
    }
+
    public void loop(@Observes GameLoaded gameLoaded) {
       // init OpenGL context
       initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
@@ -136,6 +160,7 @@ public class Main {
          // Renders everything
          renderAnimation();
          renderPhysical();
+         renderGUI();
          updateWorld();
 
          // Fire deferred events
@@ -158,10 +183,10 @@ public class Main {
          GL11.glMatrixMode(GL11.GL_PROJECTION);
          GL11.glLoadIdentity();
 
-         final int width = Display.getWidth();
-         final int height = Display.getHeight();
-         GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
-         GL11.glViewport(0, 0, width, height);
+         Window window = uiContext.getWindow();
+         // GL11.glOrtho(0, window.getWidth(), 0, -window.getHeight(), 1, -1);
+         GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
+         GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
 
          GL11.glMatrixMode(GL11.GL_MODELVIEW);
          GL11.glLoadIdentity();
@@ -174,6 +199,29 @@ public class Main {
 
          mouseManager.handleMouseEvent();
          keyboardManager.handleKeyboardEvent();
+      }
+   }
+
+   private void renderGUI() {
+      Ship ship = uiContext.getSelectedShip();
+      int x = uiContext.getWindow().getWidth() / 2 - 2;
+      int y = -uiContext.getWindow().getHeight() / 2 + 2;
+      if (ship != null) {
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), 1, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), 2, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), 3, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.###}", ship.getHealth()), 4, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), 5, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), 6, Color.white, false);
+         int i = 7;
+         for (Component c : ship.getComponents().values()) {
+            Color color = Color.white;
+            if (!c.isActive()) {
+               color = Color.red;
+            }
+            RenderUtils.renderText(font, x, y,
+                  MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), i++, color, false);
+         }
       }
    }
 
@@ -228,19 +276,6 @@ public class Main {
       GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
       GL11.glScalef(zoomFactor, zoomFactor, 1);
 
-      switch (uiContext.getRenderMode()) {
-         case SELECT:
-            renderPhysicalSelect();
-            break;
-         default:
-            renderPhysicalNormal();
-      }
-
-      GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
-      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
-   }
-
-   private void renderPhysicalNormal() {
       final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
       if (shipRenderer != null) {
          for (final Ship ship : world.getShips()) {
@@ -252,24 +287,17 @@ public class Main {
       }
 
       for (PhysicalEntity entity : world.getPhysicalEntities()) {
-         final Vector2f pos = entity.getPos();
-         GL11.glTranslatef(pos.x, pos.y, 0);
-         Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
-         renderer.render(entity);
-         GL11.glTranslatef(-pos.x, -pos.y, 0);
-      }
-   }
-
-   private void renderPhysicalSelect() {
-      final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
-      if (shipRenderer != null) {
-         for (final Ship ship : world.getShips()) {
-            final Vector2f pos = ship.getPos();
+         if (!(entity instanceof Ship)) {
+            final Vector2f pos = entity.getPos();
             GL11.glTranslatef(pos.x, pos.y, 0);
-            shipRenderer.render(ship);
+            Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
+            renderer.render(entity);
             GL11.glTranslatef(-pos.x, -pos.y, 0);
          }
       }
+
+      GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
+      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
    }
 
    private void updateKinematics() {

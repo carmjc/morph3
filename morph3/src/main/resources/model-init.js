@@ -18,18 +18,30 @@ asteroid.mass = 2;
 asteroid.rotateSpeed = 5;
 world.add(asteroid);
 
+ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
+ship1.getPos().copy(100, 0);
+ship1.setHealth(50);
+ship1.mass = 2;
+ship1.player = me;
+ship1.energy = 100;
+world.add(ship1);
+
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship.getPos().copy(100, 100);
-ship.setHealth(5);
+ship.setHealth(10);
 ship.mass = 0.5;
 ship.player = other;
-ship.energy = 1000;
+ship.energy = 10;
+ship.resources = 10;
 ship.getSpeed().copy(-100, -100)
 ship.getComponents().put(ComponentType.MINING_LASERS, new MiningLaser(ship));
+ship.getComponents().put(ComponentType.LASERS, new Laser(ship));
 ship.getComponents().put(ComponentType.PROPULSORS, new SimplePropulsor(ship));
 ship.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship));
-order = orderFactory.newInstance(OrderType.MINE_ASTEROID, ship);
-order.setAsteroid(asteroid);
+//order = orderFactory.newInstance(OrderType.MINE_ASTEROID, ship);
+//order.setAsteroid(asteroid);
+order = orderFactory.newInstance(OrderType.ATTACK, ship);
+order.setTarget(ship1);
 ship.add(order);
 world.add(ship);
 

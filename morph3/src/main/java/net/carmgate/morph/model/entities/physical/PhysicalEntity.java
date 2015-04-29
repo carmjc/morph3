@@ -9,6 +9,7 @@ import net.carmgate.morph.ui.renderers.Renderable;
 
 public abstract class PhysicalEntity implements Renderable {
 
+   private int id;
    private final Vector2f pos = new Vector2f();
    private final Vector2f speed = new Vector2f();
    private final Vector2f accel = new Vector2f();
@@ -55,6 +56,14 @@ public abstract class PhysicalEntity implements Renderable {
 
    public void setRotateSpeed(float rotateSpeed) {
       this.rotateSpeed = rotateSpeed;
+   }
+
+   public int getId() {
+      return id;
+   }
+
+   public void setId(int id) {
+      this.id = id;
    }
 
 }

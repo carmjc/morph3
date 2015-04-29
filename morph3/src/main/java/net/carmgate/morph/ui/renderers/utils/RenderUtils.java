@@ -33,10 +33,10 @@ public class RenderUtils {
       float[] yBackup = new float[] { 0, 0, 0, 0 };
       FloatBuffer temp = FloatBuffer.allocate(4);
 
-      x[0] = innerRadius; // radius
-      x[1] = innerRadius + blurWidthInt;
-      x[2] = outerRadius - blurWidthExt;
-      x[3] = outerRadius;
+      x[0] = innerRadius - blurWidthInt; // radius
+      x[1] = innerRadius;
+      x[2] = outerRadius;
+      x[3] = outerRadius + blurWidthExt;
 
       temp.clear();
       temp.put(x);
@@ -166,6 +166,13 @@ public class RenderUtils {
    // TODO The "line" parameter should not be necessary
    // The method should adapt to the number of lines printed so far
    public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color) {
+      renderText(font, x, y, str, line, color, true);
+   }
+
+   public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color, boolean alignLeft) {
+      if (!alignLeft) {
+         x -= font.getWidth(str);
+      }
       font.drawString(x, y + font.getHeight() * (line - 1), str, color);
    }
 }

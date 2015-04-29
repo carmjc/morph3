@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 
 public class Attack extends ActionOrder {
 
-   private static final float MAX_DISTANCE = 200;
+   private static final float MAX_DISTANCE = 500;
 
    @Inject private MEvent<WorldEvent> worldEventMgr;
    @Inject private AnimationFactory animationFactory;
