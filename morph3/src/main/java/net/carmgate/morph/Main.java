@@ -176,14 +176,16 @@ public class Main {
          Display.sync(100);
 
          // handle window resize
+         Window window = uiContext.getWindow();
          if (Display.wasResized()) {
             initView();
+            window.setWidth(Display.getWidth());
+            window.setHeight(Display.getHeight());
          }
 
          GL11.glMatrixMode(GL11.GL_PROJECTION);
          GL11.glLoadIdentity();
 
-         Window window = uiContext.getWindow();
          // GL11.glOrtho(0, window.getWidth(), 0, -window.getHeight(), 1, -1);
          GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
          GL11.glViewport(0, 0, window.getWidth(), window.getHeight());

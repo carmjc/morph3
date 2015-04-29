@@ -22,6 +22,7 @@ import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.model.orders.ship.action.ActionOrder;
 import net.carmgate.morph.model.orders.ship.move.MoveOrder;
 import net.carmgate.morph.model.physics.ForceSource;
+import net.carmgate.morph.script.util.ScriptManager;
 
 import org.slf4j.Logger;
 
@@ -34,6 +35,7 @@ public class Ship extends PhysicalEntity {
    @Inject private Logger LOGGER;
    @Inject private WorldEventFactory worldEventFactory;
    @Inject private OrderFactory orderFactory;
+   @Inject private ScriptManager scriptManager;
 
    private Player owner;
    private final Surroundings surroundings = new Surroundings();
@@ -59,13 +61,13 @@ public class Ship extends PhysicalEntity {
       order.setWorld(world);
 
       if (order instanceof MoveOrder) {
-         LOGGER.debug("CloseIn order added: " + order);
+         LOGGER.debug("Move order added: " + order);
          if (moveOrder != null && moveOrder instanceof ForceSource) {
             getForceSources().remove(moveOrder);
          }
          moveOrder = (MoveOrder) order;
       } else if (order instanceof ActionOrder) {
-         LOGGER.debug("Attack order added: " + order);
+         LOGGER.debug("Action order added: " + order);
          if (actionOrder != null && actionOrder instanceof ForceSource) {
             getForceSources().remove(actionOrder);
          }
@@ -109,7 +111,21 @@ public class Ship extends PhysicalEntity {
             final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
             shipDead.setDeadShip(this);
             worldEventMgr.fire(shipDead);
+         } else {
+            HashMap<String, Object> inputs = new HashMap<>();
+            inputs.put("self", this);
+            inputs.put("damage", event.getDamage());
+            scriptManager.callScript("onSelfShipHit", inputs, null);
          }
+      }
+   }
+
+   public void onShipDeath(@MObserves ShipDeath shipDeath) {
+      if (shipDeath.getShip() != this) {
+         HashMap<String, Object> inputs = new HashMap<>();
+         inputs.put("self", this);
+         inputs.put("ship", new ReadOnlyShip(shipDeath.getShip()));
+         scriptManager.callScript("onOtherShipDeath", inputs, null);
       }
    }
 

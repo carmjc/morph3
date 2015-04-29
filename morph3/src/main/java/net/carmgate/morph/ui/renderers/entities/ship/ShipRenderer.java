@@ -62,22 +62,9 @@ public class ShipRenderer implements Renderer<Ship> {
       float zoom = uiContext.getViewport().getZoomFactor();
       final float massScale = ship.getMass();
       final float width = 128;
-      final float selectedWidth = 128 + 12 / zoom / massScale;
 
       GL11.glScalef(massScale, massScale, 0);
       GL11.glColor4f(1f, 1f, 1f, 0.6f);
-
-      if (ship == uiContext.getSelectedShip()) {
-         float colorScale = (int) (world.getTime() % 1000);
-         colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.5f;
-         RenderUtils.renderCircle(selectedWidth / 2f - 1 / zoom / massScale,
-               selectedWidth / 2f + 1 / zoom / massScale,
-               1 / zoom / massScale,
-               6 / zoom / massScale,
-               new float[] { 0f, 0f, 0f, 0f },
-               new float[] { 1f, 1f, 1f, 0.5f * colorScale },
-               new float[] { 0f, 0f, 0f, 0f });
-      }
 
       RenderUtils.renderCircle(width / 2f - 2 / zoom / massScale,
             width / 2f + 1 / zoom / massScale,
@@ -120,13 +107,34 @@ public class ShipRenderer implements Renderer<Ship> {
     * @param width
     */
    private void renderComponents(Ship ship) {
+      float zoom = uiContext.getViewport().getZoomFactor();
       final float massScale = ship.getMass();
       final float width = 128;
+
+      if (ship == uiContext.getSelectedShip()) {
+         float colorScale = (int) (world.getTime() % 1000);
+         colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.6f;
+         RenderUtils.renderCircle(width / 2f + 12 / massScale,
+               width / 2f + 14 / massScale,
+               1 / zoom / massScale,
+               5 / zoom / massScale,
+               new float[] { 0f, 0f, 0f, 0f },
+               new float[] { 1f, 1f, 1f, 0.5f * colorScale },
+               new float[] { 0f, 0f, 0f, 0f });
+      } else {
+         RenderUtils.renderCircle(width / 2f + 12 / massScale,
+               width / 2f + 14 / massScale,
+               1 / zoom / massScale,
+               1 / zoom / massScale,
+               new float[] { 0f, 0f, 0f, 0f },
+               new float[] { 1f, 1f, 1f, 0.1f },
+               new float[] { 0f, 0f, 0f, 0f });
+      }
 
       Collection<Component> components = ship.getComponents().values();
       int cmpNb = components.size();
       float i = 0;
-      float rotSpeed = 1f / 100 * ship.getSpeed().length() / 20;
+      float rotSpeed = 0;// 1f / 100 * ship.getSpeed().length() / 20;
       GL11.glRotatef(rotSpeed * world.getTime(), 0, 0, 1);
       for (Component cmp : components) {
          GL11.glRotatef(i * 360 / cmpNb, 0, 0, 1);
@@ -138,7 +146,7 @@ public class ShipRenderer implements Renderer<Ship> {
          CharSequence ss = str.subSequence(0, 1);
          Color color = Color.white;
          if (!cmp.isActive()) {
-            color = new Color(1.0f, 1.0f, 1.0f, 0.3f);
+            color = new Color(0.4f, 0.4f, 0.4f, 1f);
          }
          RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 0, color);
 
