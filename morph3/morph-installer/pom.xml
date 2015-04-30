@@ -1,0 +1,45 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.carmgate.morph</groupId>
+		<artifactId>morph</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>morph-installer</artifactId>
+	<packaging>izpack-jar</packaging>
+	<properties>
+		<!-- Installer variables -->
+		<staging.dir>${project.build.directory}/staging</staging.dir>
+		<info.appName>My Killer Application</info.appName>
+		<info.appsubpath>my-killer-app/standard</info.appsubpath>
+		<izpack.dir.app>${basedir}/src/main/izpack</izpack.dir.app>
+		<staging.dir.app>${staging.dir}/appfiles</staging.dir.app>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.izpack</groupId>
+				<artifactId>izpack-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<baseDir>${staging.dir.app}</baseDir>
+					<installFile>${izpack.dir.app}/install.xml</installFile>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+					<finalName>${project.build.finalName}</finalName>
+					<enableOverrideArtifact>true</enableOverrideArtifact>
+					<mkdirs>true</mkdirs>
+					<autoIncludeUrl>false</autoIncludeUrl>
+					<autoIncludeDevelopers>false</autoIncludeDevelopers>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

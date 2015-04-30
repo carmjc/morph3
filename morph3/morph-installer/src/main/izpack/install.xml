@@ -1,0 +1,57 @@
+<izpack:installation version="5.0"
+	xmlns:izpack="http://izpack.org/schema/installation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://izpack.org/schema/installation http://izpack.org/schema/5.0/izpack-installation-5.0.xsd">
+
+	<info>
+		<appname>Morph</appname>
+		<appversion>${project.version}</appversion>
+		<appsubpath>morph</appsubpath>
+		<javaversion>1.8</javaversion>
+	</info>
+
+	<variables>
+		<variable name="JDKPathPanel.minVersion" value="1.8.0" />
+		<variable name="JDKPathPanel.skipIfValid" value="yes" />
+	</variables>
+
+	<guiprefs width="800" height="600" resizable="yes">
+		<modifier key="useButtonIcons" value="yes" />
+		<modifier key="useLabelIcons" value="yes" />
+		<modifier key="labelGap" value="2" />
+		<modifier key="layoutAnchor" value="NORTHWEST" />
+		<modifier key="useHeadingPanel" value="yes" />
+		<modifier key="headingImageOnLeft" value="yes" />
+		<modifier key="headingLineCount" value="1" />
+		<modifier key="headingFontSize" value="2" />
+		<modifier key="headingBackgroundColor" value="0x00ffffff" />
+		<modifier key="headingPanelCounter" value="text" />
+		<modifier key="headingPanelCounterPos" value="inHeading" />
+	</guiprefs>
+
+	<locale>
+		<langpack iso3="eng" />
+	</locale>
+
+	<resources>
+		<res id="CustomLangPack.xml_eng" src="i18n/CustomLangPack.xml_eng" />
+		<res id="Installer.image" src="install_left.png" />
+	</resources>
+
+	<panels>
+		<panel classname="TargetPanel" />
+		<panel classname="PacksPanel" />
+		<panel classname="InstallPanel" />
+		<panel classname="FinishPanel" />
+	</panels>
+
+	<packs>
+		<pack name="Morph game" required="yes">
+			<description>The game in itself</description>
+			<fileset dir="plain" targetdir="${INSTALL_PATH}" override="true" />
+		</pack>
+		<!-- pack name="JRE" required="no" preselected="true"> <description>Install 
+			the JRE. You can skip this process if you already have a JRE at least 1.8.x</description> 
+			<fileset dir="jre" targetdir="${INSTALL_PATH}" override="true" /> </pack -->
+	</packs>
+
+</izpack:installation>

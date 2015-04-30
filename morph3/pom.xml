@@ -7,5 +7,6 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>morph-game</module>
+		<module>morph-installer</module>
 	</modules>
 </project>
