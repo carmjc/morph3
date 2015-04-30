@@ -1,0 +1,10 @@
+<beans>
+	<scan>
+		<exclude name="ch.**" />
+		<exclude name="com.**" />
+		<exclude name="sun.**" />
+		<exclude name="org.**" />
+		<exclude name="javax.**" />
+		<exclude name="javassist.**" />
+	</scan>
+</beans>

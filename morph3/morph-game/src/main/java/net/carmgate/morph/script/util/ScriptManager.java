@@ -1,6 +1,8 @@
 package net.carmgate.morph.script.util;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,7 +35,8 @@ public class ScriptManager {
             return;
          }
 
-         final FileReader reader = new FileReader(scriptResource.getPath());
+         InputStream in = getClass().getResourceAsStream("/shipScriptsFor" + player.getName() + "/" + script + ".js");
+         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
          if (inputs != null) {
             for (Entry<String, Object> input : inputs.entrySet()) {
                engine.put(input.getKey(), input.getValue());

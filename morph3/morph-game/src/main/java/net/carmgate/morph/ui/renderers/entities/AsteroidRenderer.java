@@ -1,6 +1,6 @@
 package net.carmgate.morph.ui.renderers.entities;
 
-import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 
 import javax.enterprise.event.Event;
@@ -32,7 +32,7 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
    public void init() {
       // load texture from PNG file if needed
       if (asteroids1Texture == null) {
-         try (FileInputStream fileInputStream = new FileInputStream(ClassLoader.getSystemResource("img/asteroids1.png").getPath())) {
+         try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream("img/asteroids1.png"))) {
             asteroids1Texture = TextureLoader.getTexture("PNG", fileInputStream);
          } catch (IOException e) {
             LOGGER.error("Exception raised while loading texture", e);
