@@ -132,6 +132,10 @@ public class RenderUtils {
    }
 
    public static void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
+      renderLine(from, to, width, width, blurWidth, colorInt, colorExt);
+   }
+
+   public static void renderLine(Vector2f from, Vector2f to, float widthFrom, float widthTo, float blurWidth, float[] colorInt, float[] colorExt) {
       TextureImpl.bindNone();
       ortho.copy(to).sub(from);
       float orthoLength = ortho.length();
@@ -139,27 +143,22 @@ public class RenderUtils {
 
       GL11.glBegin(GL11.GL_QUADS);
       GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
-      GL11.glVertex2f(to.x - ortho.x * width / 2 - ortho.x * blurWidth, to.y - ortho.y * width / 2 - ortho.y * blurWidth);
-      GL11.glVertex2f(from.x - ortho.x * width / 2 - ortho.x * blurWidth, from.y - ortho.y * width / 2 - ortho.y * blurWidth);
+      GL11.glVertex2f(to.x - ortho.x * widthTo / 2 - ortho.x * blurWidth, to.y - ortho.y * widthTo / 2 - ortho.y * blurWidth);
+      GL11.glVertex2f(from.x - ortho.x * widthFrom / 2 - ortho.x * blurWidth, from.y - ortho.y * widthFrom / 2 - ortho.y * blurWidth);
       GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
-      GL11.glVertex2f(from.x - ortho.x * width / 2, from.y - ortho.y * width / 2);
-      GL11.glVertex2f(to.x - ortho.x * width / 2, to.y - ortho.y * width / 2);
+      GL11.glVertex2f(from.x - ortho.x * widthFrom / 2, from.y - ortho.y * widthFrom / 2);
+      GL11.glVertex2f(to.x - ortho.x * widthTo / 2, to.y - ortho.y * widthTo / 2);
 
-      GL11.glVertex2f(from.x - ortho.x * width / 2, from.y - ortho.y * width / 2);
-      GL11.glVertex2f(to.x - ortho.x * width / 2, to.y - ortho.y * width / 2);
-      // GL11.glVertex2f(to.x, to.y);
-      // GL11.glVertex2f(0, 0);
-      //
-      // GL11.glVertex2f(to.x, to.y);
-      // GL11.glVertex2f(0, 0);
-      GL11.glVertex2f(to.x + ortho.x * width / 2, to.y + ortho.y * width / 2);
-      GL11.glVertex2f(from.x + ortho.x * width / 2, from.y + ortho.y * width / 2);
+      GL11.glVertex2f(from.x - ortho.x * widthFrom / 2, from.y - ortho.y * widthFrom / 2);
+      GL11.glVertex2f(to.x - ortho.x * widthTo / 2, to.y - ortho.y * widthTo / 2);
+      GL11.glVertex2f(to.x + ortho.x * widthTo / 2, to.y + ortho.y * widthTo / 2);
+      GL11.glVertex2f(from.x + ortho.x * widthFrom / 2, from.y + ortho.y * widthFrom / 2);
 
-      GL11.glVertex2f(from.x + ortho.x * width / 2, from.y + ortho.y * width / 2);
-      GL11.glVertex2f(to.x + ortho.x * width / 2, to.y + ortho.y * width / 2);
+      GL11.glVertex2f(from.x + ortho.x * widthFrom / 2, from.y + ortho.y * widthFrom / 2);
+      GL11.glVertex2f(to.x + ortho.x * widthTo / 2, to.y + ortho.y * widthTo / 2);
       GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
-      GL11.glVertex2f(to.x + ortho.x * width / 2 + ortho.x * blurWidth, to.y + ortho.y * width / 2 + ortho.y * blurWidth);
-      GL11.glVertex2f(from.x + ortho.x * width / 2 + ortho.x * blurWidth, from.y + ortho.y * width / 2 + ortho.y * blurWidth);
+      GL11.glVertex2f(to.x + ortho.x * widthTo / 2 + ortho.x * blurWidth, to.y + ortho.y * widthTo / 2 + ortho.y * blurWidth);
+      GL11.glVertex2f(from.x + ortho.x * widthFrom / 2 + ortho.x * blurWidth, from.y + ortho.y * widthFrom / 2 + ortho.y * blurWidth);
       GL11.glEnd();
    }
 
