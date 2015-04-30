@@ -29,7 +29,7 @@ public class RepairSelf extends Order {
          getOrderee().setIntegrity(1);
          setDone(true);
       }
-      LOGGER.debug(getOrderee().getIntegrity() + " - " + ((float) world.getTime() - lastUpdateTime) / 100000 + "-" + lastUpdateTime + "/" + world.getTime());
+      // LOGGER.debug(getOrderee().getIntegrity() + " - " + ((float) world.getTime() - lastUpdateTime) / 100000 + "-" + lastUpdateTime + "/" + world.getTime());
       lastUpdateTime = world.getTime();
    }
 

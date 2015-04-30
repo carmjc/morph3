@@ -47,6 +47,7 @@ import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
+import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.Renderable;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
@@ -253,13 +254,27 @@ public class Main {
          RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.#}%", ship.getIntegrity() * 100), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), line++, Color.white, false);
-         for (Component c : ship.getComponents().values()) {
-            Color color = Color.white;
-            if (!c.isActive()) {
-               color = Color.red;
+         if (ship.getMoveOrder() != null) {
+            RenderUtils.renderText(font, x, y, MessageFormat.format("Move order: {0}", ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false);
+         }
+         if (ship.getActionOrder() != null) {
+            RenderUtils.renderText(font, x, y, MessageFormat.format("Action order: {0}", ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false);
+         }
+         if (!ship.getBgOrders().isEmpty()) {
+            RenderUtils.renderText(font, x, y, "Background orders", line++, Color.white, false);
+            for (Order bgOrder : ship.getBgOrders()) {
+               RenderUtils.renderText(font, x, y, MessageFormat.format("{0}", bgOrder.getClass().getSimpleName()), line++, Color.white, false);
             }
-            RenderUtils.renderText(font, x, y,
-                  MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
+         }
+         if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+            for (Component c : ship.getComponents().values()) {
+               Color color = Color.white;
+               if (!c.isActive()) {
+                  color = Color.red;
+               }
+               RenderUtils.renderText(font, x, y,
+                     MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
+            }
          }
       }
    }
