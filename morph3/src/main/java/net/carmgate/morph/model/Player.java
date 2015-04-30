@@ -6,7 +6,7 @@ import java.util.List;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 public class Player {
-   private String name;
+   private final String name;
    private List<Ship> ships = new ArrayList<>();
    private float[] color;
 
@@ -28,5 +28,9 @@ public class Player {
 
    public void setColor(float[] color) {
       this.color = color;
+   }
+
+   public String getName() {
+      return name;
    }
 }

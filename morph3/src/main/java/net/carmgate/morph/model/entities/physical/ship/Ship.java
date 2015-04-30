@@ -115,7 +115,8 @@ public class Ship extends PhysicalEntity {
             HashMap<String, Object> inputs = new HashMap<>();
             inputs.put("self", this);
             inputs.put("damage", event.getDamage());
-            scriptManager.callScript("onSelfShipHit", inputs, null);
+            inputs.put("aggressor", event.getAggressor());
+            scriptManager.callScript("onSelfShipHit", getPlayer(), inputs, null);
          }
       }
    }
@@ -125,7 +126,7 @@ public class Ship extends PhysicalEntity {
          HashMap<String, Object> inputs = new HashMap<>();
          inputs.put("self", this);
          inputs.put("ship", new ReadOnlyShip(shipDeath.getShip()));
-         scriptManager.callScript("onOtherShipDeath", inputs, null);
+         scriptManager.callScript("onOtherShipDeath", getPlayer(), inputs, null);
       }
    }
 

@@ -24,6 +24,7 @@ public class OrderFactory {
       final U u = (U) orders.select(orderType.getClazz()).get();
       eventManager.scanAndRegister(u);
       u.setOrderee(orderee);
+      u.setOrderType(orderType);
       return u;
    }
 
@@ -33,13 +34,9 @@ public class OrderFactory {
          return null;
       }
 
-      final U u = (U) orders.select(orderTypeValue.getClazz()).get();
-      eventManager.scanAndRegister(u);
-      u.setOrderee(orderee);
-      return u;
+      return newInstance(orderTypeValue, orderee);
    }
 
-   @SuppressWarnings("unchecked")
    public <U extends Order> U newInstance(String orderType, ReadOnlyShip orderee) {
       U u = null;
       Field shipField;

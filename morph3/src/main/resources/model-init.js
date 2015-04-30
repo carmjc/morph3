@@ -9,8 +9,10 @@ var ArrayList = Java.type('java.util.ArrayList');
 
 me = new Player("Me");
 me.color = [1, 0.5, 0.5, 1];
+world.add(me);
 other = new Player("Other");
 other.color = [0.2, 1, 0.5, 1];
+world.add(other);
 
 asteroid = entityFactory.newInstance(PhysicalEntityType.valueOf("ASTEROID"));
 asteroid.getPos().copy(-500, -80);
@@ -20,18 +22,18 @@ world.add(asteroid);
 
 ship1 = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship1.getPos().copy(100, 0);
-ship1.health = 10;
+ship1.health = 1;
 ship1.mass = 2;
-ship1.player = me;
+ship1.player = other;
 ship1.energy = 100;
 ship1.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship1));
 world.add(ship1);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship.getPos().copy(-200, 200);
-ship.health = 10;
+ship.health = 100;
 ship.mass = 0.5;
-ship.player = other;
+ship.player = me;
 ship.energy = 10;
 ship.resources = 10;
 ship.getSpeed().copy(-100, -100)

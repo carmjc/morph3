@@ -50,7 +50,7 @@ public class CloseIn extends MoveOrder {
          // getOrderee().debug3.copy(Vector2f.NULL);
          // getOrderee().debug4.copy(Vector2f.NULL);
       } else {
-         LOGGER.debug("dist: " + actualDistance);
+         // LOGGER.debug("dist: " + actualDistance);
          force.copy(target.getPos()).sub(getOrderee().getPos());
          // getOrderee().debug1.copy(force);
          // LOGGER.debug("toTarget: " + force.length());
@@ -60,7 +60,9 @@ public class CloseIn extends MoveOrder {
          force.sub(tmpVect); // .add(target.getSpeed())
          // getOrderee().debug3.copy(force);
          // LOGGER.debug("desiredSpeed: " + force.length());
-         force.scale(getOrderee().getSpeed().lengthSquared() / (2 * actualDistance + getOrderee().getSpeed().length()));
+         if (getOrderee().getSpeed().lengthSquared() > 0) {
+            force.scale(getOrderee().getSpeed().lengthSquared() / (2 * actualDistance + getOrderee().getSpeed().length()));
+         }
          // getOrderee().debug4.copy(force);
       }
       // LOGGER.debug(force.length() + " - " + Ship.MAX_PROPULSOR_FORCE);

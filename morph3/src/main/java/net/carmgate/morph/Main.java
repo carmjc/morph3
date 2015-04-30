@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -25,14 +26,22 @@ import net.carmgate.morph.eventmgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
+import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
+import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.ship.Background;
 import net.carmgate.morph.model.entities.physical.ship.Component;
 import net.carmgate.morph.model.entities.physical.ship.ComponentType;
+import net.carmgate.morph.model.entities.physical.ship.Laser;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.SimpleGenerator;
+import net.carmgate.morph.model.entities.physical.ship.SimplePropulsor;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
+import net.carmgate.morph.model.orders.OrderFactory;
+import net.carmgate.morph.model.orders.OrderType;
+import net.carmgate.morph.model.orders.ship.action.Attack;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
@@ -66,6 +75,8 @@ public class Main {
    @Inject private KeyboardManager keyboardManager;
    @Inject private MEvent<WorldEvent> worldEvtMgr;
    @Inject private WorldEventFactory worldEventFactory;
+   @Inject private PhysicalEntityFactory physicalEntityFactory;
+   @Inject private OrderFactory orderFactory;
 
    // Computation attributes
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
@@ -73,6 +84,7 @@ public class Main {
    private final List<Animation> finishedAnimations = new ArrayList<>();
    private long lastUpdateTime = 0;
    private static TrueTypeFont font;
+   private int nextWaveId = 1;
 
    /**
     * Initialise the GL display
@@ -162,6 +174,7 @@ public class Main {
          renderPhysical();
          renderGUI();
          updateWorld();
+         addWaves();
 
          // Fire deferred events
          eventManager.deferredFire();
@@ -204,25 +217,48 @@ public class Main {
       }
    }
 
+   private void addWaves() {
+      if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
+         for (int i = 0; i < nextWaveId; i++) {
+            LOGGER.debug("Adding wave " + nextWaveId);
+            Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
+            ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
+            ship.setPlayer(world.getPlayers().get("Other"));
+            Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
+            attack.setTarget(world.getShips().get(0));
+            ship.add(attack);
+            ship.setMass(0.5f);
+            ship.setEnergy(20);
+            ship.setResources(20);
+            ship.setHealth(5);
+            ship.getComponents().put(ComponentType.LASERS, new Laser(ship));
+            ship.getComponents().put(ComponentType.PROPULSORS, new SimplePropulsor(ship));
+            ship.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship));
+            world.add(ship);
+         }
+         nextWaveId++;
+      }
+   }
+
    private void renderGUI() {
       Ship ship = uiContext.getSelectedShip();
       int x = uiContext.getWindow().getWidth() / 2 - 2;
       int y = -uiContext.getWindow().getHeight() / 2 + 2;
+      int line = 1;
       if (ship != null) {
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), 1, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), 2, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), 3, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.###}", ship.getHealth()), 4, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), 5, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), 6, Color.white, false);
-         int i = 7;
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.###}", ship.getHealth()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), line++, Color.white, false);
          for (Component c : ship.getComponents().values()) {
             Color color = Color.white;
             if (!c.isActive()) {
                color = Color.red;
             }
             RenderUtils.renderText(font, x, y,
-                  MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), i++, color, false);
+                  MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
          }
       }
    }
@@ -357,9 +393,6 @@ public class Main {
 
    private void updateShipEconomics(final Ship ship) {
       // Economics updates from components
-      float energyDt = 0;
-      float resourcesDt = 0;
-
       Map<ComponentType, Integer> componentCriticities = new HashMap<>();
       if (ship.getMoveOrder() != null) {
          for (ComponentType compType : ship.getMoveOrder().getComponentTypes()) {

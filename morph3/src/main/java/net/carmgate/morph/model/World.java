@@ -7,8 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -56,9 +58,9 @@ public class World {
 
    private final List<Ship> ships = new ArrayList<>();
    private final List<PhysicalEntity> nonShipsPhysicalEntities = new ArrayList<>();
-   // private final List<WorldUpdateListener> worldChangeListeners = new ArrayList<>();
    private final Set<PhysicalEntity> physicalEntities = new HashSet<>();
    private final Set<Animation> animations = new HashSet<>();
+   private final Map<String, Player> players = new HashMap<>();
    private long lastUpdateTime = 0;
    private long time = 0;
    private float timeFactor = 1f;
@@ -91,6 +93,10 @@ public class World {
       final ShipAdded shipAdded = worldEventFactory.newInstance(WorldEventType.SHIP_ADDED);
       shipAdded.setAddedShip(ship);
       worldEventMgr.fire(shipAdded);
+   }
+
+   public void add(Player player) {
+      players.put(player.getName(), player);
    }
 
    public Set<Animation> getAnimations() {
@@ -197,6 +203,10 @@ public class World {
 
    public void toggleTimeFrozen() {
       timeFrozen = !timeFrozen;
+   }
+
+   public Map<String, Player> getPlayers() {
+      return players;
    }
 
 }

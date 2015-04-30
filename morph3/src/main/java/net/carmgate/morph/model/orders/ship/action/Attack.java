@@ -63,7 +63,7 @@ public class Attack extends ActionOrder {
 
       // Create the event
       final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
-      shipHit.init(target, 1);
+      shipHit.init(getOrderee(), target, 1);
       worldEventMgr.fire(shipHit);
    }
 
@@ -78,6 +78,7 @@ public class Attack extends ActionOrder {
    }
 
    @Override
+   // FIXME transform this into an Annotation
    public ComponentType[] getComponentTypes() {
       return new ComponentType[] { ComponentType.LASERS };
    }

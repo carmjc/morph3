@@ -10,9 +10,7 @@ public abstract class Order {
    private long nextEvalTime = 0;
    private Ship orderee;
    private boolean done = false;
-
-   public Order() {
-   }
+   private OrderType orderType;
 
    public void eval() {
       if (world.getTime() > nextEvalTime) {
@@ -66,5 +64,13 @@ public abstract class Order {
    public abstract ComponentType[] getComponentTypes();
 
    public abstract int getCriticity();
+
+   public OrderType getOrderType() {
+      return orderType;
+   }
+
+   public void setOrderType(OrderType orderType) {
+      this.orderType = orderType;
+   }
 
 }

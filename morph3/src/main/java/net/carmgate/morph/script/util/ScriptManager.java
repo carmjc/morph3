@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.Asteroid;
 import net.carmgate.morph.model.orders.OrderFactory;
@@ -23,11 +24,11 @@ public class ScriptManager {
    @Inject private World world;
    @Inject private OrderFactory orderFactory;
 
-   public void callScript(String script, Map<String, Object> inputs, Map<String, Object> outputs) {
+   public void callScript(String script, Player player, Map<String, Object> inputs, Map<String, Object> outputs) {
       final ScriptEngineManager manager = new ScriptEngineManager();
       final ScriptEngine engine = manager.getEngineByName("nashorn");
       try {
-         URL scriptResource = getClass().getResource("/shipScripts/" + script + ".js");
+         URL scriptResource = getClass().getResource("/shipScriptsFor" + player.getName() + "/" + script + ".js");
          if (scriptResource == null) {
             return;
          }
