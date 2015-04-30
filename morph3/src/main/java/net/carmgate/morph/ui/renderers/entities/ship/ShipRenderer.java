@@ -11,8 +11,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.entities.physical.ship.Component;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.RenderMode;

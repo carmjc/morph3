@@ -2,8 +2,8 @@ package net.carmgate.morph.model.orders.ship;
 
 import java.util.List;
 
-import net.carmgate.morph.model.entities.physical.ship.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.physics.ForceSource;

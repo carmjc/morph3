@@ -1,4 +1,6 @@
-package net.carmgate.morph.model.entities.physical.ship;
+package net.carmgate.morph.model.entities.physical.ship.components;
+
+import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 public class Laser extends Component {
 

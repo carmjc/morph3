@@ -28,13 +28,13 @@ import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
-import net.carmgate.morph.model.entities.physical.ship.Background;
-import net.carmgate.morph.model.entities.physical.ship.Component;
-import net.carmgate.morph.model.entities.physical.ship.ComponentType;
-import net.carmgate.morph.model.entities.physical.ship.Laser;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.SimpleGenerator;
-import net.carmgate.morph.model.entities.physical.ship.SimplePropulsor;
+import net.carmgate.morph.model.entities.physical.ship.components.Background;
+import net.carmgate.morph.model.entities.physical.ship.components.Component;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
+import net.carmgate.morph.model.entities.physical.ship.components.Laser;
+import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
+import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -230,7 +230,8 @@ public class Main {
             ship.setMass(0.5f);
             ship.setEnergy(20);
             ship.setResources(20);
-            ship.setHealth(5);
+            ship.setIntegrity(1);
+            ship.setDurability(5);
             ship.getComponents().put(ComponentType.LASERS, new Laser(ship));
             ship.getComponents().put(ComponentType.PROPULSORS, new SimplePropulsor(ship));
             ship.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship));
@@ -249,7 +250,7 @@ public class Main {
          RenderUtils.renderText(font, x, y, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.###}", ship.getHealth()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.#}%", ship.getIntegrity() * 100), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), line++, Color.white, false);
          for (Component c : ship.getComponents().values()) {
@@ -388,6 +389,19 @@ public class Main {
             LOGGER.debug("order removed: " + order);
             ship.removeActionOrder();
          }
+
+         // background orders
+         List<Order> bgOrdersToRemove = new ArrayList<>();
+         for (Order bgOrder : ship.getBgOrders()) {
+            if (bgOrder != null && !bgOrder.isDone()) {
+               bgOrder.eval();
+            }
+            if (bgOrder != null && bgOrder.isDone()) {
+               LOGGER.debug("order removed: " + bgOrder);
+               bgOrdersToRemove.add(bgOrder);
+            }
+         }
+         ship.getBgOrders().removeAll(bgOrdersToRemove);
       }
    }
 

@@ -1,6 +1,8 @@
 package net.carmgate.morph.model.entities.physical.ship;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -11,6 +13,8 @@ import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Surroundings;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
+import net.carmgate.morph.model.entities.physical.ship.components.Component;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.events.WorldEvent;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
@@ -19,6 +23,7 @@ import net.carmgate.morph.model.events.entities.ship.ShipHit;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;
+import net.carmgate.morph.model.orders.ship.Unique;
 import net.carmgate.morph.model.orders.ship.action.ActionOrder;
 import net.carmgate.morph.model.orders.ship.move.MoveOrder;
 import net.carmgate.morph.model.physics.ForceSource;
@@ -41,7 +46,9 @@ public class Ship extends PhysicalEntity {
    private final Surroundings surroundings = new Surroundings();
    private Order actionOrder;
    private MoveOrder moveOrder;
-   private float health;
+   private final List<Order> bgOrders = new ArrayList<>();
+   private float integrity = 1;
+   private float durability;
    private final Map<ComponentType, Component> components = new HashMap<>();
 
    // internal economics
@@ -61,20 +68,27 @@ public class Ship extends PhysicalEntity {
       order.setWorld(world);
 
       if (order instanceof MoveOrder) {
-         LOGGER.debug("Move order added: " + order);
          if (moveOrder != null && moveOrder instanceof ForceSource) {
             getForceSources().remove(moveOrder);
          }
          moveOrder = (MoveOrder) order;
+         LOGGER.debug("Move order added: " + order);
       } else if (order instanceof ActionOrder) {
-         LOGGER.debug("Action order added: " + order);
          if (actionOrder != null && actionOrder instanceof ForceSource) {
             getForceSources().remove(actionOrder);
          }
          actionOrder = order;
+         LOGGER.debug("Action order added: " + order);
       } else {
-         LOGGER.error("Could not add unknown order type: " + order.getClass().getSimpleName());
-         return;
+         if (order.getClass().isAnnotationPresent(Unique.class)) {
+            for (Order uniqueOrder : bgOrders) {
+               if (uniqueOrder.getClass().equals(order.getClass())) {
+                  return;
+               }
+            }
+         }
+         bgOrders.add(order);
+         LOGGER.debug("Background order added: " + order);
       }
 
       if (order instanceof ForceSource) {
@@ -86,8 +100,8 @@ public class Ship extends PhysicalEntity {
       return actionOrder;
    }
 
-   public float getHealth() {
-      return health;
+   public float getIntegrity() {
+      return integrity;
    }
 
    public MoveOrder getMoveOrder() {
@@ -104,9 +118,9 @@ public class Ship extends PhysicalEntity {
 
    // FIXME This will occur too regularly, event should be used only for non periodic events
    public void onShipHit(@MObserves ShipHit event) {
-      if (event.getShip() == this && health > 0) {
-         health -= event.getDamage();
-         if (health <= 0) {
+      if (event.getShip() == this && integrity > 0) {
+         integrity -= event.getDamage() / durability;
+         if (integrity <= 0) {
             LOGGER.debug("Dying");
             final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
             shipDead.setDeadShip(this);
@@ -141,8 +155,8 @@ public class Ship extends PhysicalEntity {
       this.owner = owner;
    }
 
-   public void setHealth(float health) {
-      this.health = health;
+   public void setIntegrity(float integrity) {
+      this.integrity = integrity;
    }
 
    public float getEnergy() {
@@ -203,5 +217,17 @@ public class Ship extends PhysicalEntity {
 
    public boolean isForceStop() {
       return forceStop;
+   }
+
+   public List<Order> getBgOrders() {
+      return bgOrders;
+   }
+
+   public float getDurability() {
+      return durability;
+   }
+
+   public void setDurability(float durability) {
+      this.durability = durability;
    }
 }

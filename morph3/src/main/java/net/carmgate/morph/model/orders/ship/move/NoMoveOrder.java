@@ -1,6 +1,6 @@
 package net.carmgate.morph.model.orders.ship.move;
 
-import net.carmgate.morph.model.entities.physical.ship.ComponentType;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
 
 public class NoMoveOrder extends MoveOrder {

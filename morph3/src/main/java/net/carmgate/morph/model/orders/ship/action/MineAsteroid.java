@@ -7,7 +7,7 @@ import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.MiningLaserAnim;
 import net.carmgate.morph.model.entities.physical.Asteroid;
-import net.carmgate.morph.model.entities.physical.ship.ComponentType;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.events.WorldEventType;
 import net.carmgate.morph.model.events.animations.AnimationStart;

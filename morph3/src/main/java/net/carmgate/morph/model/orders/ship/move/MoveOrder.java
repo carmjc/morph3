@@ -2,7 +2,7 @@ package net.carmgate.morph.model.orders.ship.move;
 
 import javax.inject.Inject;
 
-import net.carmgate.morph.model.entities.physical.ship.ComponentType;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.orders.Order;
 import net.carmgate.morph.model.orders.OrderFactory;
 import net.carmgate.morph.model.physics.ForceSource;

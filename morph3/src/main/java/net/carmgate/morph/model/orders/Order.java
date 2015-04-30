@@ -1,8 +1,8 @@
 package net.carmgate.morph.model.orders;
 
 import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.entities.physical.ship.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 
 public abstract class Order {
 
