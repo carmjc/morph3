@@ -55,6 +55,7 @@ import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
+import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -86,6 +87,8 @@ public class Main {
    private long lastUpdateTime = 0;
    private static TrueTypeFont font;
    private int nextWaveId = 1;
+
+   private boolean gameLoaded;
 
    /**
     * Initialise the GL display
@@ -156,7 +159,24 @@ public class Main {
       }
    }
 
-   public void loop(@Observes GameLoaded gameLoaded) {
+   public void onGameLoaded(@Observes GameLoaded gameLoaded) {
+      this.gameLoaded = true;
+   }
+
+   public void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
+      new Thread((Runnable) () -> {
+         while (!Main.this.gameLoaded) {
+            try {
+               Thread.sleep(100);
+            } catch (Exception e) {
+               LOGGER.error("Thread.sleep interrupted", e);
+            }
+         }
+         loop();
+      }, "Game engine").start();
+   }
+
+   public void loop() {
       // init OpenGL context
       initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
 
@@ -219,7 +239,7 @@ public class Main {
    }
 
    private void addWaves() {
-      if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
+      if (1 != 1 && world.getTime() > 7000 * nextWaveId * nextWaveId) {
          for (int i = 0; i < nextWaveId; i++) {
             LOGGER.debug("Adding wave " + nextWaveId);
             Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
@@ -273,7 +293,7 @@ public class Main {
                   color = Color.red;
                }
                RenderUtils.renderText(font, x, y,
-                     MessageFormat.format(c.getClass().getSimpleName() + " - de/dt: {0,number,#.###}, dr/dt: {1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
+                     MessageFormat.format(c.getClass().getSimpleName() + ": {0,number,#.###}/{1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
             }
          }
       }

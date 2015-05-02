@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.script.ScriptEngine;
@@ -39,6 +39,7 @@ import net.carmgate.morph.model.events.entities.ship.ShipAdded;
 import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.model.orders.OrderFactory;
 
+import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;
 
 @Singleton
@@ -120,8 +121,8 @@ public class World {
       return time;
    }
 
-   @PostConstruct
-   private void init() {
+   // @PostConstruct
+   private void init(@Observes ContainerInitialized containerInitializedEvent) {
       eventManager.scanAndRegister(this);
 
       new Thread((Runnable) () -> {
