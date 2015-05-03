@@ -3,10 +3,10 @@ package net.carmgate.morph.model.animations;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import net.carmgate.morph.eventmgt.MObserves;
+import net.carmgate.morph.events.entities.ship.ShipDeath;
+import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 
 
 public class LaserAnim extends Animation {

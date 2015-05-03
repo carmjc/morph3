@@ -4,7 +4,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.eventmgt.MEventManager;
+import net.carmgate.morph.events.mgt.MEventManager;
 
 @Singleton
 public class PhysicalEntityFactory {

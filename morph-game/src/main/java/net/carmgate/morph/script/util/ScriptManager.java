@@ -15,7 +15,7 @@ import javax.script.ScriptEngineManager;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.Asteroid;
-import net.carmgate.morph.model.orders.OrderFactory;
+import net.carmgate.morph.orders.OrderFactory;
 
 import org.slf4j.Logger;
 

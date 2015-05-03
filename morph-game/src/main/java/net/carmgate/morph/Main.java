@@ -21,8 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.eventmgt.MEvent;
-import net.carmgate.morph.eventmgt.MEventManager;
+import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
@@ -35,14 +34,12 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
 import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
 import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
-import net.carmgate.morph.model.events.WorldEvent;
-import net.carmgate.morph.model.events.WorldEventFactory;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.orders.Order;
-import net.carmgate.morph.model.orders.OrderFactory;
-import net.carmgate.morph.model.orders.OrderType;
-import net.carmgate.morph.model.orders.ship.action.Attack;
 import net.carmgate.morph.model.physics.ForceSource;
+import net.carmgate.morph.orders.Order;
+import net.carmgate.morph.orders.OrderFactory;
+import net.carmgate.morph.orders.OrderType;
+import net.carmgate.morph.orders.ship.action.Attack;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
@@ -75,8 +72,6 @@ public class Main {
    @Inject private UIContext uiContext;
    @Inject private MouseManager mouseManager;
    @Inject private KeyboardManager keyboardManager;
-   @Inject private MEvent<WorldEvent> worldEvtMgr;
-   @Inject private WorldEventFactory worldEventFactory;
    @Inject private PhysicalEntityFactory physicalEntityFactory;
    @Inject private OrderFactory orderFactory;
 

@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.animations;
+package net.carmgate.morph.events;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -7,18 +7,19 @@ import javax.inject.Singleton;
 import net.carmgate.morph.events.mgt.MEventManager;
 
 @Singleton
-public class AnimationFactory {
+public class WorldEventFactory {
 
    @Inject
-   private Instance<Animation> animations;
+   Instance<WorldEvent> worldEventInstances;
 
    @Inject
    private MEventManager eventManager;
 
    @SuppressWarnings("unchecked")
-   public <U extends Animation> U newInstance(AnimationType type) {
-      U u = (U) animations.select(type.getClazz()).get();
+   public <U extends WorldEvent> U newInstance(WorldEventType type) {
+      U u = (U) worldEventInstances.select(type.getClazz()).get();
       eventManager.scanAndRegister(u);
       return u;
    }
+
 }

@@ -7,26 +7,26 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import net.carmgate.morph.eventmgt.MEvent;
-import net.carmgate.morph.eventmgt.MObserves;
+import net.carmgate.morph.events.WorldEvent;
+import net.carmgate.morph.events.WorldEventFactory;
+import net.carmgate.morph.events.WorldEventType;
+import net.carmgate.morph.events.entities.ship.ShipDeath;
+import net.carmgate.morph.events.entities.ship.ShipHit;
+import net.carmgate.morph.events.mgt.MEvent;
+import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Surroundings;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
-import net.carmgate.morph.model.events.WorldEvent;
-import net.carmgate.morph.model.events.WorldEventFactory;
-import net.carmgate.morph.model.events.WorldEventType;
-import net.carmgate.morph.model.events.entities.ship.ShipDeath;
-import net.carmgate.morph.model.events.entities.ship.ShipHit;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.model.orders.Order;
-import net.carmgate.morph.model.orders.OrderFactory;
-import net.carmgate.morph.model.orders.ship.Unique;
-import net.carmgate.morph.model.orders.ship.action.ActionOrder;
-import net.carmgate.morph.model.orders.ship.move.MoveOrder;
 import net.carmgate.morph.model.physics.ForceSource;
+import net.carmgate.morph.orders.Order;
+import net.carmgate.morph.orders.OrderFactory;
+import net.carmgate.morph.orders.ship.Unique;
+import net.carmgate.morph.orders.ship.action.ActionOrder;
+import net.carmgate.morph.orders.ship.move.MoveOrder;
 import net.carmgate.morph.script.util.ScriptManager;
 
 import org.slf4j.Logger;

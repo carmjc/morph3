@@ -4,10 +4,10 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.eventmgt.MEventManager;
-import net.carmgate.morph.eventmgt.MObserves;
+import net.carmgate.morph.events.entities.ship.ShipDeath;
+import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.events.entities.ship.ShipDeath;
 import net.carmgate.morph.ui.renderers.RenderMode;
 
 @Singleton
