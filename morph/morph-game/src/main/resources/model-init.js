@@ -4,7 +4,7 @@ importPackage(Packages.net.carmgate.morph.model.entities.physical.ship.component
 importPackage(Packages.net.carmgate.morph.model.entities.physical.ship)
 importPackage(Packages.net.carmgate.morph.model.entities.physical)
 importPackage(Packages.net.carmgate.morph.model.geometry)
-importPackage(Packages.net.carmgate.morph.model.orders)
+importPackage(Packages.net.carmgate.morph.orders)
 importPackage(Packages.org.lwjgl.util.vector)
 var ArrayList = Java.type('java.util.ArrayList');
 

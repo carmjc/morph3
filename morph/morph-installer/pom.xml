@@ -11,8 +11,8 @@
 	<properties>
 		<!-- Installer variables -->
 		<staging.dir>${project.build.directory}/staging</staging.dir>
-		<info.appName>My Killer Application</info.appName>
-		<info.appsubpath>my-killer-app/standard</info.appsubpath>
+		<info.appName>Morph</info.appName>
+		<info.appsubpath>morph</info.appsubpath>
 		<izpack.dir.app>${basedir}/src/main/izpack</izpack.dir.app>
 		<staging.dir.app>${staging.dir}/appfiles</staging.dir.app>
 	</properties>

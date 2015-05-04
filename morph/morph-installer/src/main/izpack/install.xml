@@ -34,6 +34,7 @@
 
 	<resources>
 		<res id="CustomLangPack.xml_eng" src="i18n/CustomLangPack.xml_eng" />
+		<res id="packsLang.xml_eng" src="i18n/packsLang.xml_eng" />
 		<res id="Installer.image" src="install_left.png" />
 	</resources>
 
@@ -45,7 +46,7 @@
 	</panels>
 
 	<packs>
-		<pack name="Morph game" required="yes">
+		<pack name="MorphGame" required="yes">
 			<description>The game in itself</description>
 			<fileset dir="plain" targetdir="${INSTALL_PATH}" override="true" />
 		</pack>
