@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.carmgate.morph</groupId>
-		<artifactId>morph</artifactId>
+		<artifactId>morph-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>morph-installer</artifactId>
@@ -39,6 +39,47 @@
 					<autoIncludeUrl>false</autoIncludeUrl>
 					<autoIncludeDevelopers>false</autoIncludeDevelopers>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.7.5</version>
+				<executions>
+					<execution>
+						<id>l4j-clui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>gui</headerType>
+							<jar>${project.build.directory}/${artifactId}-${version}.jar</jar>
+							<outfile>${project.build.directory}/morph3-installer.exe</outfile>
+							<downloadUrl>http://carmgate.net/morph3</downloadUrl>
+							<classPath>
+								<mainClass>com.izforge.izpack.installer.bootstrap.Installer</mainClass>
+								<preCp>anything</preCp>
+							</classPath>
+							<!-- <icon>src/main/resources/icon/application.ico</icon> -->
+							<jre>
+								<minVersion>1.8.0</minVersion>
+								<jdkPreference>preferJdk</jdkPreference>
+							</jre>
+							<versionInfo>
+								<fileVersion>1.0.0.0</fileVersion>
+								<txtFileVersion>${project.version}</txtFileVersion>
+								<fileDescription>${project.name}</fileDescription>
+								<copyright>2015 carmgate.net</copyright>
+								<productVersion>1.0.0.0</productVersion>
+								<txtProductVersion>1.0.0.0</txtProductVersion>
+								<productName>${project.name}</productName>
+								<companyName>carmgate</companyName>
+								<internalName>morph3-installer</internalName>
+								<originalFilename>morph3-installer.exe</originalFilename>
+							</versionInfo>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

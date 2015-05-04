@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.carmgate.morph</groupId>
-		<artifactId>morph3</artifactId>
+		<artifactId>morph-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>morph-game</artifactId>
@@ -110,38 +110,31 @@
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>
 			<artifactId>weld-se</artifactId>
-			<version>2.2.10.SP1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.lwjgl.lwjgl</groupId>
 			<artifactId>lwjgl</artifactId>
-			<version>2.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.lwjgl.lwjgl</groupId>
 			<artifactId>lwjgl-platform</artifactId>
-			<version>2.9.0</version>
 			<classifier>natives-${platform}</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.newdawn.slick</groupId>
 			<artifactId>slick-util</artifactId>
-			<version>UNKNOWN</version>
 		</dependency>
 		<dependency>
 			<groupId>org.lwjgl.lwjgl</groupId>
 			<artifactId>lwjgl_util</artifactId>
-			<version>2.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>guava</artifactId>
@@ -152,22 +145,18 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.4</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-			<version>3.2.1</version>
 		</dependency>
 	</dependencies>
 </project>
