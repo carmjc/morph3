@@ -1,12 +1,10 @@
 package net.carmgate.morph.events;
 
-import net.carmgate.morph.events.animations.AnimationStart;
 import net.carmgate.morph.events.entities.ship.ShipAdded;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.entities.ship.ShipHit;
 
 public enum WorldEventType {
-   ANIMATION_START(AnimationStart.class),
    SHIP_ADDED(ShipAdded.class),
    SHIP_DEATH(ShipDeath.class),
    SHIP_HIT(ShipHit.class);

@@ -19,6 +19,7 @@ import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Surroundings;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
@@ -47,7 +48,6 @@ public class Ship extends PhysicalEntity {
    private Order actionOrder;
    private MoveOrder moveOrder;
    private final List<Order> bgOrders = new ArrayList<>();
-   private float integrity = 1;
    private float durability;
    private final Map<ComponentType, Component> components = new HashMap<>();
 
@@ -56,6 +56,8 @@ public class Ship extends PhysicalEntity {
    private float energydt; // energy variation d(energy)/dt
    private float resources;
    private float resourcesdt; // resources variation d(resources)/dt
+   private float integrity = 1;
+   private float integrityDt; // integrity variation d(integrity)/dt
 
    public Vector2f debug1 = new Vector2f();
    public Vector2f debug2 = new Vector2f();
@@ -64,18 +66,30 @@ public class Ship extends PhysicalEntity {
 
    private boolean forceStop;
 
+   public void add(Component component) {
+      component.setShip(this);
+      ComponentKind componentKind = component.getClass().getAnnotation(ComponentKind.class);
+      getComponents().put(componentKind.value(), component);
+   }
+
    public void add(Order order) {
       order.setWorld(world);
 
       if (order instanceof MoveOrder) {
-         if (moveOrder != null && moveOrder instanceof ForceSource) {
-            getForceSources().remove(moveOrder);
+         if (moveOrder != null) {
+            moveOrder.onRemoveOrder();
+            if (moveOrder instanceof ForceSource) {
+               getForceSources().remove(moveOrder);
+            }
          }
          moveOrder = (MoveOrder) order;
          LOGGER.debug("Move order added: " + order);
       } else if (order instanceof ActionOrder) {
-         if (actionOrder != null && actionOrder instanceof ForceSource) {
-            getForceSources().remove(actionOrder);
+         if (actionOrder != null) {
+            actionOrder.onRemoveOrder();
+            if (actionOrder instanceof ForceSource) {
+               getForceSources().remove(actionOrder);
+            }
          }
          actionOrder = order;
          LOGGER.debug("Action order added: " + order);
@@ -229,5 +243,17 @@ public class Ship extends PhysicalEntity {
 
    public void setDurability(float durability) {
       this.durability = durability;
+   }
+
+   public float getIntegrityDt() {
+      return integrityDt;
+   }
+
+   public void setIntegrityDt(float integrityDt) {
+      this.integrityDt = integrityDt;
+   }
+
+   public void addIntegrity(float integrityDelta) {
+      integrity += integrityDelta;
    }
 }

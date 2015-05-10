@@ -1,14 +1,9 @@
 package net.carmgate.morph.model.entities.physical.ship.components;
 
-import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 @Background
+@ComponentKind(ComponentType.GENERATORS)
 public class SimpleGenerator extends Component {
-
-   public SimpleGenerator(Ship ship) {
-      super(ship);
-      // TODO Auto-generated constructor stub
-   }
 
    @Override
    public float getEnergyDt() {

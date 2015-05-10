@@ -3,42 +3,39 @@ package net.carmgate.morph.model.animations;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.Asteroid;
+import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 public class MiningLaserAnim extends Animation {
 
    @Inject private World world;
 
-   private Asteroid target;
-   private Ship source;
+   private Holder<PhysicalEntity> targetHolder;
+   private Holder<Ship> sourceHolder;
 
    @PostConstruct
    public void init() {
       setAnimationDuration(300);
       setAnimationEnd(world.getTime() + getAnimationDuration());
-   }
-
-   protected void onShipDeath(@MObserves ShipDeath shipDeath) {
-      setAnimationEnd(0);
+      setAnimationCoolDown(700);
    }
 
    public Ship getSource() {
-      return source;
+      return sourceHolder.get();
    }
 
    public Asteroid getTarget() {
-      return target;
+      return (Asteroid) targetHolder.get();
    }
 
-   public void setTarget(Asteroid target) {
-      this.target = target;
+   public void setTarget(Holder<PhysicalEntity> holder) {
+      targetHolder = holder;
    }
 
-   public void setSource(Ship source) {
-      this.source = source;
+   public void setSourceHolder(Holder<Ship> holder) {
+      sourceHolder = holder;
    }
 }

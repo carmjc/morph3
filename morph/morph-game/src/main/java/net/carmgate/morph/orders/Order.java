@@ -73,4 +73,6 @@ public abstract class Order {
       this.orderType = orderType;
    }
 
+   public abstract void onRemoveOrder();
+
 }

@@ -7,6 +7,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Background;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
 import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
@@ -63,7 +65,7 @@ import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
 @Singleton
-public class Main {
+public class GameMain {
 
    @Inject private MEventManager eventManager;
    @Inject private Logger LOGGER;
@@ -74,6 +76,7 @@ public class Main {
    @Inject private KeyboardManager keyboardManager;
    @Inject private PhysicalEntityFactory physicalEntityFactory;
    @Inject private OrderFactory orderFactory;
+   @Inject private ComponentFactory componentFactory;
 
    // Computation attributes
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
@@ -160,7 +163,7 @@ public class Main {
 
    public void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
       new Thread((Runnable) () -> {
-         while (!Main.this.gameLoaded) {
+         while (!GameMain.this.gameLoaded) {
             try {
                Thread.sleep(100);
             } catch (Exception e) {
@@ -187,6 +190,7 @@ public class Main {
 
          // Renders everything
          renderAnimation();
+         renderComponentsAnimation();
          renderPhysical();
          renderGUI();
          updateWorld();
@@ -234,7 +238,7 @@ public class Main {
    }
 
    private void addWaves() {
-      if (1 != 1 && world.getTime() > 7000 * nextWaveId * nextWaveId) {
+      if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
          for (int i = 0; i < nextWaveId; i++) {
             LOGGER.debug("Adding wave " + nextWaveId);
             Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
@@ -248,9 +252,9 @@ public class Main {
             ship.setResources(20);
             ship.setIntegrity(1);
             ship.setDurability(5);
-            ship.getComponents().put(ComponentType.LASERS, new Laser(ship));
-            ship.getComponents().put(ComponentType.PROPULSORS, new SimplePropulsor(ship));
-            ship.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship));
+            ship.add(componentFactory.newInstance(Laser.class));
+            ship.add(componentFactory.newInstance(SimplePropulsor.class));
+            ship.add(componentFactory.newInstance(SimpleGenerator.class));
             world.add(ship);
          }
          nextWaveId++;
@@ -268,7 +272,9 @@ public class Main {
          RenderUtils.renderText(font, x, y, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.#}%", ship.getIntegrity() * 100), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Energy/dt: {0,number,#.###}", ship.getEnergyDt()), line++, Color.white, false);
          RenderUtils.renderText(font, x, y, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format("Resources/dt: {0,number,#.###}", ship.getResourcesDt()), line++, Color.white, false);
          if (ship.getMoveOrder() != null) {
             RenderUtils.renderText(font, x, y, MessageFormat.format("Move order: {0}", ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false);
          }
@@ -284,8 +290,11 @@ public class Main {
          if (uiContext.getRenderMode() == RenderMode.DEBUG) {
             for (Component c : ship.getComponents().values()) {
                Color color = Color.white;
-               if (!c.isActive()) {
+               if (c.isFamished()) {
                   color = Color.red;
+               }
+               if (!c.isActive()) {
+                  color = Color.gray;
                }
                RenderUtils.renderText(font, x, y,
                      MessageFormat.format(c.getClass().getSimpleName() + ": {0,number,#.###}/{1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
@@ -337,6 +346,34 @@ public class Main {
       finishedAnimations.clear();
       GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
       GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+   }
+
+   private void renderComponentsAnimation() {
+      for (final Ship ship : world.getShips()) {
+         final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+         final float zoomFactor = uiContext.getViewport().getZoomFactor();
+         GL11.glScalef(zoomFactor, zoomFactor, 1);
+         GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+
+         Collection<Component> components = ship.getComponents().values();
+         components.forEach(cmp -> {
+            if (cmp.isActive()) {
+               Animation anim = cmp.getAnimation();
+               if (anim != null) {
+                  Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
+                  if (anim.getAnimationEnd() > world.getTime()) {
+                     renderer.render(anim);
+                  }
+                  if (anim.getAnimationEnd() + anim.getAnimationCoolDown() < world.getTime()) {
+                     anim.setAnimationEnd(anim.getAnimationEnd() + anim.getAnimationCoolDown() + anim.getAnimationDuration());
+                  }
+               }
+            }
+         });
+
+         GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+         GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+      }
    }
 
    private void renderPhysical() {
@@ -437,6 +474,7 @@ public class Main {
 
    private void updateShipEconomics(final Ship ship) {
       // Economics updates from components
+      // FIXME rework this, it is unreadable and probaly useless
       Map<ComponentType, Integer> componentCriticities = new HashMap<>();
       if (ship.getMoveOrder() != null) {
          for (ComponentType compType : ship.getMoveOrder().getComponentTypes()) {
@@ -470,15 +508,22 @@ public class Main {
 
       ship.setEnergyDt(0);
       ship.setResourcesDt(0);
-      for (Set<ComponentType> set : map.values()) {
-         for (ComponentType cp : set) {
-            if (ship.getEnergy() + ship.getEnergyDt() + ship.getComponents().get(cp).getEnergyDt() >= 0 &&
-                  ship.getResources() + ship.getResourcesDt() + ship.getComponents().get(cp).getResourcesDt() >= 0) {
-               ship.getComponents().get(cp).setActive(true);
-               ship.setEnergyDt(ship.getEnergyDt() + ship.getComponents().get(cp).getEnergyDt());
-               ship.setResourcesDt(ship.getResourcesDt() + ship.getComponents().get(cp).getResourcesDt());
-            } else {
-               ship.getComponents().get(cp).setActive(false);
+      ship.setIntegrityDt(0);
+      for (Set<ComponentType> cmpTypeSet : map.values()) {
+         for (ComponentType cmpType : cmpTypeSet) {
+            Component cmp = ship.getComponents().get(cmpType);
+            if (cmp.isActive()) {
+               if (ship.getEnergy() + ship.getEnergyDt() + cmp.getEnergyDt() >= 0 &&
+                     ship.getResources() + ship.getResourcesDt() + cmp.getResourcesDt() >= 0) {
+                  cmp.setFamished(false);
+                  ship.setEnergyDt(ship.getEnergyDt() + cmp.getEnergyDt());
+                  ship.setResourcesDt(ship.getResourcesDt() + cmp.getResourcesDt());
+                  ship.setIntegrityDt(ship.getIntegrityDt() + cmp.getIntegrityDt());
+                  // LOGGER.debug("Active: " + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
+               } else {
+                  cmp.setFamished(true);
+                  // LOGGER.debug("Famished" + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
+               }
             }
          }
       }
@@ -495,6 +540,12 @@ public class Main {
          ship.setResources(0);
       } else {
          ship.addResources(resourcesDelta);
+      }
+      float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
+      if (ship.getIntegrity() + integrityDelta < 0) {
+         ship.setIntegrity(0);
+      } else {
+         ship.addIntegrity(integrityDelta);
       }
    }
 }

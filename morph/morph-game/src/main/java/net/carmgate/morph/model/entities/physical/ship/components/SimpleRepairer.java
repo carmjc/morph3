@@ -1,23 +1,39 @@
 package net.carmgate.morph.model.entities.physical.ship.components;
 
-import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 @Background
+@ComponentKind(ComponentType.REPAIRER)
 public class SimpleRepairer extends Component {
 
-   public SimpleRepairer(Ship ship) {
-      super(ship);
-      // TODO Auto-generated constructor stub
+   @Override
+   public boolean isActive() {
+      if (getShip().getIntegrity() < 1) {
+         return true;
+      }
+      return false;
    }
 
    @Override
    public float getEnergyDt() {
-      return -0.5f;
+      if (getShip().getIntegrity() < 1) {
+         return -0.5f;
+      }
+      return 0;
    }
 
    @Override
    public float getResourcesDt() {
-      return -0.5f;
+      if (getShip().getIntegrity() < 1) {
+         return -0.5f;
+      }
+      return 0;
    }
 
+   @Override
+   public float getIntegrityDt() {
+      if (getShip().getIntegrity() < 1) {
+         return 0.01f;
+      }
+      return 0;
+   }
 }

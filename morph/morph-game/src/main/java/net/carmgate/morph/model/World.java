@@ -37,6 +37,7 @@ import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
 import net.carmgate.morph.orders.OrderFactory;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
@@ -58,6 +59,7 @@ public class World {
    @Inject private PhysicalEntityFactory entityFactory;
    @Inject private WorldEventFactory worldEventFactory;
    @Inject private MEventManager eventManager;
+   @Inject private ComponentFactory componentFactory;
 
    private final List<Ship> ships = new ArrayList<>();
    private final List<PhysicalEntity> nonShipsPhysicalEntities = new ArrayList<>();
@@ -134,6 +136,7 @@ public class World {
             engine.put("world", World.this);
             engine.put("orderFactory", orderFactory);
             engine.put("entityFactory", entityFactory);
+            engine.put("componentFactory", componentFactory);
             engine.eval(reader);
             gameLoadedEvent.fire(new GameLoaded());
          } catch (final Exception e) {

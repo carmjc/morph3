@@ -27,7 +27,7 @@ ship1.mass = 2;
 ship1.durability = 1;
 ship1.player = other;
 ship1.energy = 100;
-ship1.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship1));
+ship1.add(componentFactory.newInstance(SimpleGenerator.class));
 world.add(ship1);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
@@ -38,11 +38,11 @@ ship.player = me;
 ship.energy = 10;
 ship.resources = 10;
 ship.getSpeed().copy(-100, -100)
-ship.getComponents().put(ComponentType.MINING_LASERS, new MiningLaser(ship));
-ship.getComponents().put(ComponentType.LASERS, new Laser(ship));
-ship.getComponents().put(ComponentType.PROPULSORS, new SimplePropulsor(ship));
-ship.getComponents().put(ComponentType.GENERATORS, new SimpleGenerator(ship));
-ship.getComponents().put(ComponentType.REPAIRER, new SimpleRepairer(ship));
+ship.add(componentFactory.newInstance(MiningLaser.class));
+ship.add(componentFactory.newInstance(Laser.class));
+ship.add(componentFactory.newInstance(SimplePropulsor.class));
+ship.add(componentFactory.newInstance(SimpleGenerator.class));
+ship.add(componentFactory.newInstance(SimpleRepairer.class));
 //order = orderFactory.newInstance(OrderType.MINE_ASTEROID, ship);
 //order.setAsteroid(asteroid);
 order = orderFactory.newInstance(OrderType.ATTACK, ship);

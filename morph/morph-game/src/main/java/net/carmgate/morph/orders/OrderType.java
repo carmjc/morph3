@@ -1,7 +1,6 @@
 package net.carmgate.morph.orders;
 
 import net.carmgate.morph.orders.ship.Flee;
-import net.carmgate.morph.orders.ship.RepairSelf;
 import net.carmgate.morph.orders.ship.action.Attack;
 import net.carmgate.morph.orders.ship.action.MineAsteroid;
 import net.carmgate.morph.orders.ship.move.CloseIn;
@@ -12,8 +11,8 @@ public enum OrderType {
    FLEE(Flee.class),
    CLOSE_IN(CloseIn.class),
    NO_MOVE(NoMoveOrder.class),
-   MINE_ASTEROID(MineAsteroid.class),
-   REPAIR_SELF(RepairSelf.class);
+   MINE_ASTEROID(MineAsteroid.class);
+   // REPAIR_SELF(RepairSelf.class);
 
    private final Class<? extends Order> clazz;
 

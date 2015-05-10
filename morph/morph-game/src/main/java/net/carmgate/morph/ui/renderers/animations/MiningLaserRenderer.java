@@ -4,7 +4,9 @@ import java.util.Random;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
+import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.MiningLaserAnim;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
@@ -13,6 +15,8 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 
 public class MiningLaserRenderer implements Renderer<MiningLaserAnim> {
+
+   @Inject private World world;
 
    private Random rand = new Random();
 
@@ -27,8 +31,10 @@ public class MiningLaserRenderer implements Renderer<MiningLaserAnim> {
 
    @Override
    public void render(MiningLaserAnim laser) {
-      RenderUtils.renderLine(laser.getSource().getPos(), laser.getTarget().getPos(), 10f, 0f, rand.nextFloat() * 5 + 3,
-            new float[] { 1f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+      if (laser.getSource() != null && laser.getTarget() != null) {
+         RenderUtils.renderLine(laser.getSource().getPos(), laser.getTarget().getPos(), 10f, 0f, rand.nextFloat() * 5 + 3,
+               new float[] { 1f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+      }
    }
 
 }

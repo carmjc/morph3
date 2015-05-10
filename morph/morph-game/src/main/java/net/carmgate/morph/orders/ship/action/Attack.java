@@ -5,15 +5,13 @@ import javax.inject.Inject;
 import net.carmgate.morph.events.WorldEvent;
 import net.carmgate.morph.events.WorldEventFactory;
 import net.carmgate.morph.events.WorldEventType;
-import net.carmgate.morph.events.animations.AnimationStart;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.entities.ship.ShipHit;
 import net.carmgate.morph.events.mgt.MEvent;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.animations.AnimationFactory;
-import net.carmgate.morph.model.animations.AnimationType;
-import net.carmgate.morph.model.animations.LaserAnim;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.orders.OrderFactory;
@@ -53,13 +51,9 @@ public class Attack extends ActionOrder {
          return;
       }
 
-      // Create animation
-      final LaserAnim laser = animationFactory.newInstance(AnimationType.LASER);
-      laser.setSource(getOrderee());
+      Component laser = getOrderee().getComponents().get(ComponentType.LASERS);
       laser.setTarget(target);
-      final AnimationStart animationStart = worldEventFactory.newInstance(WorldEventType.ANIMATION_START);
-      animationStart.setAnimation(laser);
-      worldEventMgr.fire(animationStart);
+      laser.setActive(true);
 
       // Create the event
       final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
@@ -69,6 +63,8 @@ public class Attack extends ActionOrder {
 
    protected void onDeadShip(@MObserves ShipDeath deadShip) {
       if (deadShip.getShip() == target) {
+         Component laser = getOrderee().getComponents().get(ComponentType.LASERS);
+         laser.setActive(false);
          setDone(true);
       }
    }
@@ -86,6 +82,13 @@ public class Attack extends ActionOrder {
    @Override
    public int getCriticity() {
       return 50;
+   }
+
+   @Override
+   public void onRemoveOrder() {
+      Component laser = getOrderee().getComponents().get(ComponentType.LASERS);
+      laser.setActive(false);
+      setDone(true);
    }
 
 }

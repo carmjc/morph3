@@ -112,4 +112,9 @@ public class CloseIn extends MoveOrder {
       return (int) (tmpVect.copy(target.getPos()).sub(getOrderee().getPos()).length() - getDistance());
    }
 
+   @Override
+   public void onRemoveOrder() {
+      // Do nothing
+   }
+
 }

@@ -1,21 +1,29 @@
 package net.carmgate.morph.model.entities.physical.ship.components;
 
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
+import net.carmgate.morph.model.animations.AnimationFactory;
+import net.carmgate.morph.model.animations.AnimationType;
+import net.carmgate.morph.model.animations.LaserAnim;
+
+
+@ComponentKind(ComponentType.LASERS)
 public class Laser extends Component {
 
-   public Laser(Ship ship) {
-      super(ship);
-   }
+   @Inject private AnimationFactory animationFactory;
 
-   @Override
-   public float getEnergyDt() {
-      return -0.5f;
-   }
+   private LaserAnim laserAnim;;
 
-   @Override
-   public float getResourcesDt() {
-      return -0.5f;
+   @PostConstruct
+   private void init() {
+      laserAnim = animationFactory.newInstance(AnimationType.LASER);
+      laserAnim.setSourceHolder(getShipHolder());
+      laserAnim.setTargetHolder(getTargetHolder());
+      setAnimation(laserAnim);
+
+      setEnergyDt(-0.5f);
+      setResourcesDt(-0.5f);
    }
 
 }

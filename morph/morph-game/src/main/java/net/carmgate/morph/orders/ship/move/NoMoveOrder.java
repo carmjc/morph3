@@ -24,4 +24,9 @@ public class NoMoveOrder extends MoveOrder {
       return Integer.MIN_VALUE;
    }
 
+   @Override
+   public void onRemoveOrder() {
+      // Do nothing
+   }
+
 }

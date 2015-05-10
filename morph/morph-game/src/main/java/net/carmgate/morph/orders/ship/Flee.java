@@ -56,4 +56,9 @@ public class Flee extends Order implements ForceSource {
       return 100;
    }
 
+   @Override
+   public void onRemoveOrder() {
+      // Do nothing
+   }
+
 }

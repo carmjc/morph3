@@ -7,10 +7,10 @@ public class AnimationStart implements WorldEvent {
 
    private Animation animation;
 
-   public void setAnimation(Animation animation) {
-      this.animation = animation;
-   }
-
+   // public void setAnimation(Animation animation) {
+   // this.animation = animation;
+   // }
+   //
    public Animation getAnimation() {
       return animation;
    }

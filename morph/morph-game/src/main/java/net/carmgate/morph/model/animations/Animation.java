@@ -6,6 +6,7 @@ public abstract class Animation implements Renderable {
 
    private long animationDuration;
    private long animationEnd;
+   private long animationCoolDown;
 
    public Animation() {
    }
@@ -22,7 +23,15 @@ public abstract class Animation implements Renderable {
       return animationEnd;
    }
 
-   protected void setAnimationEnd(long animationEnd) {
+   public void setAnimationEnd(long animationEnd) {
       this.animationEnd = animationEnd;
+   }
+
+   public long getAnimationCoolDown() {
+      return animationCoolDown;
+   }
+
+   protected void setAnimationCoolDown(long animationCoolDown) {
+      this.animationCoolDown = animationCoolDown;
    }
 }
