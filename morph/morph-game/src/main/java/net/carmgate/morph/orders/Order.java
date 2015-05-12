@@ -14,15 +14,7 @@ public abstract class Order {
 
    public void eval() {
       if (world.getTime() > nextEvalTime) {
-         float energyDt = 0;
-         float resourcesDt = 0;
-         for (ComponentType compType : getComponentTypes()) {
-            energyDt += getOrderee().getComponents().get(compType).getEnergyDt();
-            resourcesDt += getOrderee().getComponents().get(compType).getResourcesDt();
-         }
-         if (getOrderee().getEnergy() > energyDt && getOrderee().getResources() > resourcesDt) {
-            evaluate();
-         }
+         evaluate();
       }
    }
 

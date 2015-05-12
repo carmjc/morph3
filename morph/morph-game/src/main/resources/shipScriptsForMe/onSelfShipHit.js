@@ -4,6 +4,6 @@ if (self.getActionOrder().getOrderType().name() != "ATTACK") {
 	self.add(attack);
 }
 if (self.integrity < 1) {
-	repair = orderFactory.newInstance("REPAIR_SELF", self);
-	self.add(repair);
+	//repair = orderFactory.newInstance("REPAIR_SELF", self);
+	//self.add(repair);
 }

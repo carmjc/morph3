@@ -9,7 +9,6 @@ import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.entities.ship.ShipHit;
 import net.carmgate.morph.events.mgt.MEvent;
 import net.carmgate.morph.events.mgt.MObserves;
-import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
@@ -25,7 +24,6 @@ public class Attack extends ActionOrder {
    private static final float MAX_DISTANCE = 500;
 
    @Inject private MEvent<WorldEvent> worldEventMgr;
-   @Inject private AnimationFactory animationFactory;
    @Inject private WorldEventFactory worldEventFactory;
    @Inject private OrderFactory orderFactory;
    @Inject private Logger LOGGER;
@@ -56,9 +54,11 @@ public class Attack extends ActionOrder {
       laser.setActive(true);
 
       // Create the event
-      final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
-      shipHit.init(getOrderee(), target, 1);
-      worldEventMgr.fire(shipHit);
+      if (!laser.isFamished()) {
+         final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
+         shipHit.init(getOrderee(), target, 1);
+         worldEventMgr.fire(shipHit);
+      }
    }
 
    protected void onDeadShip(@MObserves ShipDeath deadShip) {

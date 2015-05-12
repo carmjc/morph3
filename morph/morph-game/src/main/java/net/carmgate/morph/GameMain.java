@@ -357,7 +357,7 @@ public class GameMain {
 
          Collection<Component> components = ship.getComponents().values();
          components.forEach(cmp -> {
-            if (cmp.isActive()) {
+            if (cmp.isActive() && !cmp.isFamished()) {
                Animation anim = cmp.getAnimation();
                if (anim != null) {
                   Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
