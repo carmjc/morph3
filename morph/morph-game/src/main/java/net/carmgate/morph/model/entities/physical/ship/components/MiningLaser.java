@@ -3,6 +3,7 @@ package net.carmgate.morph.model.entities.physical.ship.components;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.MiningLaserAnim;
@@ -14,6 +15,7 @@ public class MiningLaser extends Component {
 
    @Inject private Logger LOGGER;
    @Inject private AnimationFactory animationFactory;
+   @Inject private Conf conf;
 
    private MiningLaserAnim laserAnim;
 
@@ -24,6 +26,9 @@ public class MiningLaser extends Component {
       laserAnim.setTarget(getTargetHolder());
       setAnimation(laserAnim);
       LOGGER.debug("laserAnimation added");
+
+      setEnergyDt(conf.getFloatProperty("component.miningLaser.energyDt"));
+      setResourcesDt(conf.getFloatProperty("component.miningLaser.resourcesDt"));
    }
 
 }

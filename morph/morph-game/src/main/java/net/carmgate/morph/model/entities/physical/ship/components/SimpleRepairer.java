@@ -1,9 +1,15 @@
 package net.carmgate.morph.model.entities.physical.ship.components;
 
+import javax.inject.Inject;
+
+import net.carmgate.morph.conf.Conf;
+
 
 @Background
 @ComponentKind(ComponentType.REPAIRER)
 public class SimpleRepairer extends Component {
+
+   @Inject private Conf conf;
 
    @Override
    public boolean isActive() {
@@ -16,7 +22,7 @@ public class SimpleRepairer extends Component {
    @Override
    public float getEnergyDt() {
       if (getShip().getIntegrity() < 1) {
-         return -0.5f;
+         return conf.getFloatProperty("component.repairer.energyDt");
       }
       return 0;
    }
@@ -24,7 +30,7 @@ public class SimpleRepairer extends Component {
    @Override
    public float getResourcesDt() {
       if (getShip().getIntegrity() < 1) {
-         return -0.5f;
+         return conf.getFloatProperty("component.repairer.resourcesDt");
       }
       return 0;
    }
@@ -32,7 +38,7 @@ public class SimpleRepairer extends Component {
    @Override
    public float getIntegrityDt() {
       if (getShip().getIntegrity() < 1) {
-         return 0.01f;
+         return conf.getFloatProperty("component.repairer.integrityDt");
       }
       return 0;
    }

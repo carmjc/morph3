@@ -3,6 +3,7 @@ package net.carmgate.morph.model.animations;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.Asteroid;
@@ -12,15 +13,16 @@ import net.carmgate.morph.model.entities.physical.ship.Ship;
 public class MiningLaserAnim extends Animation {
 
    @Inject private World world;
+   @Inject private Conf conf;
 
    private Holder<PhysicalEntity> targetHolder;
    private Holder<Ship> sourceHolder;
 
    @PostConstruct
    public void init() {
-      setAnimationDuration(300);
+      setAnimationDuration(conf.getIntProperty("miningLaser.anim.duration"));
       setAnimationEnd(world.getTime() + getAnimationDuration());
-      setAnimationCoolDown(700);
+      setAnimationCoolDown(conf.getIntProperty("miningLaser.anim.cooldown"));
    }
 
    public Ship getSource() {

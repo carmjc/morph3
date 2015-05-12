@@ -100,7 +100,7 @@ public class GameMain {
       try {
          Display.setDisplayMode(new DisplayMode(width, height));
          Display.create();
-         Display.setTitle("Morph 3");
+         Display.setTitle(conf.getProperty("ui.window.title"));
          // Display.setVSyncEnabled(true);
          Display.setResizable(true);
       } catch (final LWJGLException e) {
@@ -147,8 +147,8 @@ public class GameMain {
          // Font awtFont = new Font("Verdana", Font.PLAIN, 11);
          Font awtFont;
          try {
-            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream("fonts/Rock_Elegance.otf"));
-            awtFont = awtFont.deriveFont(12f); // set font size
+            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ui.font")));
+            awtFont = awtFont.deriveFont(conf.getFloatProperty("ui.font.size")); // set font size
             font = new TrueTypeFont(awtFont, true);
          } catch (FontFormatException | IOException e) {
             // TODO Auto-generated catch block
@@ -263,8 +263,10 @@ public class GameMain {
 
    private void renderGUI() {
       Ship ship = uiContext.getSelectedShip();
-      int x = uiContext.getWindow().getWidth() / 2 - 2;
-      int y = -uiContext.getWindow().getHeight() / 2 + 2;
+      float zoomFactor = uiContext.getViewport().getZoomFactor();
+      Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+      float x = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
+      float y = -uiContext.getWindow().getHeight() / 2 + 2 - focalPoint.y * (1 - zoomFactor);
       int line = 1;
       if (ship != null) {
          RenderUtils.renderText(font, x, y, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), line++, Color.white, false);
@@ -352,8 +354,8 @@ public class GameMain {
       for (final Ship ship : world.getShips()) {
          final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
          final float zoomFactor = uiContext.getViewport().getZoomFactor();
-         GL11.glScalef(zoomFactor, zoomFactor, 1);
          GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+         GL11.glScalef(zoomFactor, zoomFactor, 1);
 
          Collection<Component> components = ship.getComponents().values();
          components.forEach(cmp -> {
@@ -402,8 +404,8 @@ public class GameMain {
          }
       }
 
-      GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
       GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+      GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
    }
 
    private void updateKinematics() {

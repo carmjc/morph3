@@ -34,6 +34,10 @@ public class Conf {
       return Integer.parseInt(prop.getProperty(key));
    }
 
+   public int getCharProperty(String key) {
+      return prop.getProperty(key).getBytes()[0];
+   }
+
    public String getProperty(String key) {
       return prop.getProperty(key);
    }

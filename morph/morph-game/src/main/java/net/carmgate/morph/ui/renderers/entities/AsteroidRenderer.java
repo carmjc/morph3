@@ -7,6 +7,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.entities.physical.Asteroid;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 public class AsteroidRenderer implements Renderer<Asteroid> {
 
    @Inject private Logger LOGGER;
+   @Inject private Conf conf;
 
    private static Texture asteroids1Texture;
 
@@ -32,7 +34,7 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
    public void init() {
       // load texture from PNG file if needed
       if (asteroids1Texture == null) {
-         try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream("img/asteroids1.png"))) {
+         try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("asteroid.renderer.texture")))) {
             asteroids1Texture = TextureLoader.getTexture("PNG", fileInputStream);
          } catch (IOException e) {
             LOGGER.error("Exception raised while loading texture", e);
@@ -42,7 +44,7 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
 
    @Override
    public void render(Asteroid asteroid) {
-      float massScale = asteroid.getMass();
+      float massScale = asteroid.getMass() * conf.getFloatProperty("asteroid.renderer.massToSizeFactor");
       float width = 128f;
 
       int i = 2; // TODO variabilize this

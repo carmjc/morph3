@@ -51,11 +51,11 @@ public class Zoom implements MouseListener {
             zoomVariation = ZOOM_MAX / viewport.getZoomFactor();
          }
 
-         viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
          Vector2f fromWindowCenterToMouse = new Vector2f(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
                -uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
-         uiContext.getViewport().getFocalPoint().add(new Vector2f(fromWindowCenterToMouse).scale(1f / zoomVariation)).scale(zoomVariation)
-         .sub(new Vector2f(fromWindowCenterToMouse).scale(zoomVariation));
+         uiContext.getViewport().getFocalPoint().sub(new Vector2f(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
+         .add(new Vector2f(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
+         viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
 
          inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }
@@ -73,11 +73,11 @@ public class Zoom implements MouseListener {
             zoomVariation = ZOOM_MAX / viewport.getZoomFactor();
          }
 
-         viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
          Vector2f fromWindowCenterToMouse = new Vector2f(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
                -uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
-         uiContext.getViewport().getFocalPoint().add(new Vector2f(fromWindowCenterToMouse).scale(1f / zoomVariation)).scale(zoomVariation)
-         .sub(new Vector2f(fromWindowCenterToMouse).scale(zoomVariation));
+         uiContext.getViewport().getFocalPoint().sub(new Vector2f(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
+               .add(new Vector2f(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
+         viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
 
          inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }

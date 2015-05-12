@@ -2,6 +2,7 @@ package net.carmgate.morph.orders.ship.move;
 
 import javax.inject.Inject;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
@@ -15,10 +16,9 @@ import org.slf4j.Logger;
 
 public class CloseIn extends MoveOrder {
 
-   private static final float EPSILON = 0.05f;
-
    @Inject private OrderFactory orderFactory;
    @Inject private Logger LOGGER;
+   @Inject private Conf conf;
 
    private PhysicalEntity target;
    private float desiredDistance;
@@ -33,7 +33,8 @@ public class CloseIn extends MoveOrder {
       tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
       float actualDistance = tmpVect.length() - getDistance();
 
-      if (actualDistance < EPSILON && getOrderee().getSpeed().lengthSquared() < EPSILON) {
+      float epsilon = conf.getFloatProperty("order.moveOrder.epsilon");
+      if (actualDistance < epsilon && getOrderee().getSpeed().lengthSquared() < epsilon) {
          if (!getOrderee().isForceStop()) {
             getOrderee().setForceStop(true);
             getForce().copy(Vector2f.NULL);

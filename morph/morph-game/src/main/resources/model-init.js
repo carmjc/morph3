@@ -17,7 +17,7 @@ world.add(other);
 
 asteroid = entityFactory.newInstance(PhysicalEntityType.valueOf("ASTEROID"));
 asteroid.getPos().copy(-500, -80);
-asteroid.mass = 2;
+asteroid.mass = 2000;
 asteroid.rotateSpeed = 5;
 world.add(asteroid);
 

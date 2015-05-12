@@ -1,5 +1,9 @@
 package net.carmgate.morph.ui;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.geometry.Vector2f;
 
 import org.slf4j.Logger;
@@ -11,6 +15,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ViewPort {
 
+   @Inject private Conf conf;
+
    @SuppressWarnings("unused")
    private static final Logger LOGGER = LoggerFactory.getLogger(ViewPort.class);
 
@@ -21,7 +27,12 @@ public class ViewPort {
    private final float rotation = 0;
 
    /** The zoom factor. > 1 means what you see is bigger. */
-   private float zoomFactor = 0.5f;
+   private float zoomFactor;
+
+   @PostConstruct
+   private void init() {
+      zoomFactor = conf.getFloatProperty("ui.viewPort.zoomFactor");
+   }
 
    // private Entity lockedOnEntity;
 

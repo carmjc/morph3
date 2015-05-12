@@ -2,6 +2,7 @@ package net.carmgate.morph.orders.ship.action;
 
 import javax.inject.Inject;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.WorldEvent;
 import net.carmgate.morph.events.WorldEventFactory;
 import net.carmgate.morph.events.WorldEventType;
@@ -21,12 +22,11 @@ import org.slf4j.Logger;
 
 public class Attack extends ActionOrder {
 
-   private static final float MAX_DISTANCE = 500;
-
    @Inject private MEvent<WorldEvent> worldEventMgr;
    @Inject private WorldEventFactory worldEventFactory;
    @Inject private OrderFactory orderFactory;
    @Inject private Logger LOGGER;
+   @Inject private Conf conf;
 
    private Ship target;
    private final Vector2f tmpVect = new Vector2f();
@@ -37,7 +37,7 @@ public class Attack extends ActionOrder {
 
       if (getOrderee().getMoveOrder() == null || getOrderee().getMoveOrder().getParentOrder() != this) {
          final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN, getOrderee());
-         closeInOrder.setDistance(MAX_DISTANCE * 0.5f);
+         closeInOrder.setDistance(conf.getIntProperty("order.attack.maxDistance") * 0.5f);
          closeInOrder.setTarget(target);
          getOrderee().add(closeInOrder);
       }
@@ -45,7 +45,7 @@ public class Attack extends ActionOrder {
       // Is the target ship close enough ?
       tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
       final float distance = tmpVect.length();
-      if (distance > MAX_DISTANCE) {
+      if (distance > conf.getIntProperty("order.attack.maxDistance")) {
          return;
       }
 

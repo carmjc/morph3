@@ -2,15 +2,15 @@ package net.carmgate.morph.orders.ship.move;
 
 import javax.inject.Inject;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.orders.Order;
-import net.carmgate.morph.orders.OrderFactory;
 
 public abstract class MoveOrder extends Order implements ForceSource {
 
-   @Inject private OrderFactory orderFactory;
+   @Inject private Conf conf;
 
    private Order parentOrder;
 
@@ -29,7 +29,7 @@ public abstract class MoveOrder extends Order implements ForceSource {
       propulsors.setActive(false);
       if (!(this instanceof NoMoveOrder)) {
          float forceMag = getForce().length();
-         propulsors.setEnergyDt(-forceMag / 40);
+         propulsors.setEnergyDt(-forceMag * conf.getFloatProperty("component.propulsors.energyConsumptionFactor"));
          if (forceMag > 0) {
             propulsors.setActive(true);
          }

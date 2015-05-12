@@ -2,8 +2,10 @@ package net.carmgate.morph.orders.ship.action;
 
 import javax.inject.Inject;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.entities.ship.PhysicalEntityToBeRemoved;
 import net.carmgate.morph.events.mgt.MEvent;
+import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.Asteroid;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
@@ -19,11 +21,12 @@ public class MineAsteroid extends ActionOrder {
    @Inject private Logger LOGGER;
    @Inject private OrderFactory orderFactory;
    @Inject private MEvent<PhysicalEntityToBeRemoved> removalEventMgr;
+   @Inject private Conf conf;
+   @Inject private World world;
 
-   private static final float MAX_DISTANCE = 600;
-   private static final float MASS_MINED = 0.001f;
    private Asteroid asteroid;
    private final Vector2f tmpVect = new Vector2f();
+   private long lastUpdateTime = 0;
 
    @Override
    protected void evaluate() {
@@ -31,7 +34,7 @@ public class MineAsteroid extends ActionOrder {
 
       if (getOrderee().getMoveOrder() == null || getOrderee().getMoveOrder().getParentOrder() != this) {
          final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN, getOrderee());
-         closeInOrder.setDistance(MAX_DISTANCE * 0.9f);
+         closeInOrder.setDistance(conf.getIntProperty("order.mineAsteroid.maxDistance") * 0.9f);
          closeInOrder.setTarget(asteroid);
          closeInOrder.setParentOrder(this);
          getOrderee().add(closeInOrder);
@@ -41,14 +44,14 @@ public class MineAsteroid extends ActionOrder {
       tmpVect.copy(asteroid.getPos()).sub(getOrderee().getPos());
       final float distance = tmpVect.length();
       Component miningLaser = getOrderee().getComponents().get(ComponentType.MINING_LASERS);
-      if (distance > MAX_DISTANCE) {
+      if (distance > conf.getIntProperty("order.mineAsteroid.maxDistance")) {
          miningLaser.setEnergyDt(0);
          miningLaser.setResourcesDt(0);
          return;
       }
 
       LOGGER.debug("mining ?");
-      if (MASS_MINED > asteroid.getMass()) {
+      if (conf.getFloatProperty("order.mineAsteroid.massMined") > asteroid.getMass()) {
          getOrderee().setMass(getOrderee().getMass() + asteroid.getMass());
          asteroid.setMass(0);
          PhysicalEntityToBeRemoved removalEvent = new PhysicalEntityToBeRemoved();
@@ -60,16 +63,13 @@ public class MineAsteroid extends ActionOrder {
          miningLaser.setTarget(null);
          miningLaser.setActive(false);
       } else {
-         getOrderee().setMass(getOrderee().getMass() + MASS_MINED);
-         asteroid.setMass(asteroid.getMass() - MASS_MINED);
+         asteroid.setMass(asteroid.getMass() - conf.getFloatProperty("order.mineAsteroid.massMined") * (world.getTime() - lastUpdateTime) / 1000);
+         lastUpdateTime = world.getTime();
 
          miningLaser.setTarget(asteroid);
          miningLaser.setActive(true);
          LOGGER.debug("      Yes");
       }
-
-      miningLaser.setEnergyDt(-0.5f);
-      miningLaser.setResourcesDt(1f);
    }
 
    public Asteroid getAsteroid() {

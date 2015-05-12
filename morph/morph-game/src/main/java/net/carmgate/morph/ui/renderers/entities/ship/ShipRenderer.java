@@ -10,6 +10,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
@@ -31,6 +32,7 @@ public class ShipRenderer implements Renderer<Ship> {
 
    @Inject private UIContext uiContext;
    @Inject private World world;
+   @Inject private Conf conf;
 
    private static TrueTypeFont font;
 
@@ -45,8 +47,8 @@ public class ShipRenderer implements Renderer<Ship> {
          //      Font awtFont = new Font("Verdana", Font.PLAIN, 11);
          Font awtFont;
          try {
-            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream("fonts/Rock_Elegance.otf"));
-            awtFont = awtFont.deriveFont(20f); // set font size
+            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ship.renderer.font")));
+            awtFont = awtFont.deriveFont(conf.getFloatProperty("ship.renderer.font.size")); // set font size
             font = new TrueTypeFont(awtFont, true);
          } catch (FontFormatException | IOException e) {
             // TODO Auto-generated catch block
