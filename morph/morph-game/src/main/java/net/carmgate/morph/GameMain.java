@@ -77,6 +77,7 @@ public class GameMain {
    @Inject private PhysicalEntityFactory physicalEntityFactory;
    @Inject private OrderFactory orderFactory;
    @Inject private ComponentFactory componentFactory;
+   @Inject private Messages messages;
 
    // Computation attributes
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
@@ -192,7 +193,7 @@ public class GameMain {
          renderAnimation();
          renderComponentsAnimation();
          renderPhysical();
-         renderGUI();
+         renderGui();
          updateWorld();
          addWaves();
 
@@ -261,7 +262,20 @@ public class GameMain {
       }
    }
 
-   private void renderGUI() {
+   private void renderGui() {
+      renderGuiForSelectedShip();
+
+      float zoomFactor = uiContext.getViewport().getZoomFactor();
+      Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+      float x = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
+      float y = uiContext.getWindow().getHeight() / 2 - 2 - focalPoint.y * (1 - zoomFactor);
+      int line = 0;
+      if (world.isTimeFrozen()) {
+         RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false);
+      }
+   }
+
+   private void renderGuiForSelectedShip() {
       Ship ship = uiContext.getSelectedShip();
       float zoomFactor = uiContext.getViewport().getZoomFactor();
       Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
@@ -269,24 +283,24 @@ public class GameMain {
       float y = -uiContext.getWindow().getHeight() / 2 + 2 - focalPoint.y * (1 - zoomFactor);
       int line = 1;
       if (ship != null) {
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Distance: {0,number,#.###}", ship.debug1.length()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Speed: {0,number,#.###}", ship.getSpeed().length()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Accel: {0,number,#.###}", ship.getAccel().length()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Health: {0,number,#.#}%", ship.getIntegrity() * 100), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Energy: {0,number,#.###}", ship.getEnergy()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Energy/dt: {0,number,#.###}", ship.getEnergyDt()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Resources: {0,number,#.###}", ship.getResources()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format("Resources/dt: {0,number,#.###}", ship.getResourcesDt()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energy"), ship.getEnergy()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energyDt"), ship.getEnergyDt()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resources"), ship.getResources()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resourcesDt"), ship.getResourcesDt()), line++, Color.white, false);
          if (ship.getMoveOrder() != null) {
-            RenderUtils.renderText(font, x, y, MessageFormat.format("Move order: {0}", ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false);
+            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false);
          }
          if (ship.getActionOrder() != null) {
-            RenderUtils.renderText(font, x, y, MessageFormat.format("Action order: {0}", ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false);
+            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false);
          }
          if (!ship.getBgOrders().isEmpty()) {
-            RenderUtils.renderText(font, x, y, "Background orders", line++, Color.white, false);
+            RenderUtils.renderText(font, x, y, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false);
             for (Order bgOrder : ship.getBgOrders()) {
-               RenderUtils.renderText(font, x, y, MessageFormat.format("{0}", bgOrder.getClass().getSimpleName()), line++, Color.white, false);
+               RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false);
             }
          }
          if (uiContext.getRenderMode() == RenderMode.DEBUG) {
@@ -299,7 +313,7 @@ public class GameMain {
                   color = Color.gray;
                }
                RenderUtils.renderText(font, x, y,
-                     MessageFormat.format(c.getClass().getSimpleName() + ": {0,number,#.###}/{1,number,#.###}", c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
+                     MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
             }
          }
       }
@@ -384,22 +398,22 @@ public class GameMain {
       GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
       GL11.glScalef(zoomFactor, zoomFactor, 1);
 
-      final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
-      if (shipRenderer != null) {
-         for (final Ship ship : world.getShips()) {
-            final Vector2f pos = ship.getPos();
-            GL11.glTranslatef(pos.x, pos.y, 0);
-            shipRenderer.render(ship);
-            GL11.glTranslatef(-pos.x, -pos.y, 0);
-         }
-      }
-
       for (PhysicalEntity entity : world.getPhysicalEntities()) {
          if (!(entity instanceof Ship)) {
             final Vector2f pos = entity.getPos();
             GL11.glTranslatef(pos.x, pos.y, 0);
             Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
             renderer.render(entity);
+            GL11.glTranslatef(-pos.x, -pos.y, 0);
+         }
+      }
+
+      final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
+      if (shipRenderer != null) {
+         for (final Ship ship : world.getShips()) {
+            final Vector2f pos = ship.getPos();
+            GL11.glTranslatef(pos.x, pos.y, 0);
+            shipRenderer.render(ship);
             GL11.glTranslatef(-pos.x, -pos.y, 0);
          }
       }

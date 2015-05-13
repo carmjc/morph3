@@ -50,6 +50,7 @@ public class Ship extends PhysicalEntity {
    private final List<Order> bgOrders = new ArrayList<>();
    private float durability;
    private final Map<ComponentType, Component> components = new HashMap<>();
+   private final Map<ComponentType, Float> componentsComposition = new HashMap<>();
 
    // internal economics
    private float energy;
