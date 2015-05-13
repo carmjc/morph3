@@ -113,6 +113,7 @@ public class ShipRenderer implements Renderer<Ship> {
 
       GL11.glScalef(massScale, massScale, 0);
       GL11.glColor4f(1f, 1f, 1f, 0.6f);
+      GL11.glRotatef(ship.getRotate(), 0, 0, 1);
 
       // RenderUtils.renderCircle(width / 2f - 2 / zoom / massScale,
       // width / 2f + 1 / zoom / massScale,
@@ -158,6 +159,7 @@ public class ShipRenderer implements Renderer<Ship> {
       GL11.glVertex2f(-width / 2, width / 2);
       GL11.glEnd();
 
+      GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
       GL11.glScalef(1f / massScale, 1f / massScale, 0);
 
       if (uiContext.getRenderMode() == RenderMode.DEBUG) {
@@ -173,6 +175,7 @@ public class ShipRenderer implements Renderer<Ship> {
          RenderUtils.renderLine(Vector2f.NULL, ship.debug3, 2, 2, new float[] { 1f, 1f, 1f, 1f }, new float[] { 0f, 0f, 0f, 0f });
          RenderUtils.renderLine(Vector2f.NULL, ship.debug4, 2, 2, new float[] { 1f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
       }
+
    }
 
    /**

@@ -1,9 +1,11 @@
 package net.carmgate.morph.model.geometry;
 
+
 @SuppressWarnings("serial")
 public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<Vector2f> {
 
    public static final Vector2f NULL = new Vector2f();
+   public static final Vector2f J = new Vector2f(0, -1);
 
    public Vector2f() {
       super(0, 0);
@@ -61,5 +63,14 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
    @Override
    public String toString() {
       return "[" + x + "," + y + "]";
+   }
+
+   public float angleWith(Vector2f v) {
+      float angle = org.lwjgl.util.vector.Vector2f.angle(this, v);
+      float crossMag = x * v.y - v.x * y;
+      if (crossMag > 0) {
+         angle = -angle;
+      }
+      return angle;
    }
 }

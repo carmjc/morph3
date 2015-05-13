@@ -18,7 +18,7 @@
    xml:space="preserve"
    inkscape:version="0.91 r13725"
    sodipodi:docname="ship1.svg"
-   inkscape:export-filename="D:\Users\jcouilla\git\morph3\morph\morph-game\src\main\resources\img\components\ship1-lasers.png"
+   inkscape:export-filename="D:\Users\jcouilla\git\morph3\morph\morph-game\src\main\resources\img\ship1-bg.png"
    inkscape:export-xdpi="460.79999"
    inkscape:export-ydpi="460.79999"><metadata
      id="metadata17"><rdf:RDF><cc:Work
@@ -104,7 +104,7 @@
      inkscape:groupmode="layer"
      id="layer6"
      inkscape:label="shipBg"
-     style="display:none"><path
+     style="display:inline"><path
        style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.35000002px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 49.708686,8.3050847 39.269067,49.777542 18.38983,68.082627 l 0,9.438559 27.17161,4.862288 0,3.432204 2.002118,0.143008 0.286018,3.575213 7.150423,3.003178 7.579449,-3.432204 4.290255,-8.723516 24.740465,-2.860171 0.286018,-7.722458 L 87.605931,64.078389 69.87288,48.633474 60.720338,8.4480929 Z"
        id="path4282"
@@ -114,7 +114,7 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="ship"
-     style="display:inline"><g
+     style="display:none"><g
        id="g3"
        style="stroke:none;stroke-opacity:1"
        transform="translate(5.1483056,0.85805088)"><path
@@ -122,7 +122,7 @@
          id="path5"
          style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-opacity:1"
          inkscape:connector-curvature="0" /><polygon
-         points="50,15 45,17.75 43.25,22.75 50,20 56.75,22.75 55,17.75 "
+         points="43.25,22.75 50,20 56.75,22.75 55,17.75 50,15 45,17.75 "
          id="polygon7"
          style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-opacity:1" /></g></g><g
      inkscape:groupmode="layer"

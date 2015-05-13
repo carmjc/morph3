@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
+import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.orders.Order;
 
@@ -32,6 +33,13 @@ public abstract class MoveOrder extends Order implements ForceSource {
          propulsors.setEnergyDt(-forceMag * conf.getFloatProperty("component.propulsors.energyConsumptionFactor"));
          if (forceMag > 0) {
             propulsors.setActive(true);
+         }
+
+         // set orientation
+         // TODO This is a very basic orientating method
+         if (getForce() != null && getForce().length() != 0) {
+            float angle = (float) (getForce().angleWith(Vector2f.J) / Math.PI * 180);
+            getOrderee().setRotate(angle);
          }
       }
    }
