@@ -21,8 +21,8 @@ public class Window {
 
 	@PostConstruct
 	void init() {
-		width = conf.getIntProperty("window.initialWidth");
-		height = conf.getIntProperty("window.initialHeight");
+		width = conf.getIntProperty("window.initialWidth"); //$NON-NLS-1$
+		height = conf.getIntProperty("window.initialHeight"); //$NON-NLS-1$
 	}
 
 	public void setHeight(int height) {

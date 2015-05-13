@@ -33,7 +33,7 @@ public class CloseIn extends MoveOrder {
       tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
       float actualDistance = tmpVect.length() - getDistance();
 
-      float epsilon = conf.getFloatProperty("order.moveOrder.epsilon");
+      float epsilon = conf.getFloatProperty("order.moveOrder.epsilon"); //$NON-NLS-1$
       if (actualDistance < epsilon && getOrderee().getSpeed().lengthSquared() < epsilon) {
          if (!getOrderee().isForceStop()) {
             getOrderee().setForceStop(true);

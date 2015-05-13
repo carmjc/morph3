@@ -31,7 +31,7 @@ public class ViewPort {
 
    @PostConstruct
    private void init() {
-      zoomFactor = conf.getFloatProperty("ui.viewPort.zoomFactor");
+      zoomFactor = conf.getFloatProperty("ui.viewPort.zoomFactor"); //$NON-NLS-1$
    }
 
    // private Entity lockedOnEntity;

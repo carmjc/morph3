@@ -129,7 +129,7 @@ public class World {
 
       new Thread((Runnable) () -> {
          final ScriptEngineManager manager = new ScriptEngineManager();
-         final ScriptEngine engine = manager.getEngineByName("nashorn");
+         final ScriptEngine engine = manager.getEngineByName("nashorn"); //$NON-NLS-1$
          try {
             InputStream in = getClass().getResourceAsStream("/model-init.js");
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -140,9 +140,9 @@ public class World {
             engine.eval(reader);
             gameLoadedEvent.fire(new GameLoaded());
          } catch (final Exception e) {
-            LOGGER.error("Cannot open init file", e);
+            LOGGER.error("Cannot open init file", e); //$NON-NLS-1$
          }
-      }, "model init").start();
+      }, "model init").start(); //$NON-NLS-1$
    }
 
    protected void onAnimationStart(@MObserves AnimationStart animationStart) {
@@ -150,7 +150,7 @@ public class World {
    }
 
    protected void onShipDeath(@MObserves ShipDeath shipDeath) {
-      LOGGER.debug("Ship death: " + shipDeath.getShip());
+      LOGGER.debug("Ship death: " + shipDeath.getShip()); //$NON-NLS-1$
       remove(shipDeath.getShip());
 
       // final Ship ship = entityFactory.newInstance(PhysicalEntityType.SHIP);
@@ -163,7 +163,7 @@ public class World {
    }
 
    protected void onEntityRemovel(@MObserves PhysicalEntityToBeRemoved event) {
-      LOGGER.debug("Removing " + event.getEntity().getClass().getName());
+      LOGGER.debug("Removing " + event.getEntity().getClass().getName()); //$NON-NLS-1$
       remove(event.getEntity());
    }
 

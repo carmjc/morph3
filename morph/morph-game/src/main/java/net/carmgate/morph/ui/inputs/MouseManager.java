@@ -25,14 +25,14 @@ public class MouseManager {
 
    public void addMouseListener(MouseListener mouseListener) {
       mouseListeners.add(mouseListener);
-      LOGGER.debug("Added new mouse listener: " + mouseListener.getClass().getName());
+      LOGGER.debug("Added new mouse listener: " + mouseListener.getClass().getName()); //$NON-NLS-1$
    }
 
    public void handleMouseEvent() {
       if (Mouse.next()) {
          final int dWheel = Mouse.getDWheel();
          if (dWheel != 0) {
-            LOGGER.debug("Logged a mouse wheel: " + dWheel);
+            LOGGER.debug("Logged a mouse wheel: " + dWheel); //$NON-NLS-1$
             final UIEvent event = new UIEvent(EventType.MOUSE_WHEEL, dWheel, new int[] { Mouse.getEventX(), Mouse.getEventY() });
             inputHistory.addEvent(event);
          }

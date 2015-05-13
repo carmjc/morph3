@@ -30,7 +30,7 @@ public abstract class MoveOrder extends Order implements ForceSource {
       propulsors.setActive(false);
       if (!(this instanceof NoMoveOrder)) {
          float forceMag = getForce().length();
-         propulsors.setEnergyDt(-forceMag * conf.getFloatProperty("component.propulsors.energyConsumptionFactor"));
+         propulsors.setEnergyDt(-forceMag * conf.getFloatProperty("component.propulsors.energyConsumptionFactor")); //$NON-NLS-1$
          if (forceMag > 0) {
             propulsors.setActive(true);
          }

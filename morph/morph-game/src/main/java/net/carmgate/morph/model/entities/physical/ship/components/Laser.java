@@ -24,8 +24,8 @@ public class Laser extends Component {
       laserAnim.setTargetHolder(getTargetHolder());
       setAnimation(laserAnim);
 
-      setEnergyDt(conf.getFloatProperty("component.laser.energyDt"));
-      setResourcesDt(conf.getFloatProperty("component.laser.resourcesDt"));
+      setEnergyDt(conf.getFloatProperty("component.laser.energyDt")); //$NON-NLS-1$
+      setResourcesDt(conf.getFloatProperty("component.laser.resourcesDt")); //$NON-NLS-1$
    }
 
 }

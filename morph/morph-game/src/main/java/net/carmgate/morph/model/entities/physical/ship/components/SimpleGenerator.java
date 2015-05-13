@@ -13,12 +13,12 @@ public class SimpleGenerator extends Component {
 
    @Override
    public float getEnergyDt() {
-      return conf.getFloatProperty("component.generators.energyDt");
+      return conf.getFloatProperty("component.generators.energyDt"); //$NON-NLS-1$
    }
 
    @Override
    public float getResourcesDt() {
-      return conf.getFloatProperty("component.generators.resourcesDt");
+      return conf.getFloatProperty("component.generators.resourcesDt"); //$NON-NLS-1$
    }
 
 }

@@ -34,17 +34,17 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
    public void init() {
       // load texture from PNG file if needed
       if (asteroids1Texture == null) {
-         try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("asteroid.renderer.texture")))) {
+         try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("asteroid.renderer.texture")))) { //$NON-NLS-1$
             asteroids1Texture = TextureLoader.getTexture("PNG", fileInputStream);
          } catch (IOException e) {
-            LOGGER.error("Exception raised while loading texture", e);
+            LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
          }
       }
    }
 
    @Override
    public void render(Asteroid asteroid) {
-      float massScale = asteroid.getMass() * conf.getFloatProperty("asteroid.renderer.massToSizeFactor");
+      float massScale = asteroid.getMass() * conf.getFloatProperty("asteroid.renderer.massToSizeFactor"); //$NON-NLS-1$
       float width = 128f;
 
       int i = 2; // TODO variabilize this

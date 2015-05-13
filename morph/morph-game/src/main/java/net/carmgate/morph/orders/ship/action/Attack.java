@@ -37,7 +37,7 @@ public class Attack extends ActionOrder {
 
       if (getOrderee().getMoveOrder() == null || getOrderee().getMoveOrder().getParentOrder() != this) {
          final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN, getOrderee());
-         closeInOrder.setDistance(conf.getIntProperty("order.attack.maxDistance") * 0.5f);
+         closeInOrder.setDistance(conf.getIntProperty("order.attack.maxDistance") * 0.5f); //$NON-NLS-1$
          closeInOrder.setTarget(target);
          getOrderee().add(closeInOrder);
       }
@@ -45,7 +45,7 @@ public class Attack extends ActionOrder {
       // Is the target ship close enough ?
       tmpVect.copy(target.getPos()).sub(getOrderee().getPos());
       final float distance = tmpVect.length();
-      if (distance > conf.getIntProperty("order.attack.maxDistance")) {
+      if (distance > conf.getIntProperty("order.attack.maxDistance")) { //$NON-NLS-1$
          return;
       }
 

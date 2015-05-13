@@ -58,48 +58,48 @@ public class ShipRenderer implements Renderer<Ship> {
       //      Font awtFont = new Font("Verdana", Font.PLAIN, 11);
       Font awtFont;
       try {
-         awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ship.renderer.font")));
-         awtFont = awtFont.deriveFont(conf.getFloatProperty("ship.renderer.font.size")); // set font size
+         awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ship.renderer.font"))); //$NON-NLS-1$
+         awtFont = awtFont.deriveFont(conf.getFloatProperty("ship.renderer.font.size")); // set font size //$NON-NLS-1$
          font = new TrueTypeFont(awtFont, true);
       } catch (FontFormatException | IOException e) {
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture.bg")))) {
+      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture.bg")))) { //$NON-NLS-1$
          shipBgTexture = TextureLoader.getTexture("PNG", fileInputStream);
       } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e);
+         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture")))) {
+      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture")))) { //$NON-NLS-1$
          shipTexture = TextureLoader.getTexture("PNG", fileInputStream);
       } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e);
+         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.laser.renderer.texture")))) {
+      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.laser.renderer.texture")))) { //$NON-NLS-1$
          cmpTextures.put(ComponentType.LASERS, TextureLoader.getTexture("PNG", fileInputStream));
       } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e);
+         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.miningLaser.renderer.texture")))) {
+      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.miningLaser.renderer.texture")))) { //$NON-NLS-1$
          cmpTextures.put(ComponentType.MINING_LASERS, TextureLoader.getTexture("PNG", fileInputStream));
       } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e);
+         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture")))) {
+      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture")))) { //$NON-NLS-1$
          cmpTextures.put(ComponentType.REPAIRER, TextureLoader.getTexture("PNG", fileInputStream));
       } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e);
+         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.propulsors.renderer.texture")))) {
+      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.propulsors.renderer.texture")))) { //$NON-NLS-1$
          cmpTextures.put(ComponentType.PROPULSORS, TextureLoader.getTexture("PNG", fileInputStream));
       } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e);
+         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
    }
 

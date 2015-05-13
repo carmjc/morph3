@@ -34,7 +34,7 @@ public class MineAsteroid extends ActionOrder {
 
       if (getOrderee().getMoveOrder() == null || getOrderee().getMoveOrder().getParentOrder() != this) {
          final CloseIn closeInOrder = orderFactory.newInstance(OrderType.CLOSE_IN, getOrderee());
-         closeInOrder.setDistance(conf.getIntProperty("order.mineAsteroid.maxDistance") * 0.9f);
+         closeInOrder.setDistance(conf.getIntProperty("order.mineAsteroid.maxDistance") * 0.9f); //$NON-NLS-1$
          closeInOrder.setTarget(asteroid);
          closeInOrder.setParentOrder(this);
          getOrderee().add(closeInOrder);
@@ -44,14 +44,14 @@ public class MineAsteroid extends ActionOrder {
       tmpVect.copy(asteroid.getPos()).sub(getOrderee().getPos());
       final float distance = tmpVect.length();
       Component miningLaser = getOrderee().getComponents().get(ComponentType.MINING_LASERS);
-      if (distance > conf.getIntProperty("order.mineAsteroid.maxDistance")) {
+      if (distance > conf.getIntProperty("order.mineAsteroid.maxDistance")) { //$NON-NLS-1$
          miningLaser.setEnergyDt(0);
          miningLaser.setResourcesDt(0);
          return;
       }
 
-      LOGGER.debug("mining ?");
-      if (conf.getFloatProperty("order.mineAsteroid.massMined") > asteroid.getMass()) {
+      LOGGER.debug("mining ?"); //$NON-NLS-1$
+      if (conf.getFloatProperty("order.mineAsteroid.massMined") > asteroid.getMass()) { //$NON-NLS-1$
          getOrderee().setMass(getOrderee().getMass() + asteroid.getMass());
          asteroid.setMass(0);
          PhysicalEntityToBeRemoved removalEvent = new PhysicalEntityToBeRemoved();
@@ -63,12 +63,12 @@ public class MineAsteroid extends ActionOrder {
          miningLaser.setTarget(null);
          miningLaser.setActive(false);
       } else {
-         asteroid.setMass(asteroid.getMass() - conf.getFloatProperty("order.mineAsteroid.massMined") * (world.getTime() - lastUpdateTime) / 1000);
+         asteroid.setMass(asteroid.getMass() - conf.getFloatProperty("order.mineAsteroid.massMined") * (world.getTime() - lastUpdateTime) / 1000); //$NON-NLS-1$
          lastUpdateTime = world.getTime();
 
          miningLaser.setTarget(asteroid);
          miningLaser.setActive(true);
-         LOGGER.debug("      Yes");
+         LOGGER.debug("      Yes"); //$NON-NLS-1$
       }
    }
 

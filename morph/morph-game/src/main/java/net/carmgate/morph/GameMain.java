@@ -101,7 +101,7 @@ public class GameMain {
       try {
          Display.setDisplayMode(new DisplayMode(width, height));
          Display.create();
-         Display.setTitle(conf.getProperty("ui.window.title"));
+         Display.setTitle(conf.getProperty("ui.window.title")); //$NON-NLS-1$
          // Display.setVSyncEnabled(true);
          Display.setResizable(true);
       } catch (final LWJGLException e) {
@@ -109,7 +109,7 @@ public class GameMain {
          System.exit(0);
       }
 
-      LOGGER.debug("init view: " + width + "x" + height);
+      LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
 
       initView();
    }
@@ -122,7 +122,7 @@ public class GameMain {
 
       final int width = Display.getWidth();
       final int height = Display.getHeight();
-      LOGGER.debug("init view: " + width + "x" + height);
+      LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
 
       // set clear color - Wont be needed once we have a background
       GL11.glClearColor(0.2f, 0.2f, 0.2f, 0f);
@@ -148,8 +148,8 @@ public class GameMain {
          // Font awtFont = new Font("Verdana", Font.PLAIN, 11);
          Font awtFont;
          try {
-            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ui.font")));
-            awtFont = awtFont.deriveFont(conf.getFloatProperty("ui.font.size")); // set font size
+            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ui.font"))); //$NON-NLS-1$
+            awtFont = awtFont.deriveFont(conf.getFloatProperty("ui.font.size")); // set font size //$NON-NLS-1$
             font = new TrueTypeFont(awtFont, true);
          } catch (FontFormatException | IOException e) {
             // TODO Auto-generated catch block
@@ -168,16 +168,16 @@ public class GameMain {
             try {
                Thread.sleep(100);
             } catch (Exception e) {
-               LOGGER.error("Thread.sleep interrupted", e);
+               LOGGER.error("Thread.sleep interrupted", e); //$NON-NLS-1$
             }
          }
          loop();
-      }, "Game engine").start();
+      }, "Game engine").start(); //$NON-NLS-1$
    }
 
    public void loop() {
       // init OpenGL context
-      initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight"));
+      initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight")); //$NON-NLS-1$ //$NON-NLS-2$
 
       for (final Renderer<?> renderer : renderers.values()) {
          renderer.init();
@@ -241,10 +241,10 @@ public class GameMain {
    private void addWaves() {
       if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
          for (int i = 0; i < nextWaveId; i++) {
-            LOGGER.debug("Adding wave " + nextWaveId);
+            LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
             Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
             ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
-            ship.setPlayer(world.getPlayers().get("Other"));
+            ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
             Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
             attack.setTarget(world.getShips().get(0));
             ship.add(attack);
@@ -271,7 +271,7 @@ public class GameMain {
       float y = uiContext.getWindow().getHeight() / 2 - 2 - focalPoint.y * (1 - zoomFactor);
       int line = 0;
       if (world.isTimeFrozen()) {
-         RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false);
+         RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
       }
    }
 
@@ -283,24 +283,24 @@ public class GameMain {
       float y = -uiContext.getWindow().getHeight() / 2 + 2 - focalPoint.y * (1 - zoomFactor);
       int line = 1;
       if (ship != null) {
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energy"), ship.getEnergy()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energyDt"), ship.getEnergyDt()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resources"), ship.getResources()), line++, Color.white, false);
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resourcesDt"), ship.getResourcesDt()), line++, Color.white, false);
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energy"), ship.getEnergy()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energyDt"), ship.getEnergyDt()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resources"), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resourcesDt"), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
          if (ship.getMoveOrder() != null) {
-            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false);
+            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
          }
          if (ship.getActionOrder() != null) {
-            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false);
+            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
          }
          if (!ship.getBgOrders().isEmpty()) {
-            RenderUtils.renderText(font, x, y, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false);
+            RenderUtils.renderText(font, x, y, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false); //$NON-NLS-1$
             for (Order bgOrder : ship.getBgOrders()) {
-               RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false);
+               RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
             }
          }
          if (uiContext.getRenderMode() == RenderMode.DEBUG) {
@@ -313,7 +313,7 @@ public class GameMain {
                   color = Color.gray;
                }
                RenderUtils.renderText(font, x, y,
-                     MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false);
+                     MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false); //$NON-NLS-1$
             }
          }
       }
@@ -330,17 +330,17 @@ public class GameMain {
                if (paramType.getRawType().equals(Renderer.class)) {
                   final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
                   renderers.put(type, renderer);
-                  LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName());
+                  LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
                }
                if (paramType.getRawType().equals(SelectRenderer.class)) {
                   final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
                   selectRenderers.put(type, renderer);
-                  LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName());
+                  LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
                }
             }
          }
       } catch (final Exception e) {
-         LOGGER.error("Error", e);
+         LOGGER.error("Error", e); //$NON-NLS-1$
       }
    }
 
@@ -469,7 +469,7 @@ public class GameMain {
             order.eval();
          }
          if (order != null && order.isDone()) {
-            LOGGER.debug("order removed: " + order);
+            LOGGER.debug("order removed: " + order); //$NON-NLS-1$
             ship.removeActionOrder();
          }
 
@@ -480,7 +480,7 @@ public class GameMain {
                bgOrder.eval();
             }
             if (bgOrder != null && bgOrder.isDone()) {
-               LOGGER.debug("order removed: " + bgOrder);
+               LOGGER.debug("order removed: " + bgOrder); //$NON-NLS-1$
                bgOrdersToRemove.add(bgOrder);
             }
          }

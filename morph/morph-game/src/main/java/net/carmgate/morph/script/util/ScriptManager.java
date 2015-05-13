@@ -28,7 +28,7 @@ public class ScriptManager {
 
    public void callScript(String script, Player player, Map<String, Object> inputs, Map<String, Object> outputs) {
       final ScriptEngineManager manager = new ScriptEngineManager();
-      final ScriptEngine engine = manager.getEngineByName("nashorn");
+      final ScriptEngine engine = manager.getEngineByName("nashorn"); //$NON-NLS-1$
       try {
          URL scriptResource = getClass().getResource("/shipScriptsFor" + player.getName() + "/" + script + ".js");
          if (scriptResource == null) {
@@ -51,7 +51,7 @@ public class ScriptManager {
             }
          }
       } catch (final Exception e) {
-         LOGGER.error("Cannot open script file: " + script, e);
+         LOGGER.error("Cannot open script file: " + script, e); //$NON-NLS-1$
       }
    }
 }

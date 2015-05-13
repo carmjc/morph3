@@ -25,10 +25,10 @@ public class MiningLaser extends Component {
       laserAnim.setSourceHolder(getShipHolder());
       laserAnim.setTarget(getTargetHolder());
       setAnimation(laserAnim);
-      LOGGER.debug("laserAnimation added");
+      LOGGER.debug("laserAnimation added"); //$NON-NLS-1$
 
-      setEnergyDt(conf.getFloatProperty("component.miningLaser.energyDt"));
-      setResourcesDt(conf.getFloatProperty("component.miningLaser.resourcesDt"));
+      setEnergyDt(conf.getFloatProperty("component.miningLaser.energyDt")); //$NON-NLS-1$
+      setResourcesDt(conf.getFloatProperty("component.miningLaser.resourcesDt")); //$NON-NLS-1$
    }
 
 }

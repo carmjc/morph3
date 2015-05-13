@@ -12,7 +12,7 @@ public class Messages {
 
    @PostConstruct
    private void init() {
-      messageBundle = ResourceBundle.getBundle("i18n.messages");
+      messageBundle = ResourceBundle.getBundle("i18n.messages"); //$NON-NLS-1$
    }
 
    public final String getString(String key) {

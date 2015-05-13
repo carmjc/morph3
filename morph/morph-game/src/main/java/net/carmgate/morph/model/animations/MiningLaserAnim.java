@@ -20,9 +20,9 @@ public class MiningLaserAnim extends Animation {
 
    @PostConstruct
    public void init() {
-      setAnimationDuration(conf.getIntProperty("miningLaser.anim.duration"));
+      setAnimationDuration(conf.getIntProperty("miningLaser.anim.duration")); //$NON-NLS-1$
       setAnimationEnd(world.getTime() + getAnimationDuration());
-      setAnimationCoolDown(conf.getIntProperty("miningLaser.anim.cooldown"));
+      setAnimationCoolDown(conf.getIntProperty("miningLaser.anim.cooldown")); //$NON-NLS-1$
    }
 
    public Ship getSource() {

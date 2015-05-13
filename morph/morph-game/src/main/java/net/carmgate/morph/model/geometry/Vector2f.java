@@ -62,7 +62,7 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 
    @Override
    public String toString() {
-      return "[" + x + "," + y + "]";
+      return "[" + x + "," + y + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
    }
 
    public float angleWith(Vector2f v) {

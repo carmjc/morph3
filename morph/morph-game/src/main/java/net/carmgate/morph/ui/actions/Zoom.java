@@ -32,8 +32,8 @@ public class Zoom implements MouseListener {
    @SuppressWarnings("unused")
    private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
       mouseManager.addMouseListener(this);
-      ZOOM_VARIATION = conf.getFloatProperty("zoom.variationFactor");
-      ZOOM_MAX = conf.getFloatProperty("zoom.max");
+      ZOOM_VARIATION = conf.getFloatProperty("zoom.variationFactor"); //$NON-NLS-1$
+      ZOOM_MAX = conf.getFloatProperty("zoom.max"); //$NON-NLS-1$
    }
 
    @Override

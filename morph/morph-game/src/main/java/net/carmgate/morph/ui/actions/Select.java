@@ -45,7 +45,7 @@ public class Select implements MouseListener {
    public void onMouseEvent() {
       if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
             && inputHistory.getLastMouseEvent(0).getButton() == 0 && inputHistory.getLastMouseEvent(0).getEventType() == EventType.MOUSE_BUTTON_UP) {
-         LOGGER.debug("click detected");
+         LOGGER.debug("click detected"); //$NON-NLS-1$
          select(Mouse.getX() - uiContext.getWindow().getWidth() / 2, Mouse.getY() - uiContext.getWindow().getHeight() / 2);
          inputHistory.consumeEvents(inputHistory.getLastMouseEvent(0), inputHistory.getLastMouseEvent(1));
       }
@@ -88,7 +88,7 @@ public class Select implements MouseListener {
     */
    private void select(int x, int y) {
 
-      LOGGER.debug("Picking at " + x + " " + y);
+      LOGGER.debug("Picking at " + x + " " + y); //$NON-NLS-1$ //$NON-NLS-2$
 
       // get viewport
       IntBuffer viewport = BufferUtils.createIntBuffer(16);
@@ -120,12 +120,12 @@ public class Select implements MouseListener {
 
       // For debugging purpose only ...
       // This allows to see the select buffer
-      String result = "[";
+      String result = "["; //$NON-NLS-1$
       for (int i = 0; i < selectBuf.capacity(); i++)
       {
-         result += selectBuf.get(i) + ", ";
+         result += selectBuf.get(i) + ", "; //$NON-NLS-1$
       }
-      LOGGER.debug("hits: " + hits + ", result : " + result + "]");
+      LOGGER.debug("hits: " + hits + ", result : " + result + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
       // Get the model elements picked
       // The current index we are looking for in the select buffer

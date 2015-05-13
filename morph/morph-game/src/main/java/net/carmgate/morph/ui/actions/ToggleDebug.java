@@ -26,7 +26,7 @@ public class ToggleDebug implements KeyboardListener {
 
    @Override
    public void onKeyboardEvent() {
-      if (inputHistory.getLastKeyboardEvent().getButton() == conf.getCharProperty("action.toggleDebug.key")) {
+      if (inputHistory.getLastKeyboardEvent().getButton() == conf.getCharProperty("action.toggleDebug.key")) { //$NON-NLS-1$
          uiContext.setRenderMode(uiContext.getRenderMode() == RenderMode.DEBUG ? RenderMode.NORMAL : RenderMode.DEBUG);
          inputHistory.consumeEvents(inputHistory.getLastKeyboardEvent());
       }

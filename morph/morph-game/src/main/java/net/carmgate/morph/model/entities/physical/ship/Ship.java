@@ -84,7 +84,7 @@ public class Ship extends PhysicalEntity {
             }
          }
          moveOrder = (MoveOrder) order;
-         LOGGER.debug("Move order added: " + order);
+         LOGGER.debug("Move order added: " + order); //$NON-NLS-1$
       } else if (order instanceof ActionOrder) {
          if (actionOrder != null) {
             actionOrder.onRemoveOrder();
@@ -93,7 +93,7 @@ public class Ship extends PhysicalEntity {
             }
          }
          actionOrder = order;
-         LOGGER.debug("Action order added: " + order);
+         LOGGER.debug("Action order added: " + order); //$NON-NLS-1$
       } else {
          if (order.getClass().isAnnotationPresent(Unique.class)) {
             for (Order uniqueOrder : bgOrders) {
@@ -103,7 +103,7 @@ public class Ship extends PhysicalEntity {
             }
          }
          bgOrders.add(order);
-         LOGGER.debug("Background order added: " + order);
+         LOGGER.debug("Background order added: " + order); //$NON-NLS-1$
       }
 
       if (order instanceof ForceSource) {
@@ -136,7 +136,7 @@ public class Ship extends PhysicalEntity {
       if (event.getShip() == this && integrity > 0) {
          integrity -= event.getDamage() / durability;
          if (integrity <= 0) {
-            LOGGER.debug("Dying");
+            LOGGER.debug("Dying"); //$NON-NLS-1$
             final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
             shipDead.setDeadShip(this);
             worldEventMgr.fire(shipDead);

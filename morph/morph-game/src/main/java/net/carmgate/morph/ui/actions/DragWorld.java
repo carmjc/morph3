@@ -68,7 +68,7 @@ public class DragWorld implements MouseListener {
       }
       if (inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP
             && dragContext.dragInProgress()) {
-         LOGGER.debug("dragContext reset");
+         LOGGER.debug("dragContext reset"); //$NON-NLS-1$
          dragContext.reset();
          inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }

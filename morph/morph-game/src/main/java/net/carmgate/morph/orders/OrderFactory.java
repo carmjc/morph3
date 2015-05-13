@@ -41,12 +41,12 @@ public class OrderFactory {
       U u = null;
       Field shipField;
       try {
-         shipField = ReadOnlyShip.class.getDeclaredField("ship");
+         shipField = ReadOnlyShip.class.getDeclaredField("ship"); //$NON-NLS-1$
          shipField.setAccessible(true);
          u = newInstance(orderType, (Ship) shipField.get(orderee));
          shipField.setAccessible(true);
       } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-         LOGGER.error("newInstanceError", e);
+         LOGGER.error("newInstanceError", e); //$NON-NLS-1$
       }
       return u;
    }

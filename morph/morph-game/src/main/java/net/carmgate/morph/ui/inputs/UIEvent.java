@@ -121,7 +121,7 @@ public class UIEvent {
 
    @Override
    public String toString() {
-      return "eventType: " + eventType + ", button: " + button;
+      return "eventType: " + eventType + ", button: " + button; //$NON-NLS-1$ //$NON-NLS-2$
    }
 
 }

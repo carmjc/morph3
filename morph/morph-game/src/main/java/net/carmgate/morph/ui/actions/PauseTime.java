@@ -25,7 +25,7 @@ public class PauseTime implements KeyboardListener {
 
    @Override
    public void onKeyboardEvent() {
-      if (inputHistory.getLastKeyboardEvent().getButton() == conf.getCharProperty("action.pauseTime.key")) {
+      if (inputHistory.getLastKeyboardEvent().getButton() == conf.getCharProperty("action.pauseTime.key")) { //$NON-NLS-1$
          world.toggleTimeFrozen();
          inputHistory.consumeEvents(inputHistory.getLastKeyboardEvent());
       }

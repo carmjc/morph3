@@ -19,10 +19,10 @@ public class Conf {
 
    private Conf() {
       prop = new Properties();
-      try (InputStream in = getClass().getResourceAsStream("/config.properties")) {
+      try (InputStream in = getClass().getResourceAsStream("/config.properties")) { //$NON-NLS-1$
          prop.load(in);
       } catch (final IOException e) {
-         LOGGER.error("Exception raised loading properties", e);
+         LOGGER.error("Exception raised loading properties", e); //$NON-NLS-1$
       }
    }
 
