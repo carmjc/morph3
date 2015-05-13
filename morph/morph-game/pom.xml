@@ -32,6 +32,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<nativesTargetDir>target/natives</nativesTargetDir>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -15,6 +15,8 @@
 		<info.appsubpath>morph</info.appsubpath>
 		<izpack.dir.app>${basedir}/src/main/izpack</izpack.dir.app>
 		<staging.dir.app>${staging.dir}/appfiles</staging.dir.app>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<platform>windows</platform>
 	</properties>
 	<build>
 		<plugins>
@@ -38,6 +40,23 @@
 					<mkdirs>true</mkdirs>
 					<autoIncludeUrl>false</autoIncludeUrl>
 					<autoIncludeDevelopers>false</autoIncludeDevelopers>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.mavennatives</groupId>
+				<artifactId>maven-nativedependencies-plugin</artifactId>
+				<version>0.0.7</version>
+				<executions>
+					<execution>
+						<id>unpacknatives</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<nativesTargetDir>target/staging/appfiles/plain/natives</nativesTargetDir>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -83,4 +102,12 @@
 			</plugin>
 		</plugins>
 	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.lwjgl.lwjgl</groupId>
+			<artifactId>lwjgl-platform</artifactId>
+			<classifier>natives-${platform}</classifier>
+		</dependency>
+	</dependencies>
+
 </project>
