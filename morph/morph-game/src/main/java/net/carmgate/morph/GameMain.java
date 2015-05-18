@@ -54,6 +54,9 @@ import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
+import net.carmgate.morph.ui.widgets.ComponentPonderationWidget;
+import net.carmgate.morph.ui.widgets.WidgetContainer;
+import net.carmgate.morph.ui.widgets.WidgetFactory;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.LWJGLException;
@@ -80,6 +83,7 @@ public class GameMain {
    @Inject private OrderFactory orderFactory;
    @Inject private ComponentFactory componentFactory;
    @Inject private Messages messages;
+   @Inject private WidgetFactory widgetFactory;
 
    // Computation attributes
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
@@ -88,6 +92,7 @@ public class GameMain {
    private long lastUpdateTime = 0;
    private static TrueTypeFont font;
    private int nextWaveId = 1;
+   private WidgetContainer widgetRoot;
 
    private boolean gameLoaded;
 
@@ -181,6 +186,9 @@ public class GameMain {
       // init OpenGL context
       initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight")); //$NON-NLS-1$ //$NON-NLS-2$
 
+      // init GUI
+      initGui();
+
       for (final Renderer<?> renderer : renderers.values()) {
          renderer.init();
       }
@@ -238,6 +246,13 @@ public class GameMain {
          mouseManager.handleMouseEvent();
          keyboardManager.handleKeyboardEvent();
       }
+   }
+
+   private void initGui() {
+      widgetRoot = widgetFactory.newInstance(WidgetContainer.class);
+      ComponentPonderationWidget componentPonderationWidget = widgetFactory.newInstance(ComponentPonderationWidget.class);
+      componentPonderationWidget.setPosition(new float[] { 5, uiContext.getWindow().getHeight() - 50 });
+      widgetRoot.add(componentPonderationWidget);
    }
 
    private void addWaves() {
@@ -338,35 +353,11 @@ public class GameMain {
             }
          }
 
-         // Render component repartition gui
-         x = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
-         y = uiContext.getWindow().getHeight() / 2 - 42 - focalPoint.y * (1 - zoomFactor);
-         float height = 20;
-         float length = 100;
-         int nbCmpTypes = ship.getComponentsComposition().size();
-         float aggregatedPonderation = 0;
-         float i = 0;
-         TextureImpl.bindNone();
-         for (Entry<ComponentType, Float> ponderation : ship.getComponentsComposition().entrySet()) {
-            GL11.glTranslatef(x - length + aggregatedPonderation * length, y, 0);
-            float[] cmpColor = ponderation.getKey().getColor();
-            GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
-            GL11.glBegin(GL11.GL_QUADS);
-            // GL11.glTexCoord2f(0f, 0f);
-            GL11.glVertex2f(0, 0);
-            // GL11.glTexCoord2f(1f, 0f);
-            GL11.glVertex2f(length * ponderation.getValue(), 0);
-            // GL11.glTexCoord2f(1f, 1f);
-            GL11.glVertex2f(length * ponderation.getValue(), height);
-            // GL11.glTexCoord2f(0f, 1f);
-            GL11.glVertex2f(0, height);
-            GL11.glEnd();
-            GL11.glTranslatef(-(x - length + aggregatedPonderation * length), -y, 0);
-
-            aggregatedPonderation += ponderation.getValue();
-            LOGGER.debug("" + aggregatedPonderation);
-            i++;
-         }
+         x = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
+         y = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
+         GL11.glTranslatef(x, y, 0);
+         widgetRoot.renderWidget();
+         GL11.glTranslatef(-x, -y, 0);
       }
    }
 
