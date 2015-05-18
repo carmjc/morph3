@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -24,7 +25,6 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.orders.Order;
-import net.carmgate.morph.orders.OrderFactory;
 import net.carmgate.morph.orders.ship.Unique;
 import net.carmgate.morph.orders.ship.action.ActionOrder;
 import net.carmgate.morph.orders.ship.move.MoveOrder;
@@ -40,7 +40,6 @@ public class Ship extends PhysicalEntity {
    @Inject private MEvent<WorldEvent> worldEventMgr;
    @Inject private Logger LOGGER;
    @Inject private WorldEventFactory worldEventFactory;
-   @Inject private OrderFactory orderFactory;
    @Inject private ScriptManager scriptManager;
 
    private Player owner;
@@ -67,10 +66,21 @@ public class Ship extends PhysicalEntity {
 
    private boolean forceStop;
 
-   public void add(Component component) {
+   public void add(Component component, float compositionContribution) {
       component.setShip(this);
       ComponentKind componentKind = component.getClass().getAnnotation(ComponentKind.class);
       getComponents().put(componentKind.value(), component);
+
+      // update components composition
+      for (Entry<ComponentType, Float> entry : componentsComposition.entrySet()) {
+         entry.setValue(entry.getValue() * (1 - compositionContribution));
+      }
+      Float componentCurrentContribution = componentsComposition.get(componentKind.value());
+      if (componentCurrentContribution == null) {
+         componentsComposition.put(componentKind.value(), compositionContribution);
+      } else {
+         componentsComposition.put(componentKind.value(), componentCurrentContribution + compositionContribution);
+      }
    }
 
    public void add(Order order) {
@@ -256,5 +266,9 @@ public class Ship extends PhysicalEntity {
 
    public void addIntegrity(float integrityDelta) {
       integrity += integrityDelta;
+   }
+
+   public Map<ComponentType, Float> getComponentsComposition() {
+      return componentsComposition;
    }
 }

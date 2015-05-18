@@ -50,7 +50,6 @@ public class MineAsteroid extends ActionOrder {
          return;
       }
 
-      LOGGER.debug("mining ?"); //$NON-NLS-1$
       if (conf.getFloatProperty("order.mineAsteroid.massMined") > asteroid.getMass()) { //$NON-NLS-1$
          getOrderee().setMass(getOrderee().getMass() + asteroid.getMass());
          asteroid.setMass(0);
@@ -68,7 +67,6 @@ public class MineAsteroid extends ActionOrder {
 
          miningLaser.setTarget(asteroid);
          miningLaser.setActive(true);
-         LOGGER.debug("      Yes"); //$NON-NLS-1$
       }
    }
 

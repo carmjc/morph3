@@ -32,6 +32,7 @@ import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Background;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
+import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
 import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
@@ -61,6 +62,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.opengl.TextureImpl;
 import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
@@ -253,9 +255,9 @@ public class GameMain {
             ship.setResources(20);
             ship.setIntegrity(1);
             ship.setDurability(5);
-            ship.add(componentFactory.newInstance(Laser.class));
-            ship.add(componentFactory.newInstance(SimplePropulsor.class));
-            ship.add(componentFactory.newInstance(SimpleGenerator.class));
+            ship.add(componentFactory.newInstance(Laser.class), 1);
+            ship.add(componentFactory.newInstance(SimplePropulsor.class), 0.5f);
+            ship.add(componentFactory.newInstance(SimpleGenerator.class), 1f / 3);
             world.add(ship);
          }
          nextWaveId++;
@@ -312,9 +314,58 @@ public class GameMain {
                if (!c.isActive()) {
                   color = Color.gray;
                }
-               RenderUtils.renderText(font, x, y,
+
+               GL11.glTranslatef(x - 5, y + font.getLineHeight() * line - 10, 0);
+               ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
+               float[] cmpColor = cmpType.getColor();
+               TextureImpl.bindNone();
+               GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
+               GL11.glBegin(GL11.GL_QUADS);
+               // GL11.glTexCoord2f(0f, 0f);
+               GL11.glVertex2f(0, 0);
+               // GL11.glTexCoord2f(1f, 0f);
+               GL11.glVertex2f(5, 0);
+               // GL11.glTexCoord2f(1f, 1f);
+               GL11.glVertex2f(5, 5);
+               // GL11.glTexCoord2f(0f, 1f);
+               GL11.glVertex2f(0, 5);
+               GL11.glEnd();
+               GL11.glTranslatef(-(x - 5), -(y + font.getLineHeight() * line - 10), 0);
+
+               RenderUtils.renderText(font, x - 10, y,
                      MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false); //$NON-NLS-1$
+
             }
+         }
+
+         // Render component repartition gui
+         x = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
+         y = uiContext.getWindow().getHeight() / 2 - 42 - focalPoint.y * (1 - zoomFactor);
+         float height = 20;
+         float length = 100;
+         int nbCmpTypes = ship.getComponentsComposition().size();
+         float aggregatedPonderation = 0;
+         float i = 0;
+         TextureImpl.bindNone();
+         for (Entry<ComponentType, Float> ponderation : ship.getComponentsComposition().entrySet()) {
+            GL11.glTranslatef(x - length + aggregatedPonderation * length, y, 0);
+            float[] cmpColor = ponderation.getKey().getColor();
+            GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
+            GL11.glBegin(GL11.GL_QUADS);
+            // GL11.glTexCoord2f(0f, 0f);
+            GL11.glVertex2f(0, 0);
+            // GL11.glTexCoord2f(1f, 0f);
+            GL11.glVertex2f(length * ponderation.getValue(), 0);
+            // GL11.glTexCoord2f(1f, 1f);
+            GL11.glVertex2f(length * ponderation.getValue(), height);
+            // GL11.glTexCoord2f(0f, 1f);
+            GL11.glVertex2f(0, height);
+            GL11.glEnd();
+            GL11.glTranslatef(-(x - length + aggregatedPonderation * length), -y, 0);
+
+            aggregatedPonderation += ponderation.getValue();
+            LOGGER.debug("" + aggregatedPonderation);
+            i++;
          }
       }
    }
