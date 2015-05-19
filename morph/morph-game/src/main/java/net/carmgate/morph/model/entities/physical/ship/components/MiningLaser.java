@@ -26,9 +26,16 @@ public class MiningLaser extends Component {
       laserAnim.setTarget(getTargetHolder());
       setAnimation(laserAnim);
       LOGGER.debug("laserAnimation added"); //$NON-NLS-1$
+   }
 
-      setEnergyDt(conf.getFloatProperty("component.miningLaser.energyDt")); //$NON-NLS-1$
-      setResourcesDt(conf.getFloatProperty("component.miningLaser.resourcesDt")); //$NON-NLS-1$
+   @Override
+   public float getEnergyDt() {
+      return conf.getFloatProperty("component.miningLaser.energyDt") * getShip().getComponentsComposition().get(ComponentType.MINING_LASERS); //$NON-NLS-1$
+   }
+
+   @Override
+   public float getResourcesDt() {
+      return conf.getFloatProperty("component.miningLaser.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.MINING_LASERS); //$NON-NLS-1$
    }
 
 }

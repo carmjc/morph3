@@ -56,7 +56,7 @@ public class Attack extends ActionOrder {
       // Create the event
       if (!laser.isFamished()) {
          final ShipHit shipHit = worldEventFactory.newInstance(WorldEventType.SHIP_HIT);
-         shipHit.init(getOrderee(), target, 1);
+         shipHit.init(getOrderee(), target, 1 * getOrderee().getComponentsComposition().get(getComponentTypes()[0])); // FIXME can there be more than one component type ?
          worldEventMgr.fire(shipHit);
       }
    }

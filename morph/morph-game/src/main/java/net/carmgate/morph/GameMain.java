@@ -212,7 +212,7 @@ public class GameMain {
             select.render();
          }
          updateWorld();
-         addWaves();
+         // addWaves();
 
          // Fire deferred events
          eventManager.deferredFire();
@@ -578,7 +578,8 @@ public class GameMain {
       for (Set<ComponentType> cmpTypeSet : map.values()) {
          for (ComponentType cmpType : cmpTypeSet) {
             Component cmp = ship.getComponents().get(cmpType);
-            if (cmp.isActive()) {
+            float cmpPercentage = ship.getComponentsComposition().get(cmp.getClass().getAnnotation(ComponentKind.class).value());
+            if (cmp.isActive() && cmpPercentage > 0) {
                if (ship.getEnergy() + ship.getEnergyDt() + cmp.getEnergyDt() >= 0 &&
                      ship.getResources() + ship.getResourcesDt() + cmp.getResourcesDt() >= 0) {
                   cmp.setFamished(false);

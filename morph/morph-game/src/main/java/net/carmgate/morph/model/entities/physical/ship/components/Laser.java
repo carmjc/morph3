@@ -23,9 +23,16 @@ public class Laser extends Component {
       laserAnim.setSourceHolder(getShipHolder());
       laserAnim.setTargetHolder(getTargetHolder());
       setAnimation(laserAnim);
+   }
 
-      setEnergyDt(conf.getFloatProperty("component.laser.energyDt")); //$NON-NLS-1$
-      setResourcesDt(conf.getFloatProperty("component.laser.resourcesDt")); //$NON-NLS-1$
+   @Override
+   public float getEnergyDt() {
+      return conf.getFloatProperty("component.laser.energyDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
+   }
+
+   @Override
+   public float getResourcesDt() {
+      return conf.getFloatProperty("component.laser.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
    }
 
 }

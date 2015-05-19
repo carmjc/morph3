@@ -70,7 +70,7 @@ public class CloseIn extends MoveOrder {
       float length = force.length();
       if (length > Ship.MAX_PROPULSOR_FORCE) {
          // LOGGER.debug("scaling ... ");
-         force.scale(Ship.MAX_PROPULSOR_FORCE / length);
+         force.scale(Ship.MAX_PROPULSOR_FORCE / length * getOrderee().getComponentsComposition().get(getComponentTypes()[0]));
       }
 
    }

@@ -22,7 +22,7 @@ public class SimpleRepairer extends Component {
    @Override
    public float getEnergyDt() {
       if (getShip().getIntegrity() < 1) {
-         return conf.getFloatProperty("component.repairer.energyDt"); //$NON-NLS-1$
+         return conf.getFloatProperty("component.repairer.energyDt") * getShip().getComponentsComposition().get(ComponentType.REPAIRER); //$NON-NLS-1$
       }
       return 0;
    }
@@ -30,7 +30,7 @@ public class SimpleRepairer extends Component {
    @Override
    public float getResourcesDt() {
       if (getShip().getIntegrity() < 1) {
-         return conf.getFloatProperty("component.repairer.resourcesDt"); //$NON-NLS-1$
+         return conf.getFloatProperty("component.repairer.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.REPAIRER); //$NON-NLS-1$
       }
       return 0;
    }
@@ -38,7 +38,7 @@ public class SimpleRepairer extends Component {
    @Override
    public float getIntegrityDt() {
       if (getShip().getIntegrity() < 1) {
-         return conf.getFloatProperty("component.repairer.integrityDt"); //$NON-NLS-1$
+         return conf.getFloatProperty("component.repairer.integrityDt") * getShip().getComponentsComposition().get(ComponentType.REPAIRER); //$NON-NLS-1$
       }
       return 0;
    }

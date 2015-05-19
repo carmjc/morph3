@@ -15,6 +15,7 @@ import net.carmgate.morph.ui.inputs.MouseListener;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.inputs.UIEvent.EventType;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
+import net.carmgate.morph.ui.renderers.SelectRenderer.TargetType;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipSelectRenderer;
 import net.carmgate.morph.ui.widgets.Widget;
 import net.carmgate.morph.ui.widgets.WidgetContainer;
@@ -47,10 +48,20 @@ public class Select implements MouseListener {
 
    @Override
    public void onMouseEvent() {
-      if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN) {
+      if (inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_DOWN
+            && inputHistory.getLastMouseEvent().getButton() == 0) {
+         LOGGER.debug("click detected"); //$NON-NLS-1$
+         Ship selectedShip = uiContext.getSelectedShip();
+         select(Mouse.getX() - uiContext.getWindow().getWidth() / 2, Mouse.getY() - uiContext.getWindow().getHeight() / 2);
+         if (selectedShip != null && uiContext.getSelectedShip() == null) {
+            uiContext.setSelectedShip(selectedShip);
+         }
+      }
+      if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
+            && inputHistory.getLastMouseEvent(1).getButton() == 0
+            && inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP) {
          LOGGER.debug("click detected"); //$NON-NLS-1$
          select(Mouse.getX() - uiContext.getWindow().getWidth() / 2, Mouse.getY() - uiContext.getWindow().getHeight() / 2);
-         // inputHistory.consumeEvents(inputHistory.getLastMouseEvent(0), inputHistory.getLastMouseEvent(1));
       }
    }
 
@@ -66,8 +77,8 @@ public class Select implements MouseListener {
       Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
       float zoomFactor = uiContext.getViewport().getZoomFactor();
 
-      float x = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
-      float y = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
+      float x = -uiContext.getWindow().getWidth() / 2;
+      float y = -uiContext.getWindow().getHeight() / 2;
       GL11.glTranslatef(x, y, 0);
       renderWidgetForSelect(uiContext.getWidgetRoot());
       GL11.glTranslatef(-x, -y, 0);
@@ -111,11 +122,12 @@ public class Select implements MouseListener {
     *
     * @param x
     * @param y
+    * @param b
     */
-   public void select(int x, int y) {
+   public TargetType select(int x, int y) {
 
       LOGGER.debug("Picking at " + x + " " + y); //$NON-NLS-1$ //$NON-NLS-2$
-
+      TargetType targetType = null;
 
       // get viewport
       IntBuffer viewport = BufferUtils.createIntBuffer(16);
@@ -173,6 +185,7 @@ public class Select implements MouseListener {
          int targetTypeId = selectBuf.get(selectBufIndex++);
          if (targetTypeId == SelectRenderer.TargetType.WIDGET.ordinal()) {
             pickedWidget = uiContext.getWidgets().get(selectBuf.get(selectBufIndex++));
+            targetType = TargetType.WIDGET;
             LOGGER.debug("Widget selected");
          }
          if (targetTypeId == SelectRenderer.TargetType.PHYSICAL_ENTITY.ordinal()) {
@@ -183,20 +196,16 @@ public class Select implements MouseListener {
                   pickedShip = ship;
                }
             }
+            targetType = TargetType.PHYSICAL_ENTITY;
          }
       }
 
-      if (pickedWidget != null) {
-         uiContext.setSelectedWidget(pickedWidget);
-      } else {
-         uiContext.setSelectedWidget(null);
+      uiContext.setSelectedWidget(pickedWidget);
+      if (pickedWidget == null) {
+         uiContext.setSelectedShip(pickedShip);
       }
 
-      if (pickedShip != null) {
-         uiContext.setSelectedShip(pickedShip);
-      } else {
-         uiContext.setSelectedShip(null);
-      }
+      return targetType;
    }
 
 }

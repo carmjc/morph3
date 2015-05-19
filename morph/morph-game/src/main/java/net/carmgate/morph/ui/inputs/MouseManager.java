@@ -49,13 +49,20 @@ public class MouseManager {
          final int dx = Mouse.getDX();
          final int dy = Mouse.getDY();
          if (dx != 0 || dy != 0) {
-            final UIEvent event = new UIEvent(EventType.MOUSE_MOVE, Mouse.getEventButton(), new int[] { gameMouse.getX(), gameMouse.getY() });
-            inputHistory.addEvent(event);
-
+            if (inputHistory.getLastMouseEvent().getEventType() != EventType.MOUSE_MOVE) {
+               final UIEvent event = new UIEvent(EventType.MOUSE_MOVE, Mouse.getEventButton(), new int[] { gameMouse.getX(), gameMouse.getY() });
+               inputHistory.addEvent(event);
+            }
          }
 
          for (final MouseListener mouseListener : mouseListeners) {
             mouseListener.onMouseEvent();
+         }
+
+         // Clean input history
+         if (inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
+               && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP) {
+            inputHistory.consumeEvents(inputHistory.getLastMouseEvent(), inputHistory.getLastMouseEvent(1));
          }
       }
    }

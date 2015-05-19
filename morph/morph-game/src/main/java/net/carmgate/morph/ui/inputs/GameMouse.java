@@ -41,4 +41,9 @@ public class GameMouse {
    public int getY() {
       return Mouse.getY();
    }
+
+   @Override
+   public String toString() {
+      return "GameMouse[" + getX() + "x" + getY() + "]";
+   }
 }

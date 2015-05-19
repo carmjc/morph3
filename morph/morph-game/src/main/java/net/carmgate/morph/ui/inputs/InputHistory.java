@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 import javax.inject.Singleton;
 
+import net.carmgate.morph.ui.inputs.UIEvent.EventType;
 import net.carmgate.morph.ui.inputs.UIEvent.HardwareType;
 
 @Singleton
@@ -68,5 +69,19 @@ public class InputHistory {
 
    public int size() {
       return stack.size();
+   }
+
+   @Override
+   public String toString() {
+      StringBuffer sb = new StringBuffer();
+      sb.append("inputHistory:\n");
+      for (UIEvent e : stack) {
+         sb.append("  " + e.getEventType().name() + "[" + e.getButton() + "]");
+         if (e.getEventType() == EventType.MOUSE_MOVE) {
+            sb.append(" " + e.getPositionInWindow()[0] + "x" + e.getPositionInWindow()[1]);
+         }
+         sb.append("\n");
+      }
+      return sb.toString();
    }
 }

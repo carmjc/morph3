@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -49,7 +50,7 @@ public class Ship extends PhysicalEntity {
    private final List<Order> bgOrders = new ArrayList<>();
    private float durability;
    private final Map<ComponentType, Component> components = new HashMap<>();
-   private final Map<ComponentType, Float> componentsComposition = new HashMap<>();
+   private final Map<ComponentType, Float> componentsComposition = new TreeMap<>();
 
    // internal economics
    private float energy;
