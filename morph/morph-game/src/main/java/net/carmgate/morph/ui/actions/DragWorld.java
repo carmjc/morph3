@@ -33,6 +33,10 @@ public class DragWorld implements MouseListener {
 
    @Override
    public void onMouseEvent() {
+      if (uiContext.getSelectedWidget() != null) {
+         return;
+      }
+
       if (inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
             && inputHistory.getLastMouseEvent(1).getButton() == 0
             && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE) {
@@ -68,7 +72,6 @@ public class DragWorld implements MouseListener {
       }
       if (inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP
             && dragContext.dragInProgress()) {
-         LOGGER.debug("dragContext reset"); //$NON-NLS-1$
          dragContext.reset();
          inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
       }

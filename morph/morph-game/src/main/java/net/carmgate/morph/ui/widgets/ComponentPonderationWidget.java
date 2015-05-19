@@ -27,7 +27,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
-public class ComponentPonderationWidget extends Widget {
+public class ComponentPonderationWidget extends Widget implements WidgetMouseListener {
 
    @Inject private UIContext uiContext;
    @Inject private Logger LOGGER;
@@ -42,16 +42,20 @@ public class ComponentPonderationWidget extends Widget {
          init();
       }
 
+      if (uiContext.getSelectedShip() == null) {
+         return;
+      }
+
       // Render component repartition gui
-      float height = 20;
-      float length = 99;
+      float height = conf.getFloatProperty("ui.componentPonderationWidget.height"); //$NON-NLS-1$
+      float width = conf.getFloatProperty("ui.componentPonderationWidget.width"); //$NON-NLS-1$
 
       TextureImpl.bindNone();
       GL11.glColor4f(1, 1, 1, 1);
       GL11.glBegin(GL11.GL_QUADS);
       GL11.glVertex2f(0, 25);
-      GL11.glVertex2f(length + 1, 25);
-      GL11.glVertex2f(length + 1, 25 + height);
+      GL11.glVertex2f(width + 1, 25);
+      GL11.glVertex2f(width + 1, 25 + height);
       GL11.glVertex2f(0, 25 + height);
       GL11.glEnd();
 
@@ -61,20 +65,20 @@ public class ComponentPonderationWidget extends Widget {
       for (Entry<ComponentType, Float> ponderation : ponderations) {
          Component cmp = uiContext.getSelectedShip().getComponents().get(ponderation.getKey());
 
-         RenderUtils.renderLine(new Vector2f(i * length / ponderations.size() + length / ponderations.size() / 2, 20),
-               new Vector2f(aggregatedPonderation * length + length * ponderation.getValue() / 2, 27), 1, 1, new float[] { 1, 1,
+         RenderUtils.renderLine(new Vector2f(i * width / ponderations.size() + width / ponderations.size() / 2, 20),
+               new Vector2f(aggregatedPonderation * width + width * ponderation.getValue() / 2, 27), 1, 1, new float[] { 1, 1,
             1, 0.25f }, new float[] { 0, 0, 0, 0 });
 
-         GL11.glTranslatef(i * length / ponderations.size() + length / ponderations.size() / 2, 0, 0);
+         GL11.glTranslatef(i * width / ponderations.size() + width / ponderations.size() / 2, 0, 0);
          // Texture texture = cmpTextures.get(ponderation.getKey());
          String str = ponderation.getKey().name();
          CharSequence ss = str.subSequence(0, 1);
          Color color = new Color(Color.white);
          RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 1, color);
-         GL11.glTranslatef(-i * length / ponderations.size() - length / ponderations.size() / 2, 0, 0);
+         GL11.glTranslatef(-i * width / ponderations.size() - width / ponderations.size() / 2, 0, 0);
 
          TextureImpl.bindNone();
-         GL11.glTranslatef(aggregatedPonderation * length, 25, 0);
+         GL11.glTranslatef(aggregatedPonderation * width, 25, 0);
          float[] cmpColor = ponderation.getKey().getColor();
          if (!cmp.isActive()) {
             cmpColor = new float[] { 0.3f, 0.3f, 0.3f, 1 };
@@ -82,11 +86,11 @@ public class ComponentPonderationWidget extends Widget {
          GL11.glColor4f(cmpColor[0], cmpColor[1], cmpColor[2], cmpColor[3]);
          GL11.glBegin(GL11.GL_QUADS);
          GL11.glVertex2f(1, 1);
-         GL11.glVertex2f(length * ponderation.getValue(), 1);
-         GL11.glVertex2f(length * ponderation.getValue(), height - 1);
+         GL11.glVertex2f(width * ponderation.getValue(), 1);
+         GL11.glVertex2f(width * ponderation.getValue(), height - 1);
          GL11.glVertex2f(1, height - 1);
          GL11.glEnd();
-         GL11.glTranslatef(-aggregatedPonderation * length, -25, 0);
+         GL11.glTranslatef(-aggregatedPonderation * width, -25, 0);
 
          aggregatedPonderation += ponderation.getValue();
          i++;
@@ -128,6 +132,43 @@ public class ComponentPonderationWidget extends Widget {
       } catch (IOException e) {
          LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
+   }
+
+   @Override
+   public void renderInteractiveAreas() {
+      if (uiContext.getSelectedShip() == null) {
+         return;
+      }
+
+      // Render component repartition gui
+      float height = conf.getFloatProperty("ui.componentPonderationWidget.height"); //$NON-NLS-1$
+      float width = conf.getFloatProperty("ui.componentPonderationWidget.width"); //$NON-NLS-1$
+
+      TextureImpl.bindNone();
+      GL11.glColor4f(1, 1, 1, 1);
+      GL11.glBegin(GL11.GL_QUADS);
+      GL11.glVertex2f(0, 25);
+      GL11.glVertex2f(width + 1, 25);
+      GL11.glVertex2f(width + 1, 25 + height);
+      GL11.glVertex2f(0, 25 + height);
+      GL11.glEnd();
+   }
+
+   @Override
+   public void onDragStart() {
+      LOGGER.debug("drag start in widget");
+   }
+
+   @Override
+   public void onDragContinue() {
+      // TODO Auto-generated method stub
+
+   }
+
+   @Override
+   public void onDragStop() {
+      // TODO Auto-generated method stub
+
    }
 
 }

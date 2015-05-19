@@ -30,6 +30,11 @@ public class ToggleDebug implements KeyboardListener {
          uiContext.setRenderMode(uiContext.getRenderMode() == RenderMode.DEBUG ? RenderMode.NORMAL : RenderMode.DEBUG);
          inputHistory.consumeEvents(inputHistory.getLastKeyboardEvent());
       }
+      if (inputHistory.getLastKeyboardEvent().getButton() == conf.getCharProperty("action.toggleSelectDebug.key") //$NON-NLS-1$
+            && (uiContext.getRenderMode() == RenderMode.DEBUG || uiContext.getRenderMode() == RenderMode.SELECT_DEBUG)) {
+         uiContext.setRenderMode(uiContext.getRenderMode() == RenderMode.SELECT_DEBUG ? RenderMode.DEBUG : RenderMode.SELECT_DEBUG);
+         inputHistory.consumeEvents(inputHistory.getLastKeyboardEvent());
+      }
    }
 
 }

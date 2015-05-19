@@ -18,4 +18,8 @@ public abstract class Widget {
    public void setPosition(float[] position) {
       this.position = position;
    }
+
+   public int getId() {
+      return id;
+   }
 }

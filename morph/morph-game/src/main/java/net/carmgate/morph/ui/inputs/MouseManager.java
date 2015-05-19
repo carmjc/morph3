@@ -14,12 +14,9 @@ import org.slf4j.Logger;
 @Singleton
 public class MouseManager {
 
-   @Inject
-   private Logger LOGGER;
-   @Inject
-   private InputHistory inputHistory;
-   @Inject
-   private GameMouse gameMouse;
+   @Inject private Logger LOGGER;
+   @Inject private InputHistory inputHistory;
+   @Inject private GameMouse gameMouse;
 
    private final List<MouseListener> mouseListeners = new ArrayList<>();
 

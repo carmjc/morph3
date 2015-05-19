@@ -4,11 +4,13 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.ui.UIContext;
 
 public class WidgetFactory {
 
    @Inject private Instance<Widget> widgets;
    @Inject private MEventManager eventManager;
+   @Inject private UIContext uiContext;
 
    private int idGen = 0;
 
@@ -16,6 +18,7 @@ public class WidgetFactory {
       final U u = widgets.select(widget).get();
       u.setId(idGen++);
       eventManager.scanAndRegister(u);
+      uiContext.getWidgets().put(u.getId(), u);
       return u;
    }
 

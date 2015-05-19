@@ -45,6 +45,7 @@ import net.carmgate.morph.orders.OrderType;
 import net.carmgate.morph.orders.ship.action.Attack;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
+import net.carmgate.morph.ui.actions.Select;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.renderers.RenderMode;
@@ -84,6 +85,7 @@ public class GameMain {
    @Inject private ComponentFactory componentFactory;
    @Inject private Messages messages;
    @Inject private WidgetFactory widgetFactory;
+   @Inject private Select select;
 
    // Computation attributes
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
@@ -92,7 +94,6 @@ public class GameMain {
    private long lastUpdateTime = 0;
    private static TrueTypeFont font;
    private int nextWaveId = 1;
-   private WidgetContainer widgetRoot;
 
    private boolean gameLoaded;
 
@@ -165,11 +166,13 @@ public class GameMain {
       }
    }
 
-   public void onGameLoaded(@Observes GameLoaded gameLoaded) {
+   @SuppressWarnings("unused")
+   private void onGameLoaded(@Observes GameLoaded gameLoaded) {
       this.gameLoaded = true;
    }
 
-   public void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
+   @SuppressWarnings("unused")
+   private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
       new Thread((Runnable) () -> {
          while (!GameMain.this.gameLoaded) {
             try {
@@ -200,10 +203,14 @@ public class GameMain {
          GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
          // Renders everything
-         renderAnimation();
-         renderComponentsAnimation();
-         renderPhysical();
-         renderGui();
+         if (uiContext.getRenderMode() != RenderMode.SELECT_DEBUG) {
+            renderAnimation();
+            renderComponentsAnimation();
+            renderPhysical();
+            renderGui();
+         } else {
+            select.render();
+         }
          updateWorld();
          addWaves();
 
@@ -249,10 +256,10 @@ public class GameMain {
    }
 
    private void initGui() {
-      widgetRoot = widgetFactory.newInstance(WidgetContainer.class);
+      uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
       ComponentPonderationWidget componentPonderationWidget = widgetFactory.newInstance(ComponentPonderationWidget.class);
       componentPonderationWidget.setPosition(new float[] { 5, uiContext.getWindow().getHeight() - 50 });
-      widgetRoot.add(componentPonderationWidget);
+      uiContext.getWidgetRoot().add(componentPonderationWidget);
    }
 
    private void addWaves() {
@@ -352,13 +359,14 @@ public class GameMain {
 
             }
          }
-
-         x = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
-         y = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
-         GL11.glTranslatef(x, y, 0);
-         widgetRoot.renderWidget();
-         GL11.glTranslatef(-x, -y, 0);
       }
+
+      x = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
+      y = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
+
+      GL11.glTranslatef(x, y, 0);
+      uiContext.getWidgetRoot().renderWidget();
+      GL11.glTranslatef(-x, -y, 0);
    }
 
    @SuppressWarnings({ "unused" })
@@ -606,4 +614,5 @@ public class GameMain {
          ship.addIntegrity(integrityDelta);
       }
    }
+
 }

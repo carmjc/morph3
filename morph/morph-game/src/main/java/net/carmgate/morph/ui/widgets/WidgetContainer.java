@@ -22,4 +22,8 @@ public class WidgetContainer extends Widget {
       return widgets.add(e);
    }
 
+   public List<Widget> getWidgets() {
+      return widgets;
+   }
+
 }

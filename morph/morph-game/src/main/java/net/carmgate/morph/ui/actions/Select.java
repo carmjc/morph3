@@ -14,7 +14,11 @@ import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.MouseListener;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.inputs.UIEvent.EventType;
+import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipSelectRenderer;
+import net.carmgate.morph.ui.widgets.Widget;
+import net.carmgate.morph.ui.widgets.WidgetContainer;
+import net.carmgate.morph.ui.widgets.WidgetMouseListener;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.BufferUtils;
@@ -43,11 +47,10 @@ public class Select implements MouseListener {
 
    @Override
    public void onMouseEvent() {
-      if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
-            && inputHistory.getLastMouseEvent(0).getButton() == 0 && inputHistory.getLastMouseEvent(0).getEventType() == EventType.MOUSE_BUTTON_UP) {
+      if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN) {
          LOGGER.debug("click detected"); //$NON-NLS-1$
          select(Mouse.getX() - uiContext.getWindow().getWidth() / 2, Mouse.getY() - uiContext.getWindow().getHeight() / 2);
-         inputHistory.consumeEvents(inputHistory.getLastMouseEvent(0), inputHistory.getLastMouseEvent(1));
+         // inputHistory.consumeEvents(inputHistory.getLastMouseEvent(0), inputHistory.getLastMouseEvent(1));
       }
    }
 
@@ -58,26 +61,49 @@ public class Select implements MouseListener {
     * @param zoomFactor
     * @param glMode
     */
-   public void render(int glMode) {
+   public void render() {
 
       Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
       float zoomFactor = uiContext.getViewport().getZoomFactor();
+
+      float x = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
+      float y = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
+      GL11.glTranslatef(x, y, 0);
+      renderWidgetForSelect(uiContext.getWidgetRoot());
+      GL11.glTranslatef(-x, -y, 0);
+
       GL11.glScalef(zoomFactor, zoomFactor, 1);
       GL11.glTranslatef(-focalPoint.x, -focalPoint.y, -0);
 
-      // In select mode, we render the model elements in reverse order, because, the first items drawn will
-      // be the first picked
       for (Ship ship : world.getShips()) {
+         GL11.glPushName(SelectRenderer.TargetType.PHYSICAL_ENTITY.ordinal());
          GL11.glPushName(ship.getId());
          final Vector2f pos = ship.getPos();
          GL11.glTranslatef(pos.x, pos.y, 0);
          shipSelectRenderer.render(ship);
          GL11.glTranslatef(-pos.x, -pos.y, 0);
-         GL11.glPopName();
       }
 
       GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
       GL11.glScalef(1f / zoomFactor, 1f / zoomFactor, 1);
+   }
+
+   private void renderWidgetForSelect(Widget widget) {
+      if (widget instanceof WidgetContainer) {
+         for (Widget childWidget : ((WidgetContainer) widget).getWidgets()) {
+            GL11.glTranslatef(childWidget.getPosition()[0], childWidget.getPosition()[1], 0);
+            renderWidgetForSelect(childWidget);
+            GL11.glTranslatef(-childWidget.getPosition()[0], -childWidget.getPosition()[1], 0);
+         }
+      }
+
+      if (widget instanceof WidgetMouseListener) {
+         GL11.glPushName(SelectRenderer.TargetType.WIDGET.ordinal());
+         GL11.glPushName(widget.getId());
+         ((WidgetMouseListener) widget).renderInteractiveAreas();
+         GL11.glPopName();
+         GL11.glPopName();
+      }
    }
 
    /**
@@ -86,9 +112,10 @@ public class Select implements MouseListener {
     * @param x
     * @param y
     */
-   private void select(int x, int y) {
+   public void select(int x, int y) {
 
       LOGGER.debug("Picking at " + x + " " + y); //$NON-NLS-1$ //$NON-NLS-2$
+
 
       // get viewport
       IntBuffer viewport = BufferUtils.createIntBuffer(16);
@@ -110,7 +137,7 @@ public class Select implements MouseListener {
       GL11.glOrtho(0, window.getWidth(), 0, -window.getHeight(), 1, -1);
       GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
 
-      render(GL11.GL_SELECT);
+      render();
 
       GL11.glMatrixMode(GL11.GL_PROJECTION);
       GL11.glPopMatrix();
@@ -133,6 +160,7 @@ public class Select implements MouseListener {
 
       // The picked entity if any
       Ship pickedShip = null;
+      Widget pickedWidget = null;
 
       // Iterate over the hits
       for (int i = 0; i < hits; i++) {
@@ -142,14 +170,26 @@ public class Select implements MouseListener {
          // jump over the two extremes of the picking z-index range
          selectBufIndex += 3;
 
-         // get the matching element in the model
-         int shipId = selectBuf.get(selectBufIndex);
-         for (Ship ship : world.getShips()) {
-            if (ship.getId() == shipId) {
-               pickedShip = ship;
+         int targetTypeId = selectBuf.get(selectBufIndex++);
+         if (targetTypeId == SelectRenderer.TargetType.WIDGET.ordinal()) {
+            pickedWidget = uiContext.getWidgets().get(selectBuf.get(selectBufIndex++));
+            LOGGER.debug("Widget selected");
+         }
+         if (targetTypeId == SelectRenderer.TargetType.PHYSICAL_ENTITY.ordinal()) {
+            // get the matching element in the model
+            int shipId = selectBuf.get(selectBufIndex++);
+            for (Ship ship : world.getShips()) { // FIXME We should implement the same logic as for widgets with a big map
+               if (ship.getId() == shipId) {
+                  pickedShip = ship;
+               }
             }
          }
+      }
 
+      if (pickedWidget != null) {
+         uiContext.setSelectedWidget(pickedWidget);
+      } else {
+         uiContext.setSelectedWidget(null);
       }
 
       if (pickedShip != null) {
