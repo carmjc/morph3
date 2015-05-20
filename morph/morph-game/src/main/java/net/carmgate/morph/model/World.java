@@ -26,14 +26,12 @@ import net.carmgate.morph.GameLoaded;
 import net.carmgate.morph.events.WorldEvent;
 import net.carmgate.morph.events.WorldEventFactory;
 import net.carmgate.morph.events.WorldEventType;
-import net.carmgate.morph.events.animations.AnimationStart;
 import net.carmgate.morph.events.entities.ship.PhysicalEntityToBeRemoved;
 import net.carmgate.morph.events.entities.ship.ShipAdded;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEvent;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.events.mgt.MObserves;
-import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
@@ -64,16 +62,11 @@ public class World {
    private final List<Ship> ships = new ArrayList<>();
    private final List<PhysicalEntity> nonShipsPhysicalEntities = new ArrayList<>();
    private final Set<PhysicalEntity> physicalEntities = new HashSet<>();
-   private final Set<Animation> animations = new HashSet<>();
    private final Map<String, Player> players = new HashMap<>();
    private long lastUpdateTime = 0;
    private long time = 0;
    private float timeFactor = 1f;
    private boolean timeFrozen = false;
-
-   public void add(Animation renderable) {
-      animations.add(renderable);
-   }
 
    public void add(PhysicalEntity entity) {
       if (entity instanceof Ship) {
@@ -102,10 +95,6 @@ public class World {
 
    public void add(Player player) {
       players.put(player.getName(), player);
-   }
-
-   public Set<Animation> getAnimations() {
-      return animations;
    }
 
    public Set<PhysicalEntity> getPhysicalEntities() {
@@ -145,10 +134,6 @@ public class World {
       }, "model init").start(); //$NON-NLS-1$
    }
 
-   protected void onAnimationStart(@MObserves AnimationStart animationStart) {
-      animations.add(animationStart.getAnimation());
-   }
-
    protected void onShipDeath(@MObserves ShipDeath shipDeath) {
       LOGGER.debug("Ship death: " + shipDeath.getShip()); //$NON-NLS-1$
       remove(shipDeath.getShip());
@@ -175,10 +160,6 @@ public class World {
 
       nonShipsPhysicalEntities.remove(entity);
       physicalEntities.remove(entity);
-   }
-
-   public void remove(Animation animation) {
-      animations.remove(animation);
    }
 
    private void remove(Ship ship) {

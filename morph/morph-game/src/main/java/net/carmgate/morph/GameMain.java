@@ -203,7 +203,6 @@ public class GameMain {
 
          // Renders everything
          if (uiContext.getRenderMode() != RenderMode.SELECT_DEBUG) {
-            renderAnimation();
             renderComponentsAnimation();
             renderPhysical();
             renderGui();
@@ -382,26 +381,6 @@ public class GameMain {
       } catch (final Exception e) {
          LOGGER.error("Error", e); //$NON-NLS-1$
       }
-   }
-
-   private void renderAnimation() {
-      final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      final float zoomFactor = uiContext.getViewport().getZoomFactor();
-      GL11.glScalef(zoomFactor, zoomFactor, 1);
-      GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
-      world.getAnimations().forEach(anim -> {
-         Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
-         renderer.render(anim);
-         if (anim.getAnimationEnd() < world.getTime()) {
-            finishedAnimations.add(anim);
-         }
-      });
-      finishedAnimations.forEach(a -> {
-         world.remove(a);
-      });
-      finishedAnimations.clear();
-      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
-      GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
    }
 
    private void renderComponentsAnimation() {
