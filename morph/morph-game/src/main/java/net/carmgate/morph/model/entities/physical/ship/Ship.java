@@ -43,7 +43,7 @@ public class Ship extends PhysicalEntity {
    @Inject private ScriptManager scriptManager;
 
    private Player owner;
-   private final Surroundings surroundings = new Surroundings();
+   @Deprecated private final Surroundings surroundings = new Surroundings();
    private Order actionOrder;
    private MoveOrder moveOrder;
    private final List<Order> bgOrders = new ArrayList<>();
@@ -127,6 +127,7 @@ public class Ship extends PhysicalEntity {
       return owner;
    }
 
+   @Deprecated
    public Surroundings getSurroundings() {
       return surroundings;
    }
@@ -182,20 +183,12 @@ public class Ship extends PhysicalEntity {
       this.energy = energy;
    }
 
-   public void addEnergy(float energy) {
-      this.energy += energy;
-   }
-
    public float getEnergyDt() {
       return energydt;
    }
 
    public void setEnergyDt(float energydt) {
       this.energydt = energydt;
-   }
-
-   public void addEnergydt(float energydt) {
-      this.energydt += energydt;
    }
 
    public float getResources() {
@@ -206,20 +199,12 @@ public class Ship extends PhysicalEntity {
       this.resources = resources;
    }
 
-   public void addResources(float resources) {
-      this.resources += resources;
-   }
-
    public float getResourcesDt() {
       return resourcesdt;
    }
 
    public void setResourcesDt(float resourcesdt) {
       this.resourcesdt = resourcesdt;
-   }
-
-   public void addResourcesDt(float resources) {
-      this.resources += resources;
    }
 
    public Map<ComponentType, Component> getComponents() {
@@ -252,10 +237,6 @@ public class Ship extends PhysicalEntity {
 
    public void setIntegrityDt(float integrityDt) {
       this.integrityDt = integrityDt;
-   }
-
-   public void addIntegrity(float integrityDelta) {
-      integrity += integrityDelta;
    }
 
    public Map<ComponentType, Float> getComponentsComposition() {

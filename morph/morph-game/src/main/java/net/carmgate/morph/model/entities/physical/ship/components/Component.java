@@ -16,7 +16,7 @@ public abstract class Component {
    private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 
    public Component() {
-      if (getClass().isAnnotationPresent(Background.class)) {
+      if (getClass().isAnnotationPresent(Permanent.class)) {
          setActive(true);
       }
    }

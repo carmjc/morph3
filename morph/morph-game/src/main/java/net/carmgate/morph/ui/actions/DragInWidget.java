@@ -2,6 +2,7 @@ package net.carmgate.morph.ui.actions;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.inputs.GameMouse;
@@ -15,6 +16,7 @@ import net.carmgate.morph.ui.widgets.WidgetMouseListener;
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;
 
+@Singleton
 public class DragInWidget implements MouseListener {
 
    @Inject private InputHistory inputHistory;

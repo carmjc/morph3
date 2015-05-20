@@ -9,6 +9,7 @@ import java.util.Set;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 
+@Deprecated
 public class Surroundings {
    private Map<Player, Set<Ship>> shipsByPlayer = new HashMap<>();
 

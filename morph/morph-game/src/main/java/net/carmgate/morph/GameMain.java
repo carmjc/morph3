@@ -29,12 +29,12 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.components.Background;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
+import net.carmgate.morph.model.entities.physical.ship.components.Permanent;
 import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
 import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -89,7 +89,6 @@ public class GameMain {
    // Computation attributes
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
    private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
-   private final List<Animation> finishedAnimations = new ArrayList<>();
    private long lastUpdateTime = 0;
    private static TrueTypeFont font;
    private int nextWaveId = 1;
@@ -526,7 +525,7 @@ public class GameMain {
          }
       }
       for (Entry<ComponentType, Component> entry : ship.getComponents().entrySet()) {
-         if (entry.getValue().getClass().isAnnotationPresent(Background.class)) {
+         if (entry.getValue().getClass().isAnnotationPresent(Permanent.class)) {
             componentCriticities.put(entry.getKey(), 0);
          }
       }
@@ -569,19 +568,19 @@ public class GameMain {
       if (ship.getEnergy() + energyDelta < 0) {
          ship.setEnergy(0);
       } else {
-         ship.addEnergy(energyDelta);
+         ship.setEnergy(ship.getEnergy() + energyDelta);
       }
       float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
       if (ship.getResources() + resourcesDelta < 0) {
          ship.setResources(0);
       } else {
-         ship.addResources(resourcesDelta);
+         ship.setResources(ship.getResources() + resourcesDelta);
       }
       float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
       if (ship.getIntegrity() + integrityDelta < 0) {
          ship.setIntegrity(0);
       } else {
-         ship.addIntegrity(integrityDelta);
+         ship.setIntegrity(ship.getIntegrity() + integrityDelta);
       }
    }
 

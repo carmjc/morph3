@@ -137,14 +137,6 @@ public class World {
    protected void onShipDeath(@MObserves ShipDeath shipDeath) {
       LOGGER.debug("Ship death: " + shipDeath.getShip()); //$NON-NLS-1$
       remove(shipDeath.getShip());
-
-      // final Ship ship = entityFactory.newInstance(PhysicalEntityType.SHIP);
-      // ship.setPlayer(shipDeath.getShip().getPlayer());
-      // final Random random = new Random();
-      // ship.setMass(random.nextFloat() / 2 + 0.5f);
-      // ship.getPos().copy(random.nextFloat() * 400 - 200, random.nextFloat() * 400 - 200);
-      // ship.setHealth(10);
-      // add(ship);
    }
 
    protected void onEntityRemovel(@MObserves PhysicalEntityToBeRemoved event) {

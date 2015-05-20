@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import net.carmgate.morph.conf.Conf;
 
 
-@Background
+@Permanent
 @ComponentKind(ComponentType.GENERATORS)
 public class SimpleGenerator extends Component {
 
