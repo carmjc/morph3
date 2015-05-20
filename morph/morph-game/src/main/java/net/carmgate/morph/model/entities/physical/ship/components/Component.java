@@ -14,6 +14,7 @@ public abstract class Component {
    private Animation animation;
    private final Holder<Ship> shipHolder = new Holder<>();
    private final Holder<PhysicalEntity> targetHolder = new Holder<>();
+   private boolean useless;
 
    public Component() {
       if (getClass().isAnnotationPresent(AlwaysActive.class)) {
@@ -99,5 +100,13 @@ public abstract class Component {
 
    public float getMaxStoredResources() {
       return 0;
+   }
+
+   public void setUseless(boolean useless) {
+      this.useless = useless;
+   }
+
+   public boolean isUseless() {
+      return useless;
    }
 }

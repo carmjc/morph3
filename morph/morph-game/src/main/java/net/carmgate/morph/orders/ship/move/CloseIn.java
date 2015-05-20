@@ -42,7 +42,7 @@ public class CloseIn extends MoveOrder {
          return;
       }
 
-      float maxAccel = Ship.MAX_PROPULSOR_FORCE / getOrderee().getMass();
+      float maxAccel = Ship.MAX_PROPULSOR_FORCE / getOrderee().getMass() * getOrderee().getComponentsComposition().get(ComponentType.PROPULSORS);
 
       if (actualDistance < 0) {
          force.copy(getOrderee().getSpeed()).scale(-1);
@@ -68,9 +68,9 @@ public class CloseIn extends MoveOrder {
       }
       // LOGGER.debug(force.length() + " - " + Ship.MAX_PROPULSOR_FORCE);
       float length = force.length();
-      if (length > Ship.MAX_PROPULSOR_FORCE) {
+      if (length > Ship.MAX_PROPULSOR_FORCE * getOrderee().getComponentsComposition().get(ComponentType.PROPULSORS)) {
          // LOGGER.debug("scaling ... ");
-         force.scale(Ship.MAX_PROPULSOR_FORCE / length * getOrderee().getComponentsComposition().get(getComponentTypes()[0]));
+         force.scale(Ship.MAX_PROPULSOR_FORCE / length * getOrderee().getComponentsComposition().get(ComponentType.PROPULSORS));
       }
 
    }

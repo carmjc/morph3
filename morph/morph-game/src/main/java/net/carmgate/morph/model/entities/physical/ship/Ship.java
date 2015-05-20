@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 
 public class Ship extends PhysicalEntity {
 
-   public static final float MAX_PROPULSOR_FORCE = 20f;
+   public static final float MAX_PROPULSOR_FORCE = 200f;
 
    @Inject private World world;
    @Inject private MEvent<WorldEvent> worldEventMgr;
@@ -54,8 +54,10 @@ public class Ship extends PhysicalEntity {
    // internal economics
    private float energy;
    private float energydt; // energy variation d(energy)/dt
+   private float energyMax;
    private float resources;
    private float resourcesdt; // resources variation d(resources)/dt
+   private float resourcesMax;
    private float integrity = 1;
    private float integrityDt; // integrity variation d(integrity)/dt
 
@@ -241,5 +243,21 @@ public class Ship extends PhysicalEntity {
 
    public Map<ComponentType, Float> getComponentsComposition() {
       return componentsComposition;
+   }
+
+   public float getEnergyMax() {
+      return energyMax;
+   }
+
+   public void setEnergyMax(float energyMax) {
+      this.energyMax = energyMax;
+   }
+
+   public float getResourcesMax() {
+      return resourcesMax;
+   }
+
+   public void setResourcesMax(float resourcesMax) {
+      this.resourcesMax = resourcesMax;
    }
 }

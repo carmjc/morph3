@@ -35,8 +35,8 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentFacto
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
-import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
 import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
+import net.carmgate.morph.model.entities.physical.ship.components.SolarPanelGenerator;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.orders.Order;
@@ -277,7 +277,7 @@ public class GameMain {
             ship.setDurability(5);
             ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
             ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
-            ship.add(componentFactory.newInstance(SimpleGenerator.class), 1f / 8);
+            ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
             world.add(ship);
          }
          nextWaveId++;
@@ -287,10 +287,8 @@ public class GameMain {
    private void renderGui() {
       renderGuiForSelectedShip();
 
-      float zoomFactor = uiContext.getViewport().getZoomFactor();
-      Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      float x = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
-      float y = uiContext.getWindow().getHeight() / 2 - 2 - focalPoint.y * (1 - zoomFactor);
+      float x = uiContext.getWindow().getWidth() / 2 - 2;
+      float y = uiContext.getWindow().getHeight() / 2 - 2;
       int line = 0;
       if (world.isTimeFrozen()) {
          RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
@@ -299,20 +297,17 @@ public class GameMain {
 
    private void renderGuiForSelectedShip() {
       Ship ship = uiContext.getSelectedShip();
-      float zoomFactor = uiContext.getViewport().getZoomFactor();
-      Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;// - focalPoint.x * (1 - zoomFactor);
-      float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;// - focalPoint.y * (1 - zoomFactor);
+      float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;
+      float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
       int line = 1;
       if (ship != null) {
          RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
          RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
          RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
          RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.energy"), ship.getEnergy()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.energyDt"), ship.getEnergyDt()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.resources"), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.resourcesDt"), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
          if (ship.getMoveOrder() != null) {
             RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
          }
@@ -331,7 +326,7 @@ public class GameMain {
                if (c.isFamished()) {
                   color = Color.red;
                }
-               if (!c.isActive()) {
+               if (!c.isActive() || c.isUseless()) {
                   color = Color.gray;
                }
 
@@ -342,15 +337,17 @@ public class GameMain {
                RenderUtils.renderQuad(0, 0, 5, 5);
                GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
 
+               float energyDt = c.isUseless() ? 0 : c.getEnergyDt();
+               float resourcesDt = c.isUseless() ? 0 : c.getResourcesDt();
                RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
-                     MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false); //$NON-NLS-1$
+                     MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), energyDt, resourcesDt), line++, color, false); //$NON-NLS-1$
 
             }
          }
       }
 
-      float borderRightX = -uiContext.getWindow().getWidth() / 2;// - focalPoint.x * (1 - zoomFactor);
-      borderTopY = -uiContext.getWindow().getHeight() / 2;// - focalPoint.y * (1 - zoomFactor);
+      float borderRightX = -uiContext.getWindow().getWidth() / 2;
+      borderTopY = -uiContext.getWindow().getHeight() / 2;
 
       GL11.glTranslatef(borderRightX, borderTopY, 0);
       uiContext.getWidgetRoot().renderWidget();
@@ -391,7 +388,7 @@ public class GameMain {
 
          Collection<Component> components = ship.getComponents().values();
          components.forEach(cmp -> {
-            if (cmp.isActive() && !cmp.isFamished()) {
+            if (cmp.isActive() && !cmp.isFamished() && !cmp.isUseless()) {
                Animation anim = cmp.getAnimation();
                if (anim != null) {
                   Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
@@ -507,8 +504,56 @@ public class GameMain {
    }
 
    private void updateShipEconomics(final Ship ship) {
-      // Economics updates from components
-      // FIXME rework this, it is unreadable and probaly useless
+
+      // adjust so that we do not have epsilon vibrations of resources
+      if (ship.getEnergy() * 0.99f > ship.getEnergyMax() && ship.getEnergyMax() > 0) {
+         ship.setEnergy(ship.getEnergyMax());
+      }
+      if (ship.getResources() * 0.99f > ship.getResourcesMax() && ship.getResourcesMax() > 0) {
+         ship.setResources(ship.getResourcesMax());
+      }
+
+      // Compute max storage available
+      float energyMax = 0;
+      float resourcesMax = 0;
+      for (Component cmp : ship.getComponents().values()) {
+         energyMax += cmp.getMaxStoredEnergy();
+         resourcesMax += cmp.getMaxStoredResources();
+      }
+      ship.setEnergyMax(energyMax);
+      ship.setResourcesMax(resourcesMax);
+
+      Collection<Set<ComponentType>> sortedComponentTypes = sortComponentTypesByCriticity(ship);
+      updateShipDts(ship, sortedComponentTypes);
+
+      // Energy and resources evolution with time
+      float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
+      if (ship.getEnergy() + energyDelta < 0) {
+         ship.setEnergy(0);
+      } else {
+         ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, energyMax));
+      }
+      float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
+      if (ship.getResources() + resourcesDelta < 0) {
+         ship.setResources(0);
+      } else {
+         ship.setResources(Math.min(ship.getResources() + resourcesDelta, resourcesMax));
+      }
+      float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
+      if (ship.getIntegrity() + integrityDelta < 0) {
+         ship.setIntegrity(0);
+      } else {
+         ship.setIntegrity(ship.getIntegrity() + integrityDelta);
+      }
+   }
+
+   /**
+    * Returns a sorted collection of {@link ComponentType} by criticity (See {@link Order#getCriticity()})
+    *
+    * @param ship
+    * @return
+    */
+   private Collection<Set<ComponentType>> sortComponentTypesByCriticity(final Ship ship) {
       Map<ComponentType, Integer> componentCriticities = new HashMap<>();
       if (ship.getMoveOrder() != null) {
          for (ComponentType compType : ship.getMoveOrder().getComponentTypes()) {
@@ -530,20 +575,23 @@ public class GameMain {
          }
       }
 
-      Map<Integer, Set<ComponentType>> map = new TreeMap<>((o1, o2) -> o2 - o1);
+      Map<Integer, Set<ComponentType>> sortedComponentTypes = new TreeMap<>((o1, o2) -> o2 - o1);
       for (Map.Entry<ComponentType, Integer> entry : componentCriticities.entrySet()) {
-         Set<ComponentType> set = map.get(entry.getValue());
+         Set<ComponentType> set = sortedComponentTypes.get(entry.getValue());
          if (set == null) {
             set = new HashSet<>();
-            map.put(entry.getValue(), set);
+            sortedComponentTypes.put(entry.getValue(), set);
          }
          set.add(entry.getKey());
       }
+      return sortedComponentTypes.values();
+   }
 
+   private void updateShipDts(final Ship ship, Collection<Set<ComponentType>> sortedComponentTypes) {
       ship.setEnergyDt(0);
       ship.setResourcesDt(0);
       ship.setIntegrityDt(0);
-      for (Set<ComponentType> cmpTypeSet : map.values()) {
+      for (Set<ComponentType> cmpTypeSet : sortedComponentTypes) {
          for (ComponentType cmpType : cmpTypeSet) {
             Component cmp = ship.getComponents().get(cmpType);
             float cmpPercentage = ship.getComponentsComposition().get(cmp.getClass().getAnnotation(ComponentKind.class).value());
@@ -551,9 +599,17 @@ public class GameMain {
                if (ship.getEnergy() + ship.getEnergyDt() + cmp.getEnergyDt() >= 0 &&
                      ship.getResources() + ship.getResourcesDt() + cmp.getResourcesDt() >= 0) {
                   cmp.setFamished(false);
-                  ship.setEnergyDt(ship.getEnergyDt() + cmp.getEnergyDt());
-                  ship.setResourcesDt(ship.getResourcesDt() + cmp.getResourcesDt());
-                  ship.setIntegrityDt(ship.getIntegrityDt() + cmp.getIntegrityDt());
+                  if (ship.getEnergy() >= ship.getEnergyMax() && cmp.getEnergyDt() > 0
+                        || ship.getResources() >= ship.getResourcesMax() && cmp.getResourcesDt() > 0) {
+                     // TODO We assume here that a component that produce something in terms of economics does not serve any other purpose in the ship
+                     // We should handle otherwise
+                     cmp.setUseless(true);
+                  } else {
+                     ship.setEnergyDt(ship.getEnergyDt() + cmp.getEnergyDt());
+                     ship.setResourcesDt(ship.getResourcesDt() + cmp.getResourcesDt());
+                     ship.setIntegrityDt(ship.getIntegrityDt() + cmp.getIntegrityDt());
+                     cmp.setUseless(false);
+                  }
                   // LOGGER.debug("Active: " + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
                } else {
                   cmp.setFamished(true);
@@ -561,34 +617,6 @@ public class GameMain {
                }
             }
          }
-      }
-
-      // Compute max storage available
-      float maxEnergyStorage = 0;
-      float maxResourcesStorage = 0;
-      for (Component cmp : ship.getComponents().values()) {
-         maxEnergyStorage += cmp.getMaxStoredEnergy();
-         maxResourcesStorage += cmp.getMaxStoredResources();
-      }
-
-      // Energy and resources evolution with time
-      float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
-      if (ship.getEnergy() + energyDelta < 0) {
-         ship.setEnergy(0);
-      } else {
-         ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, maxEnergyStorage));
-      }
-      float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
-      if (ship.getResources() + resourcesDelta < 0) {
-         ship.setResources(0);
-      } else {
-         ship.setResources(Math.min(ship.getResources() + resourcesDelta, maxResourcesStorage));
-      }
-      float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
-      if (ship.getIntegrity() + integrityDelta < 0) {
-         ship.setIntegrity(0);
-      } else {
-         ship.setIntegrity(ship.getIntegrity() + integrityDelta);
       }
    }
 
