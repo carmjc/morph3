@@ -29,12 +29,12 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.components.AlwaysActive;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
-import net.carmgate.morph.model.entities.physical.ship.components.Permanent;
 import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
 import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -301,8 +301,8 @@ public class GameMain {
       Ship ship = uiContext.getSelectedShip();
       float zoomFactor = uiContext.getViewport().getZoomFactor();
       Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
-      float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2 - focalPoint.y * (1 - zoomFactor);
+      float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;// - focalPoint.x * (1 - zoomFactor);
+      float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;// - focalPoint.y * (1 - zoomFactor);
       int line = 1;
       if (ship != null) {
          RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
@@ -349,8 +349,8 @@ public class GameMain {
          }
       }
 
-      float borderRightX = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
-      borderTopY = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
+      float borderRightX = -uiContext.getWindow().getWidth() / 2;// - focalPoint.x * (1 - zoomFactor);
+      borderTopY = -uiContext.getWindow().getHeight() / 2;// - focalPoint.y * (1 - zoomFactor);
 
       GL11.glTranslatef(borderRightX, borderTopY, 0);
       uiContext.getWidgetRoot().renderWidget();
@@ -386,8 +386,8 @@ public class GameMain {
       for (final Ship ship : world.getShips()) {
          final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
          final float zoomFactor = uiContext.getViewport().getZoomFactor();
-         GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
          GL11.glScalef(zoomFactor, zoomFactor, 1);
+         GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
 
          Collection<Component> components = ship.getComponents().values();
          components.forEach(cmp -> {
@@ -405,16 +405,16 @@ public class GameMain {
             }
          });
 
-         GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
          GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+         GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
       }
    }
 
    private void renderPhysical() {
       final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
       final float zoomFactor = uiContext.getViewport().getZoomFactor();
-      GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
       GL11.glScalef(zoomFactor, zoomFactor, 1);
+      GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
 
       for (PhysicalEntity entity : world.getPhysicalEntities()) {
          if (!(entity instanceof Ship)) {
@@ -436,8 +436,8 @@ public class GameMain {
          }
       }
 
-      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
       GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
+      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
    }
 
    private void updateKinematics() {
@@ -525,7 +525,7 @@ public class GameMain {
          }
       }
       for (Entry<ComponentType, Component> entry : ship.getComponents().entrySet()) {
-         if (entry.getValue().getClass().isAnnotationPresent(Permanent.class)) {
+         if (entry.getValue().getClass().isAnnotationPresent(AlwaysActive.class)) {
             componentCriticities.put(entry.getKey(), 0);
          }
       }
@@ -563,18 +563,26 @@ public class GameMain {
          }
       }
 
+      // Compute max storage available
+      float maxEnergyStorage = 0;
+      float maxResourcesStorage = 0;
+      for (Component cmp : ship.getComponents().values()) {
+         maxEnergyStorage += cmp.getMaxStoredEnergy();
+         maxResourcesStorage += cmp.getMaxStoredResources();
+      }
+
       // Energy and resources evolution with time
       float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
       if (ship.getEnergy() + energyDelta < 0) {
          ship.setEnergy(0);
       } else {
-         ship.setEnergy(ship.getEnergy() + energyDelta);
+         ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, maxEnergyStorage));
       }
       float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
       if (ship.getResources() + resourcesDelta < 0) {
          ship.setResources(0);
       } else {
-         ship.setResources(ship.getResources() + resourcesDelta);
+         ship.setResources(Math.min(ship.getResources() + resourcesDelta, maxResourcesStorage));
       }
       float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
       if (ship.getIntegrity() + integrityDelta < 0) {

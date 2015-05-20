@@ -93,6 +93,8 @@ public class Select implements MouseListener {
          GL11.glTranslatef(pos.x, pos.y, 0);
          shipSelectRenderer.render(ship);
          GL11.glTranslatef(-pos.x, -pos.y, 0);
+         GL11.glPopName();
+         GL11.glPopName();
       }
 
       GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);

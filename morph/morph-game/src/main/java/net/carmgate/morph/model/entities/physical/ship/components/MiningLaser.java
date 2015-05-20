@@ -18,6 +18,7 @@ public class MiningLaser extends Component {
    @Inject private Conf conf;
 
    private MiningLaserAnim laserAnim;
+   private float maxStoredResources;
 
    @PostConstruct
    public void init() {
@@ -26,6 +27,8 @@ public class MiningLaser extends Component {
       laserAnim.setTarget(getTargetHolder());
       setAnimation(laserAnim);
       LOGGER.debug("laserAnimation added"); //$NON-NLS-1$
+
+      maxStoredResources = conf.getFloatProperty("component.miningLaser.maxStoredResources");
    }
 
    @Override
@@ -38,4 +41,8 @@ public class MiningLaser extends Component {
       return conf.getFloatProperty("component.miningLaser.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.MINING_LASERS); //$NON-NLS-1$
    }
 
+   @Override
+   public float getMaxStoredResources() {
+      return maxStoredResources * getShip().getComponentsComposition().get(ComponentType.MINING_LASERS);
+   }
 }

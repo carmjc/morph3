@@ -16,7 +16,7 @@ public abstract class Component {
    private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 
    public Component() {
-      if (getClass().isAnnotationPresent(Permanent.class)) {
+      if (getClass().isAnnotationPresent(AlwaysActive.class)) {
          setActive(true);
       }
    }
@@ -91,5 +91,13 @@ public abstract class Component {
 
    public void setIntegrityDt(float integrityDt) {
       this.integrityDt = integrityDt;
+   }
+
+   public float getMaxStoredEnergy() {
+      return 0;
+   }
+
+   public float getMaxStoredResources() {
+      return 0;
    }
 }

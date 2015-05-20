@@ -1,15 +1,23 @@
 package net.carmgate.morph.model.entities.physical.ship.components;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import net.carmgate.morph.conf.Conf;
 
 
-@Permanent
+@AlwaysActive
 @ComponentKind(ComponentType.GENERATORS)
 public class SimpleGenerator extends Component {
 
    @Inject private Conf conf;
+
+   private float maxStoredEnergy;
+
+   @PostConstruct
+   private void init() {
+      maxStoredEnergy = conf.getFloatProperty("component.generators.maxStoredEnergy");
+   }
 
    @Override
    public float getEnergyDt() {
@@ -19,6 +27,11 @@ public class SimpleGenerator extends Component {
    @Override
    public float getResourcesDt() {
       return conf.getFloatProperty("component.generators.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.GENERATORS); //$NON-NLS-1$
+   }
+
+   @Override
+   public float getMaxStoredEnergy() {
+      return maxStoredEnergy * getShip().getComponentsComposition().get(ComponentType.GENERATORS);
    }
 
 }

@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import net.carmgate.morph.conf.Conf;
 
 
-@Permanent
+@AlwaysActive
 @ComponentKind(ComponentType.REPAIRER)
 public class SimpleRepairer extends Component {
 
