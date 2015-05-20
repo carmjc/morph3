@@ -7,6 +7,7 @@ import net.carmgate.morph.model.geometry.Vector2f;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,5 +174,57 @@ public class RenderUtils {
          x -= font.getWidth(str);
       }
       font.drawString(x, y + font.getHeight() * (line - 1), str, color);
+   }
+
+   /**
+    * Renders a sprite centered on the current position.
+    *
+    * @param width
+    * @param texture
+    */
+   public static void renderSprite(final float width, Texture texture) {
+      renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1);
+   }
+
+   /**
+    * Renders a quad.
+    *
+    * @param top
+    * @param left
+    * @param bottom
+    * @param right
+    */
+   public static void renderQuad(float left, float top, float right, float bottom) {
+      TextureImpl.bindNone();
+      GL11.glBegin(GL11.GL_QUADS);
+      GL11.glVertex2f(left, top);
+      GL11.glVertex2f(right, top);
+      GL11.glVertex2f(right, bottom);
+      GL11.glVertex2f(left, bottom);
+      GL11.glEnd();
+   }
+
+   /**
+    * Render a sprite using a part of a bigger texture.
+    *
+    * @param width
+    * @param texture
+    * @param texCoordLeft
+    * @param texCoordTop
+    * @param texCoordRight
+    * @param texCoordBottom
+    */
+   public static void renderSpriteFromBigTexture(float width, Texture texture, float texCoordLeft, float texCoordTop, float texCoordRight, float texCoordBottom) {
+      texture.bind();
+      GL11.glBegin(GL11.GL_QUADS);
+      GL11.glTexCoord2f(texCoordLeft, texCoordTop);
+      GL11.glVertex2f(-width / 2, -width / 2);
+      GL11.glTexCoord2f(texCoordRight, texCoordTop);
+      GL11.glVertex2f(width / 2, -width / 2);
+      GL11.glTexCoord2f(texCoordRight, texCoordBottom);
+      GL11.glVertex2f(width / 2, width / 2);
+      GL11.glTexCoord2f(texCoordLeft, texCoordBottom);
+      GL11.glVertex2f(-width / 2, width / 2);
+      GL11.glEnd();
    }
 }

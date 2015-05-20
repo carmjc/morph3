@@ -11,6 +11,7 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.entities.physical.Asteroid;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
+import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;
@@ -24,6 +25,7 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
    @Inject private Conf conf;
 
    private static Texture asteroids1Texture;
+   private float massToSizeFactor;
 
    @SuppressWarnings("unused")
    private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
@@ -40,11 +42,13 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
             LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
          }
       }
+
+      massToSizeFactor = conf.getFloatProperty("asteroid.renderer.massToSizeFactor"); //$NON-NLS-1$
    }
 
    @Override
    public void render(Asteroid asteroid) {
-      float massScale = asteroid.getMass() * conf.getFloatProperty("asteroid.renderer.massToSizeFactor"); //$NON-NLS-1$
+      float massScale = asteroid.getMass() * massToSizeFactor;
       float width = 128f;
 
       int i = 2; // TODO variabilize this
@@ -53,17 +57,7 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
       GL11.glColor4f(1, 1, 1, 1);
       GL11.glScalef(massScale, massScale, 0);
       GL11.glRotatef(asteroid.getRotate(), 0, 0, 1);
-      asteroids1Texture.bind();
-      GL11.glBegin(GL11.GL_QUADS);
-      GL11.glTexCoord2f(i / 8f, j / 8f);
-      GL11.glVertex2f(-width / 2, -width / 2);
-      GL11.glTexCoord2f((i + 1) / 8f, j / 8f);
-      GL11.glVertex2f(width / 2, -width / 2);
-      GL11.glTexCoord2f((i + 1) / 8f, (j + 1) / 8f);
-      GL11.glVertex2f(width / 2, width / 2);
-      GL11.glTexCoord2f(i / 8f, (j + 1) / 8f);
-      GL11.glVertex2f(-width / 2, width / 2);
-      GL11.glEnd();
+      RenderUtils.renderSpriteFromBigTexture(width, asteroids1Texture, i / 8f, j / 8f, (i + 1) / 8f, (j + 1) / 8f);
       GL11.glRotatef(-asteroid.getRotate(), 0, 0, 1);
       GL11.glScalef(1 / massScale, 1 / massScale, 0);
 

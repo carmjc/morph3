@@ -66,7 +66,6 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
-import org.newdawn.slick.opengl.TextureImpl;
 import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
@@ -212,7 +211,7 @@ public class GameMain {
             select.render();
          }
          updateWorld();
-         // addWaves();
+         addWaves();
 
          // Fire deferred events
          eventManager.deferredFire();
@@ -262,6 +261,7 @@ public class GameMain {
       uiContext.getWidgetRoot().add(componentPonderationWidget);
    }
 
+   // TODO Find an other way to do this
    private void addWaves() {
       if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
          for (int i = 0; i < nextWaveId; i++) {
@@ -277,9 +277,9 @@ public class GameMain {
             ship.setResources(20);
             ship.setIntegrity(1);
             ship.setDurability(5);
-            ship.add(componentFactory.newInstance(Laser.class), 1);
-            ship.add(componentFactory.newInstance(SimplePropulsor.class), 0.5f);
-            ship.add(componentFactory.newInstance(SimpleGenerator.class), 1f / 3);
+            ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
+            ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
+            ship.add(componentFactory.newInstance(SimpleGenerator.class), 1f / 8);
             world.add(ship);
          }
          nextWaveId++;
@@ -303,28 +303,28 @@ public class GameMain {
       Ship ship = uiContext.getSelectedShip();
       float zoomFactor = uiContext.getViewport().getZoomFactor();
       Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      float x = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
-      float y = -uiContext.getWindow().getHeight() / 2 + 2 - focalPoint.y * (1 - zoomFactor);
+      float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2 - focalPoint.x * (1 - zoomFactor);
+      float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2 - focalPoint.y * (1 - zoomFactor);
       int line = 1;
       if (ship != null) {
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energy"), ship.getEnergy()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.energyDt"), ship.getEnergyDt()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resources"), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.resourcesDt"), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.energy"), ship.getEnergy()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.energyDt"), ship.getEnergyDt()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.resources"), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
+         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.resourcesDt"), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
          if (ship.getMoveOrder() != null) {
-            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+            RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
          }
          if (ship.getActionOrder() != null) {
-            RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+            RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
          }
          if (!ship.getBgOrders().isEmpty()) {
-            RenderUtils.renderText(font, x, y, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false); //$NON-NLS-1$
+            RenderUtils.renderText(font, borderLeftX, borderTopY, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false); //$NON-NLS-1$
             for (Order bgOrder : ship.getBgOrders()) {
-               RenderUtils.renderText(font, x, y, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+               RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
             }
          }
          if (uiContext.getRenderMode() == RenderMode.DEBUG) {
@@ -337,36 +337,26 @@ public class GameMain {
                   color = Color.gray;
                }
 
-               GL11.glTranslatef(x - 5, y + font.getLineHeight() * line - 10, 0);
+               GL11.glTranslatef(borderLeftX - 5, borderTopY + font.getLineHeight() * line - 10, 0);
                ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
                float[] cmpColor = cmpType.getColor();
-               TextureImpl.bindNone();
                GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
-               GL11.glBegin(GL11.GL_QUADS);
-               // GL11.glTexCoord2f(0f, 0f);
-               GL11.glVertex2f(0, 0);
-               // GL11.glTexCoord2f(1f, 0f);
-               GL11.glVertex2f(5, 0);
-               // GL11.glTexCoord2f(1f, 1f);
-               GL11.glVertex2f(5, 5);
-               // GL11.glTexCoord2f(0f, 1f);
-               GL11.glVertex2f(0, 5);
-               GL11.glEnd();
-               GL11.glTranslatef(-(x - 5), -(y + font.getLineHeight() * line - 10), 0);
+               RenderUtils.renderQuad(0, 0, 5, 5);
+               GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
 
-               RenderUtils.renderText(font, x - 10, y,
+               RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
                      MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false); //$NON-NLS-1$
 
             }
          }
       }
 
-      x = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
-      y = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
+      float borderRightX = -uiContext.getWindow().getWidth() / 2 - focalPoint.x * (1 - zoomFactor);
+      borderTopY = -uiContext.getWindow().getHeight() / 2 - focalPoint.y * (1 - zoomFactor);
 
-      GL11.glTranslatef(x, y, 0);
+      GL11.glTranslatef(borderRightX, borderTopY, 0);
       uiContext.getWidgetRoot().renderWidget();
-      GL11.glTranslatef(-x, -y, 0);
+      GL11.glTranslatef(-borderRightX, -borderTopY, 0);
    }
 
    @SuppressWarnings({ "unused" })

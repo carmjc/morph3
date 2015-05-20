@@ -38,10 +38,10 @@ ship.player = me;
 ship.energy = 10;
 ship.resources = 10;
 ship.getSpeed().copy(-100, -100)
-ship.add(componentFactory.newInstance(MiningLaser.class), 1);
-ship.add(componentFactory.newInstance(SimplePropulsor.class), 1.0 / 2);
-ship.add(componentFactory.newInstance(SimpleGenerator.class), 1.0 / 3);
-ship.add(componentFactory.newInstance(SimpleRepairer.class), 1.0 / 2);
+ship.add(componentFactory.newInstance(MiningLaser.class), 1.0 / 16);
+ship.add(componentFactory.newInstance(SimplePropulsor.class), 1.0 / 4);
+ship.add(componentFactory.newInstance(SimpleGenerator.class), 1.0 / 8);
+ship.add(componentFactory.newInstance(SimpleRepairer.class), 1.0 / 16);
 ship.add(componentFactory.newInstance(Laser.class), 1.0 / 2);
 //order = orderFactory.newInstance(OrderType.MINE_ASTEROID, ship);
 //order.setAsteroid(asteroid);

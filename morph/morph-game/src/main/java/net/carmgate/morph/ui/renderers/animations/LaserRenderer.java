@@ -16,10 +16,6 @@ public class LaserRenderer implements Renderer<LaserAnim> {
 
    private Random rand = new Random();
 
-   @Override
-   public void init() {
-   }
-
    @SuppressWarnings("unused")
    private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
       newRendererEventMgr.fire(new NewRendererFound(this));

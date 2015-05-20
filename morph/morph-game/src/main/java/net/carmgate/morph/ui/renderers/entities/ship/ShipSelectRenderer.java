@@ -2,11 +2,9 @@ package net.carmgate.morph.ui.renderers.entities.ship;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
@@ -16,15 +14,6 @@ import org.lwjgl.opengl.GL11;
 
 @Singleton
 public class ShipSelectRenderer implements SelectRenderer<Ship> {
-
-   @Inject
-   private UIContext uiContext;
-
-   @Override
-   public void init() {
-      // TODO Auto-generated method stub
-
-   }
 
    @SuppressWarnings("unused")
    private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {

@@ -25,7 +25,6 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureImpl;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
@@ -46,6 +45,8 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
    private boolean leftAnchor;
    private float startOtherCmpPercentage;
    private float startSelectedCmpPercentage;
+   private float componentPonderationWidgetHeight;
+   private float componentPonderationWidgetWidth;
 
    @Override
    public void renderWidget() {
@@ -58,17 +59,11 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
       }
 
       // Render component repartition gui
-      float height = conf.getFloatProperty("ui.componentPonderationWidget.height"); //$NON-NLS-1$
-      float width = conf.getFloatProperty("ui.componentPonderationWidget.width"); //$NON-NLS-1$
+      float height = componentPonderationWidgetHeight;
+      float width = componentPonderationWidgetWidth;
 
-      TextureImpl.bindNone();
       GL11.glColor4f(1, 1, 1, 1);
-      GL11.glBegin(GL11.GL_QUADS);
-      GL11.glVertex2f(0, 25);
-      GL11.glVertex2f(width + 1, 25);
-      GL11.glVertex2f(width + 1, 25 + height);
-      GL11.glVertex2f(0, 25 + height);
-      GL11.glEnd();
+      RenderUtils.renderQuad(0, 25, width + 1, 25 + height);
 
       float aggregatedPonderation = 0;
       int i = 0;
@@ -81,26 +76,19 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
             1, 0.25f }, new float[] { 0, 0, 0, 0 });
 
          GL11.glTranslatef(i * width / nbCmpType + width / nbCmpType / 2, 0, 0);
-         // Texture texture = cmpTextures.get(ponderation.getKey());
          String str = ponderation.getKey().name();
          CharSequence ss = str.subSequence(0, 1);
          Color color = new Color(Color.white);
          RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 1, color);
          GL11.glTranslatef(-i * width / nbCmpType - width / nbCmpType / 2, 0, 0);
 
-         TextureImpl.bindNone();
          GL11.glTranslatef(aggregatedPonderation * width, 25, 0);
          float[] cmpColor = ponderation.getKey().getColor();
          if (!cmp.isActive()) {
             cmpColor = new float[] { 0.3f, 0.3f, 0.3f, 1 };
          }
          GL11.glColor4f(cmpColor[0], cmpColor[1], cmpColor[2], cmpColor[3]);
-         GL11.glBegin(GL11.GL_QUADS);
-         GL11.glVertex2f(1, 1);
-         GL11.glVertex2f(width * ponderation.getValue(), 1);
-         GL11.glVertex2f(width * ponderation.getValue(), height - 1);
-         GL11.glVertex2f(1, height - 1);
-         GL11.glEnd();
+         RenderUtils.renderQuad(1, 1, width * ponderation.getValue(), height - 1);
          GL11.glTranslatef(-aggregatedPonderation * width, -25, 0);
 
          aggregatedPonderation += ponderation.getValue();
@@ -116,33 +104,24 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
          awtFont = awtFont.deriveFont(12f); // set font size
          font = new TrueTypeFont(awtFont, true);
       } catch (FontFormatException | IOException e) {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
+         LOGGER.error("Exception raised while loading font", e); //$NON-NLS-1$
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.laser.renderer.texture")))) { //$NON-NLS-1$
-         cmpTextures.put(ComponentType.LASERS, TextureLoader.getTexture("PNG", fileInputStream));
+      try (BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.laser.renderer.texture"))); //$NON-NLS-1$
+            BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.miningLaser.renderer.texture"))); //$NON-NLS-1$
+            BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$
+            BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.propulsors.renderer.texture")))) { //$NON-NLS-1$
+         cmpTextures.put(ComponentType.LASERS, TextureLoader.getTexture("PNG", laserInputStream));
+         cmpTextures.put(ComponentType.MINING_LASERS, TextureLoader.getTexture("PNG", mlInputStream));
+         cmpTextures.put(ComponentType.REPAIRER, TextureLoader.getTexture("PNG", repairerInputStream));
+         cmpTextures.put(ComponentType.PROPULSORS, TextureLoader.getTexture("PNG", propInputStream));
       } catch (IOException e) {
          LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
       }
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.miningLaser.renderer.texture")))) { //$NON-NLS-1$
-         cmpTextures.put(ComponentType.MINING_LASERS, TextureLoader.getTexture("PNG", fileInputStream));
-      } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
-      }
+      componentPonderationWidgetHeight = conf.getFloatProperty("ui.componentPonderationWidget.height");
+      componentPonderationWidgetWidth = conf.getFloatProperty("ui.componentPonderationWidget.width");
 
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture")))) { //$NON-NLS-1$
-         cmpTextures.put(ComponentType.REPAIRER, TextureLoader.getTexture("PNG", fileInputStream));
-      } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
-      }
-
-      try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.propulsors.renderer.texture")))) { //$NON-NLS-1$
-         cmpTextures.put(ComponentType.PROPULSORS, TextureLoader.getTexture("PNG", fileInputStream));
-      } catch (IOException e) {
-         LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
-      }
    }
 
    @Override
@@ -152,17 +131,11 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
       }
 
       // Render component repartition gui
-      float height = conf.getFloatProperty("ui.componentPonderationWidget.height"); //$NON-NLS-1$
-      float width = conf.getFloatProperty("ui.componentPonderationWidget.width"); //$NON-NLS-1$
+      float height = componentPonderationWidgetHeight;
+      float width = componentPonderationWidgetWidth;
 
-      TextureImpl.bindNone();
       GL11.glColor4f(1, 1, 1, 1);
-      GL11.glBegin(GL11.GL_QUADS);
-      GL11.glVertex2f(0, 25);
-      GL11.glVertex2f(width + 1, 25);
-      GL11.glVertex2f(width + 1, 25 + height);
-      GL11.glVertex2f(0, 25 + height);
-      GL11.glEnd();
+      RenderUtils.renderQuad(0, 25, width + 1, 25 + height);
    }
 
    @Override
@@ -191,7 +164,7 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 
                float cmpWidth = entry.getValue();
                cmpEnd = cmpStart + cmpWidth;
-               if (dragStart >= cmpStart && dragStart < cmpStart + Math.min(10 / conf.getFloatProperty("ui.componentPonderationWidget.width"), cmpWidth)) {
+               if (dragStart >= cmpStart && dragStart < cmpStart + Math.min(10 / componentPonderationWidgetWidth, cmpWidth)) {
                   selectedCmpType = entry.getKey();
                   if (otherCmpType != null) {
                      startOtherCmpPercentage = ship.getComponentsComposition().get(otherCmpType);
@@ -200,7 +173,7 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
                      return;
                   }
                }
-               if (dragStart < cmpEnd && dragStart >= cmpEnd - Math.min(cmpWidth, 10 / conf.getFloatProperty("ui.componentPonderationWidget.width"))) {
+               if (dragStart < cmpEnd && dragStart >= cmpEnd - Math.min(cmpWidth, 10 / componentPonderationWidgetWidth)) {
                   selectedCmpType = entry.getKey();
                   leftAnchor = true;
                }
@@ -215,7 +188,7 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
             selectedCmpType = null;
             otherCmpType = null;
          } else {
-            float delta = (gameMouse.getX() - dragContext.getOldMousePosInWindow().getX()) / conf.getFloatProperty("ui.componentPonderationWidget.width");
+            float delta = (gameMouse.getX() - dragContext.getOldMousePosInWindow().getX()) / componentPonderationWidgetWidth;
             if (leftAnchor) {
                ship.getComponentsComposition().put(otherCmpType, Math.min(Math.max(0f, startOtherCmpPercentage - delta), startOtherCmpPercentage + startSelectedCmpPercentage));
                ship.getComponentsComposition().put(selectedCmpType, Math.min(Math.max(0f, startSelectedCmpPercentage + delta), startOtherCmpPercentage + startSelectedCmpPercentage));
@@ -233,7 +206,7 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
    }
 
    public float getCoeff(float oldMouseX) {
-      float dragStart = (oldMouseX - 5) / conf.getFloatProperty("ui.componentPonderationWidget.width");
+      float dragStart = (oldMouseX - 5) / componentPonderationWidgetWidth;
       if (dragStart < 0) {
          dragStart = 0;
       }

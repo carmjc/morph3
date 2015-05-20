@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -70,18 +69,8 @@ public class Ship extends PhysicalEntity {
    public void add(Component component, float compositionContribution) {
       component.setShip(this);
       ComponentKind componentKind = component.getClass().getAnnotation(ComponentKind.class);
-      getComponents().put(componentKind.value(), component);
-
-      // update components composition
-      for (Entry<ComponentType, Float> entry : componentsComposition.entrySet()) {
-         entry.setValue(entry.getValue() * (1 - compositionContribution));
-      }
-      Float componentCurrentContribution = componentsComposition.get(componentKind.value());
-      if (componentCurrentContribution == null) {
-         componentsComposition.put(componentKind.value(), compositionContribution);
-      } else {
-         componentsComposition.put(componentKind.value(), componentCurrentContribution + compositionContribution);
-      }
+      components.put(componentKind.value(), component);
+      componentsComposition.put(componentKind.value(), compositionContribution);
    }
 
    public void add(Order order) {
