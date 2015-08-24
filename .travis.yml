@@ -5,4 +5,4 @@ before_script:
  - mvn install:install-file -Dfile=morph/morph-game/libs-to-add-to-local-maven-repo/slick-util.jar -DgroupId=org.newdawn.slick -DartifactId=slick-util -Dversion=UNKNOWN -Dpackaging=jar
 script:
  - cd morph
- - mvn -X install
+ - mvn install
