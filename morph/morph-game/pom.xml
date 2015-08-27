@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.carmgate.morph</groupId>
-		<artifactId>morph-parent</artifactId>
+		<artifactId>morph</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>morph-game</artifactId>
@@ -70,7 +70,7 @@
 				<executions>
 					<execution>
 						<id>l4j-clui</id>
-						<phase>package</phase>
+						<phase>deploy</phase>
 						<goals>
 							<goal>launch4j</goal>
 						</goals>
