@@ -21,6 +21,16 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jboss.weld.environment.se.events.ContainerInitialized;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.util.ResourceLoader;
+import org.slf4j.Logger;
+
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.model.World;
@@ -59,565 +69,556 @@ import net.carmgate.morph.ui.widgets.ComponentPonderationWidget;
 import net.carmgate.morph.ui.widgets.WidgetContainer;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 
-import org.jboss.weld.environment.se.events.ContainerInitialized;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.Color;
-import org.newdawn.slick.TrueTypeFont;
-import org.newdawn.slick.util.ResourceLoader;
-import org.slf4j.Logger;
-
 @Singleton
 public class GameMain {
 
-   @Inject private MEventManager eventManager;
-   @Inject private Logger LOGGER;
-   @Inject private Conf conf;
-   @Inject private World world;
-   @Inject private UIContext uiContext;
-   @Inject private MouseManager mouseManager;
-   @Inject private KeyboardManager keyboardManager;
-   @Inject private PhysicalEntityFactory physicalEntityFactory;
-   @Inject private OrderFactory orderFactory;
-   @Inject private ComponentFactory componentFactory;
-   @Inject private Messages messages;
-   @Inject private WidgetFactory widgetFactory;
-   @Inject private Select select;
-
-   // Computation attributes
-   private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
-   private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
-   private long lastUpdateTime = 0;
-   private static TrueTypeFont font;
-   private int nextWaveId = 1;
-
-   private boolean gameLoaded;
-
-   /**
-    * Initialise the GL display
-    *
-    * @param width
-    *           The width of the display
-    * @param height
-    *           The height of the display
-    */
-   private void initGL(int width, int height) {
-      try {
-         Display.setDisplayMode(new DisplayMode(width, height));
-         Display.create();
-         Display.setTitle(conf.getProperty("ui.window.title")); //$NON-NLS-1$
-         // Display.setVSyncEnabled(true);
-         Display.setResizable(true);
-      } catch (final LWJGLException e) {
-         e.printStackTrace();
-         System.exit(0);
-      }
-
-      LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
-
-      initView();
-   }
-
-   /**
-    * Inits the view, viewport, window, etc.
-    * This should be called at init and when the view changes (window is resized for instance).
-    */
-   private void initView() {
-
-      final int width = Display.getWidth();
-      final int height = Display.getHeight();
-      LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
-
-      // set clear color - Wont be needed once we have a background
-      GL11.glClearColor(0.2f, 0.2f, 0.2f, 0f);
-
-      // enable alpha blending
-      GL11.glEnable(GL11.GL_BLEND);
-      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-      GL11.glDisable(GL11.GL_DEPTH_TEST);
-      GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
-      GL11.glEnable(GL11.GL_LINE_SMOOTH);
-
-      GL11.glMatrixMode(GL11.GL_PROJECTION);
-      GL11.glLoadIdentity();
-
-      GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
-      GL11.glViewport(0, 0, width, height);
-
-      GL11.glMatrixMode(GL11.GL_MODELVIEW);
-      GL11.glLoadIdentity();
-
-      if (font == null) {
-         // Font awtFont = new Font("Verdana", Font.PLAIN, 11);
-         Font awtFont;
-         try {
-            awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ui.font"))); //$NON-NLS-1$
-            awtFont = awtFont.deriveFont(conf.getFloatProperty("ui.font.size")); // set font size //$NON-NLS-1$
-            font = new TrueTypeFont(awtFont, true);
-         } catch (FontFormatException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-         }
-      }
-   }
-
-   @SuppressWarnings("unused")
-   private void onGameLoaded(@Observes GameLoaded gameLoaded) {
-      this.gameLoaded = true;
-   }
-
-   @SuppressWarnings("unused")
-   private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
-      new Thread((Runnable) () -> {
-         while (!GameMain.this.gameLoaded) {
-            try {
-               Thread.sleep(100);
-            } catch (Exception e) {
-               LOGGER.error("Thread.sleep interrupted", e); //$NON-NLS-1$
-            }
-         }
-         loop();
-      }, "Game engine").start(); //$NON-NLS-1$
-   }
-
-   public void loop() {
-      // init OpenGL context
-      initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight")); //$NON-NLS-1$ //$NON-NLS-2$
-
-      // init GUI
-      initGui();
-
-      for (final Renderer<?> renderer : renderers.values()) {
-         renderer.init();
-      }
-
-      // Rendering loop
-      while (true) {
-
-         // Reset
-         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-
-         // Renders everything
-         if (uiContext.getRenderMode() != RenderMode.SELECT_DEBUG) {
-            renderComponentsAnimation();
-            renderPhysical();
-            renderGui();
-         } else {
-            select.render();
-         }
-         updateWorld();
-         addWaves();
-
-         // Fire deferred events
-         eventManager.deferredFire();
-
-         // Update kinematics
-         updateKinematics();
-
-         lastUpdateTime = world.getTime();
-
-         // updates display and sets frame rate
-         Display.update();
-         Display.sync(100);
-
-         // handle window resize
-         Window window = uiContext.getWindow();
-         if (Display.wasResized()) {
-            initView();
-            window.setWidth(Display.getWidth());
-            window.setHeight(Display.getHeight());
-         }
-
-         GL11.glMatrixMode(GL11.GL_PROJECTION);
-         GL11.glLoadIdentity();
-
-         // GL11.glOrtho(0, window.getWidth(), 0, -window.getHeight(), 1, -1);
-         GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
-         GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
-
-         GL11.glMatrixMode(GL11.GL_MODELVIEW);
-         GL11.glLoadIdentity();
-
-         // Handles the window close requested event
-         if (Display.isCloseRequested()) {
-            Display.destroy();
-            System.exit(0);
-         }
-
-         mouseManager.handleMouseEvent();
-         keyboardManager.handleKeyboardEvent();
-      }
-   }
-
-   private void initGui() {
-      uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
-      ComponentPonderationWidget componentPonderationWidget = widgetFactory.newInstance(ComponentPonderationWidget.class);
-      componentPonderationWidget.setPosition(new float[] { 5, uiContext.getWindow().getHeight() - 50 });
-      uiContext.getWidgetRoot().add(componentPonderationWidget);
-   }
-
-   // TODO Find an other way to do this
-   private void addWaves() {
-      if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
-         for (int i = 0; i < nextWaveId; i++) {
-            LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
-            Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
-            ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
-            ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
-            Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
-            attack.setTarget(world.getShips().get(0));
-            ship.add(attack);
-            ship.setMass(0.5f);
-            ship.setEnergy(20);
-            ship.setResources(20);
-            ship.setIntegrity(1);
-            ship.setDurability(5);
-            ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
-            ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
-            ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
-            world.add(ship);
-         }
-         nextWaveId++;
-      }
-   }
-
-   private void renderGui() {
-      renderGuiForSelectedShip();
-
-      float x = uiContext.getWindow().getWidth() / 2 - 2;
-      float y = uiContext.getWindow().getHeight() / 2 - 2;
-      int line = 0;
-      if (world.isTimeFrozen()) {
-         RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
-      }
-   }
-
-   private void renderGuiForSelectedShip() {
-      Ship ship = uiContext.getSelectedShip();
-      float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;
-      float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
-      int line = 1;
-      if (ship != null) {
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
-         RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
-         if (ship.getMoveOrder() != null) {
-            RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-         }
-         if (ship.getActionOrder() != null) {
-            RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-         }
-         if (!ship.getBgOrders().isEmpty()) {
-            RenderUtils.renderText(font, borderLeftX, borderTopY, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false); //$NON-NLS-1$
-            for (Order bgOrder : ship.getBgOrders()) {
-               RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-            }
-         }
-         if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-            for (Component c : ship.getComponents().values()) {
-               Color color = Color.white;
-               if (c.isFamished()) {
-                  color = Color.red;
-               }
-               if (!c.isActive() || c.isUseless()) {
-                  color = Color.gray;
-               }
-
-               GL11.glTranslatef(borderLeftX - 5, borderTopY + font.getLineHeight() * line - 10, 0);
-               ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
-               float[] cmpColor = cmpType.getColor();
-               GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
-               RenderUtils.renderQuad(0, 0, 5, 5);
-               GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
-
-               float energyDt = c.isUseless() ? 0 : c.getEnergyDt();
-               float resourcesDt = c.isUseless() ? 0 : c.getResourcesDt();
-               RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
-                     MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), energyDt, resourcesDt), line++, color, false); //$NON-NLS-1$
-
-            }
-         }
-      }
-
-      float borderRightX = -uiContext.getWindow().getWidth() / 2;
-      borderTopY = -uiContext.getWindow().getHeight() / 2;
-
-      GL11.glTranslatef(borderRightX, borderTopY, 0);
-      uiContext.getWidgetRoot().renderWidget();
-      GL11.glTranslatef(-borderRightX, -borderTopY, 0);
-   }
-
-   @SuppressWarnings({ "unused" })
-   private void registerRenderer(@Observes NewRendererFound event) {
-      try {
-         final Renderer<? extends Renderable> renderer = event.getRenderer();
-         final Type[] interfaces = renderer.getClass().getGenericInterfaces();
-         for (final Type interf : interfaces) {
-            if (interf instanceof ParameterizedType) {
-               final ParameterizedType paramType = (ParameterizedType) interf;
-               if (paramType.getRawType().equals(Renderer.class)) {
-                  final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
-                  renderers.put(type, renderer);
-                  LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-               }
-               if (paramType.getRawType().equals(SelectRenderer.class)) {
-                  final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
-                  selectRenderers.put(type, renderer);
-                  LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-               }
-            }
-         }
-      } catch (final Exception e) {
-         LOGGER.error("Error", e); //$NON-NLS-1$
-      }
-   }
-
-   private void renderComponentsAnimation() {
-      for (final Ship ship : world.getShips()) {
-         final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-         final float zoomFactor = uiContext.getViewport().getZoomFactor();
-         GL11.glScalef(zoomFactor, zoomFactor, 1);
-         GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
-
-         Collection<Component> components = ship.getComponents().values();
-         components.forEach(cmp -> {
-            if (cmp.isActive() && !cmp.isFamished() && !cmp.isUseless()) {
-               Animation anim = cmp.getAnimation();
-               if (anim != null) {
-                  Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
-                  if (anim.getAnimationEnd() > world.getTime()) {
-                     renderer.render(anim);
-                  }
-                  if (anim.getAnimationEnd() + anim.getAnimationCoolDown() < world.getTime()) {
-                     anim.setAnimationEnd(anim.getAnimationEnd() + anim.getAnimationCoolDown() + anim.getAnimationDuration());
-                  }
-               }
-            }
-         });
-
-         GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
-         GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
-      }
-   }
-
-   private void renderPhysical() {
-      final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
-      final float zoomFactor = uiContext.getViewport().getZoomFactor();
-      GL11.glScalef(zoomFactor, zoomFactor, 1);
-      GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
-
-      for (PhysicalEntity entity : world.getPhysicalEntities()) {
-         if (!(entity instanceof Ship)) {
-            final Vector2f pos = entity.getPos();
-            GL11.glTranslatef(pos.x, pos.y, 0);
-            Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
-            renderer.render(entity);
-            GL11.glTranslatef(-pos.x, -pos.y, 0);
-         }
-      }
-
-      final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
-      if (shipRenderer != null) {
-         for (final Ship ship : world.getShips()) {
-            final Vector2f pos = ship.getPos();
-            GL11.glTranslatef(pos.x, pos.y, 0);
-            shipRenderer.render(ship);
-            GL11.glTranslatef(-pos.x, -pos.y, 0);
-         }
-      }
-
-      GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
-      GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
-   }
-
-   private void updateKinematics() {
-      for (final PhysicalEntity entity : world.getPhysicalEntities()) {
-         if (entity instanceof Ship && ((Ship) entity).isForceStop()) {
-            entity.getAccel().copy(Vector2f.NULL);
-            entity.getSpeed().copy(Vector2f.NULL);
-            continue;
-         }
-
-         Vector2f tmpEntityAccel = new Vector2f();
-         Vector2f tmpAccel = new Vector2f();
-         Vector2f tmp = new Vector2f();
-
-         for (final ForceSource source : entity.getForceSources()) {
-            tmpAccel.copy(source.getForce()).scale(1 / entity.getMass()); // FIXME This is only using one force ... :(
-            tmpEntityAccel.add(tmpAccel);
-         }
-
-         // kinematics
-         entity.getAccel().copy(tmpEntityAccel);
-         tmp.copy(entity.getAccel()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
-         entity.getSpeed().add(tmp);
-         // entity.getSpeed().scale(1f - 0.005f * (world.getTime() - lastUpdateTime) / 1000); // drag
-         tmp.copy(entity.getSpeed()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
-         entity.getPos().add(tmp);
-
-         // rotations
-         entity.setRotate(entity.getRotate() + entity.getRotateSpeed() * (world.getTime() - lastUpdateTime) / 1000);
-      }
-   }
-
-   private void updateWorld() {
-      world.updateTime();
-      for (final Ship ship : world.getShips()) {
-         // economics management
-         updateShipEconomics(ship);
-
-         // move order
-         if (ship.getMoveOrder() != null) {
-            ship.getMoveOrder().eval();
-         }
-
-         // action order
-         final Order order = ship.getActionOrder();
-         if (order != null && !order.isDone()) {
-            order.eval();
-         }
-         if (order != null && order.isDone()) {
-            LOGGER.debug("order removed: " + order); //$NON-NLS-1$
-            ship.removeActionOrder();
-         }
-
-         // background orders
-         List<Order> bgOrdersToRemove = new ArrayList<>();
-         for (Order bgOrder : ship.getBgOrders()) {
-            if (bgOrder != null && !bgOrder.isDone()) {
-               bgOrder.eval();
-            }
-            if (bgOrder != null && bgOrder.isDone()) {
-               LOGGER.debug("order removed: " + bgOrder); //$NON-NLS-1$
-               bgOrdersToRemove.add(bgOrder);
-            }
-         }
-         ship.getBgOrders().removeAll(bgOrdersToRemove);
-      }
-   }
-
-   private void updateShipEconomics(final Ship ship) {
-
-      // adjust so that we do not have epsilon vibrations of resources
-      if (ship.getEnergy() * 0.99f > ship.getEnergyMax() && ship.getEnergyMax() > 0) {
-         ship.setEnergy(ship.getEnergyMax());
-      }
-      if (ship.getResources() * 0.99f > ship.getResourcesMax() && ship.getResourcesMax() > 0) {
-         ship.setResources(ship.getResourcesMax());
-      }
-
-      // Compute max storage available
-      float energyMax = 0;
-      float resourcesMax = 0;
-      for (Component cmp : ship.getComponents().values()) {
-         energyMax += cmp.getMaxStoredEnergy();
-         resourcesMax += cmp.getMaxStoredResources();
-      }
-      ship.setEnergyMax(energyMax);
-      ship.setResourcesMax(resourcesMax);
-
-      Collection<Set<ComponentType>> sortedComponentTypes = sortComponentTypesByCriticity(ship);
-      updateShipDts(ship, sortedComponentTypes);
-
-      // Energy and resources evolution with time
-      float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
-      if (ship.getEnergy() + energyDelta < 0) {
-         ship.setEnergy(0);
-      } else {
-         ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, energyMax));
-      }
-      float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
-      if (ship.getResources() + resourcesDelta < 0) {
-         ship.setResources(0);
-      } else {
-         ship.setResources(Math.min(ship.getResources() + resourcesDelta, resourcesMax));
-      }
-      float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
-      if (ship.getIntegrity() + integrityDelta < 0) {
-         ship.setIntegrity(0);
-      } else {
-         ship.setIntegrity(ship.getIntegrity() + integrityDelta);
-      }
-   }
-
-   /**
-    * Returns a sorted collection of {@link ComponentType} by criticity (See {@link Order#getCriticity()})
-    *
-    * @param ship
-    * @return
-    */
-   private Collection<Set<ComponentType>> sortComponentTypesByCriticity(final Ship ship) {
-      Map<ComponentType, Integer> componentCriticities = new HashMap<>();
-      if (ship.getMoveOrder() != null) {
-         for (ComponentType compType : ship.getMoveOrder().getComponentTypes()) {
-            if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getMoveOrder().getCriticity()) {
-               componentCriticities.put(compType, ship.getMoveOrder().getCriticity());
-            }
-         }
-      }
-      if (ship.getActionOrder() != null) {
-         for (ComponentType compType : ship.getActionOrder().getComponentTypes()) {
-            if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getActionOrder().getCriticity()) {
-               componentCriticities.put(compType, ship.getActionOrder().getCriticity());
-            }
-         }
-      }
-      for (Entry<ComponentType, Component> entry : ship.getComponents().entrySet()) {
-         if (entry.getValue().getClass().isAnnotationPresent(AlwaysActive.class)) {
-            componentCriticities.put(entry.getKey(), 0);
-         }
-      }
-
-      Map<Integer, Set<ComponentType>> sortedComponentTypes = new TreeMap<>((o1, o2) -> o2 - o1);
-      for (Map.Entry<ComponentType, Integer> entry : componentCriticities.entrySet()) {
-         Set<ComponentType> set = sortedComponentTypes.get(entry.getValue());
-         if (set == null) {
-            set = new HashSet<>();
-            sortedComponentTypes.put(entry.getValue(), set);
-         }
-         set.add(entry.getKey());
-      }
-      return sortedComponentTypes.values();
-   }
-
-   private void updateShipDts(final Ship ship, Collection<Set<ComponentType>> sortedComponentTypes) {
-      ship.setEnergyDt(0);
-      ship.setResourcesDt(0);
-      ship.setIntegrityDt(0);
-      for (Set<ComponentType> cmpTypeSet : sortedComponentTypes) {
-         for (ComponentType cmpType : cmpTypeSet) {
-            Component cmp = ship.getComponents().get(cmpType);
-            float cmpPercentage = ship.getComponentsComposition().get(cmp.getClass().getAnnotation(ComponentKind.class).value());
-            if (cmp.isActive() && cmpPercentage > 0) {
-               if (ship.getEnergy() + ship.getEnergyDt() + cmp.getEnergyDt() >= 0 &&
-                     ship.getResources() + ship.getResourcesDt() + cmp.getResourcesDt() >= 0) {
-                  cmp.setFamished(false);
-                  if (ship.getEnergy() >= ship.getEnergyMax() && cmp.getEnergyDt() > 0
-                        || ship.getResources() >= ship.getResourcesMax() && cmp.getResourcesDt() > 0) {
-                     // TODO We assume here that a component that produce something in terms of economics does not serve any other purpose in the ship
-                     // We should handle otherwise
-                     cmp.setUseless(true);
-                  } else {
-                     ship.setEnergyDt(ship.getEnergyDt() + cmp.getEnergyDt());
-                     ship.setResourcesDt(ship.getResourcesDt() + cmp.getResourcesDt());
-                     ship.setIntegrityDt(ship.getIntegrityDt() + cmp.getIntegrityDt());
-                     cmp.setUseless(false);
-                  }
-                  // LOGGER.debug("Active: " + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
-               } else {
-                  cmp.setFamished(true);
-                  // LOGGER.debug("Famished" + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
-               }
-            }
-         }
-      }
-   }
+	@Inject private MEventManager eventManager;
+	@Inject private Logger LOGGER;
+	@Inject private Conf conf;
+	@Inject private World world;
+	@Inject private UIContext uiContext;
+	@Inject private MouseManager mouseManager;
+	@Inject private KeyboardManager keyboardManager;
+	@Inject private PhysicalEntityFactory physicalEntityFactory;
+	@Inject private OrderFactory orderFactory;
+	@Inject private ComponentFactory componentFactory;
+	@Inject private Messages messages;
+	@Inject private WidgetFactory widgetFactory;
+	@Inject private Select select;
+
+	// Computation attributes
+	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
+	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
+	private long lastUpdateTime = 0;
+	private static TrueTypeFont font;
+	private int nextWaveId = 1;
+
+	private boolean gameLoaded;
+
+	/**
+	 * Initialise the GL display
+	 *
+	 * @param width
+	 *           The width of the display
+	 * @param height
+	 *           The height of the display
+	 */
+	private void initGL(int width, int height) {
+		try {
+			Display.setDisplayMode(new DisplayMode(width, height));
+			Display.create();
+			Display.setTitle(conf.getProperty("ui.window.title")); //$NON-NLS-1$
+			// Display.setVSyncEnabled(true);
+			Display.setResizable(true);
+		} catch (final LWJGLException e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+
+		LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
+
+		initView();
+	}
+
+	/**
+	 * Inits the view, viewport, window, etc.
+	 * This should be called at init and when the view changes (window is resized for instance).
+	 */
+	private void initView() {
+
+		final int width = Display.getWidth();
+		final int height = Display.getHeight();
+		LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
+
+		// set clear color - Wont be needed once we have a background
+		GL11.glClearColor(0.2f, 0.2f, 0.2f, 0f);
+
+		// enable alpha blending
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+
+		GL11.glOrtho(-width / 2, width / 2, height / 2, -height / 2, 1, -1);
+		GL11.glViewport(0, 0, width, height);
+
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
+
+		if (font == null) {
+			// Font awtFont = new Font("Verdana", Font.PLAIN, 11);
+			Font awtFont;
+			try {
+				awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ui.font"))); //$NON-NLS-1$
+				awtFont = awtFont.deriveFont(conf.getFloatProperty("ui.font.size")); // set font size //$NON-NLS-1$
+				font = new TrueTypeFont(awtFont, true);
+			} catch (FontFormatException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void onGameLoaded(@Observes GameLoaded gameLoaded) {
+		this.gameLoaded = true;
+	}
+
+	@SuppressWarnings("unused")
+	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
+		new Thread((Runnable) () -> {
+			while (!GameMain.this.gameLoaded) {
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+					LOGGER.error("Thread.sleep interrupted", e); //$NON-NLS-1$
+				}
+			}
+			loop();
+		}, "Game engine").start(); //$NON-NLS-1$
+	}
+
+	public void loop() {
+		// init OpenGL context
+		initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight")); //$NON-NLS-1$ //$NON-NLS-2$
+
+		// init GUI
+		initGui();
+
+		for (final Renderer<?> renderer : renderers.values()) {
+			renderer.init();
+		}
+
+		// Rendering loop
+		while (true) {
+
+			// Reset
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+
+			// Renders everything
+			if (uiContext.getRenderMode() != RenderMode.SELECT_DEBUG) {
+				renderComponentsAnimation();
+				renderPhysical();
+				renderGui();
+			} else {
+				select.render();
+			}
+			updateWorld();
+			// addWaves();
+
+			// Fire deferred events
+			eventManager.deferredFire();
+
+			// Update kinematics
+			updateKinematics();
+
+			lastUpdateTime = world.getTime();
+
+			// updates display and sets frame rate
+			Display.update();
+			Display.sync(100);
+
+			// handle window resize
+			Window window = uiContext.getWindow();
+			if (Display.wasResized()) {
+				initView();
+				window.setWidth(Display.getWidth());
+				window.setHeight(Display.getHeight());
+			}
+
+			GL11.glMatrixMode(GL11.GL_PROJECTION);
+			GL11.glLoadIdentity();
+
+			// GL11.glOrtho(0, window.getWidth(), 0, -window.getHeight(), 1, -1);
+			GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
+			GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
+
+			GL11.glMatrixMode(GL11.GL_MODELVIEW);
+			GL11.glLoadIdentity();
+
+			// Handles the window close requested event
+			if (Display.isCloseRequested()) {
+				Display.destroy();
+				System.exit(0);
+			}
+
+			mouseManager.handleMouseEvent();
+			keyboardManager.handleKeyboardEvent();
+		}
+	}
+
+	private void initGui() {
+		uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
+		ComponentPonderationWidget componentPonderationWidget = widgetFactory.newInstance(ComponentPonderationWidget.class);
+		componentPonderationWidget.setPosition(new float[] { 5, uiContext.getWindow().getHeight() - 50 });
+		uiContext.getWidgetRoot().add(componentPonderationWidget);
+	}
+
+	// TODO Find an other way to do this
+	@Deprecated
+	private void addWaves() {
+		if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
+			for (int i = 0; i < nextWaveId; i++) {
+				LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
+				Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
+				ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
+				ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
+				Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
+				attack.setTarget(world.getShips().get(0));
+				ship.add(attack);
+				ship.setMass(0.5f);
+				ship.setEnergy(20);
+				ship.setResources(20);
+				ship.setIntegrity(1);
+				ship.setDurability(5);
+				ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
+				ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
+				ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
+				world.add(ship);
+			}
+			nextWaveId++;
+		}
+	}
+
+	private void renderGui() {
+		renderGuiForSelectedShip();
+
+		float x = uiContext.getWindow().getWidth() / 2 - 2;
+		float y = uiContext.getWindow().getHeight() / 2 - 2;
+		int line = 0;
+		if (world.isTimeFrozen()) {
+			RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
+		}
+	}
+
+	private void renderGuiForSelectedShip() {
+		Ship ship = uiContext.getSelectedShip();
+		float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;
+		float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
+		int line = 1;
+		if (ship != null) {
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
+			if (ship.getMoveOrder() != null) {
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+			}
+			if (ship.getActionOrder() != null) {
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+			}
+			if (!ship.getBgOrders().isEmpty()) {
+				RenderUtils.renderText(font, borderLeftX, borderTopY, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false); //$NON-NLS-1$
+				for (Order bgOrder : ship.getBgOrders()) {
+					RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+				}
+			}
+			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+				for (Component c : ship.getComponents().values()) {
+					Color color = Color.white;
+					if (c.isFamished()) {
+						color = Color.red;
+					}
+					if (!c.isActive() || c.isUseless()) {
+						color = Color.gray;
+					}
+
+					GL11.glTranslatef(borderLeftX - 5, borderTopY + font.getLineHeight() * line - 10, 0);
+					ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
+					float[] cmpColor = cmpType.getColor();
+					GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
+					RenderUtils.renderQuad(0, 0, 5, 5);
+					GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
+
+					float energyDt = c.isUseless() ? 0 : c.getEnergyDt();
+					float resourcesDt = c.isUseless() ? 0 : c.getResourcesDt();
+					RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
+							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), energyDt, resourcesDt), line++, color, false); //$NON-NLS-1$
+
+				}
+			}
+		}
+
+		float borderRightX = -uiContext.getWindow().getWidth() / 2;
+		borderTopY = -uiContext.getWindow().getHeight() / 2;
+
+		GL11.glTranslatef(borderRightX, borderTopY, 0);
+		uiContext.getWidgetRoot().renderWidget();
+		GL11.glTranslatef(-borderRightX, -borderTopY, 0);
+	}
+
+	@SuppressWarnings({ "unused" })
+	private void registerRenderer(@Observes NewRendererFound event) {
+		try {
+			final Renderer<? extends Renderable> renderer = event.getRenderer();
+			final Type[] interfaces = renderer.getClass().getGenericInterfaces();
+			for (final Type interf : interfaces) {
+				if (interf instanceof ParameterizedType) {
+					final ParameterizedType paramType = (ParameterizedType) interf;
+					if (paramType.getRawType().equals(Renderer.class)) {
+						final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
+						renderers.put(type, renderer);
+						LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					if (paramType.getRawType().equals(SelectRenderer.class)) {
+						final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
+						selectRenderers.put(type, renderer);
+						LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Error", e); //$NON-NLS-1$
+		}
+	}
+
+	private void renderComponentsAnimation() {
+		for (final Ship ship : world.getShips()) {
+			final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+			final float zoomFactor = uiContext.getViewport().getZoomFactor();
+			GL11.glScalef(zoomFactor, zoomFactor, 1);
+			GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+
+			Collection<Component> components = ship.getComponents().values();
+			components.forEach(cmp -> {
+				if (cmp.isActive() && !cmp.isFamished() && !cmp.isUseless()) {
+					Animation anim = cmp.getAnimation();
+					if (anim != null) {
+						Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
+						if (anim.getAnimationEnd() > world.getTime()) {
+							renderer.render(anim);
+						}
+						if (anim.getAnimationEnd() + anim.getAnimationCoolDown() < world.getTime()) {
+							anim.setAnimationEnd(anim.getAnimationEnd() + anim.getAnimationCoolDown() + anim.getAnimationDuration());
+						}
+					}
+				}
+			});
+
+			GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+			GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+		}
+	}
+
+	private void renderPhysical() {
+		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final float zoomFactor = uiContext.getViewport().getZoomFactor();
+		GL11.glScalef(zoomFactor, zoomFactor, 1);
+		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+
+		for (PhysicalEntity entity : world.getPhysicalEntities()) {
+			if (!(entity instanceof Ship)) {
+				final Vector2f pos = entity.getPos();
+				GL11.glTranslatef(pos.x, pos.y, 0);
+				Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
+				renderer.render(entity);
+				GL11.glTranslatef(-pos.x, -pos.y, 0);
+			}
+		}
+
+		final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
+		if (shipRenderer != null) {
+			for (final Ship ship : world.getShips()) {
+				final Vector2f pos = ship.getPos();
+				GL11.glTranslatef(pos.x, pos.y, 0);
+				shipRenderer.render(ship);
+				GL11.glTranslatef(-pos.x, -pos.y, 0);
+			}
+		}
+
+		GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
+		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+	}
+
+	private void updateKinematics() {
+		for (final PhysicalEntity entity : world.getPhysicalEntities()) {
+			if (entity instanceof Ship && ((Ship) entity).isForceStop()) {
+				entity.getAccel().copy(Vector2f.NULL);
+				entity.getSpeed().copy(Vector2f.NULL);
+				continue;
+			}
+
+			Vector2f tmpEntityAccel = new Vector2f();
+			Vector2f tmpAccel = new Vector2f();
+			Vector2f tmp = new Vector2f();
+
+			for (final ForceSource source : entity.getForceSources()) {
+				tmpAccel.copy(source.getForce()).scale(1 / entity.getMass()); // FIXME This is only using one force ... :(
+				tmpEntityAccel.add(tmpAccel);
+			}
+
+			// kinematics
+			entity.getAccel().copy(tmpEntityAccel);
+			tmp.copy(entity.getAccel()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
+			entity.getSpeed().add(tmp);
+			// entity.getSpeed().scale(1f - 0.005f * (world.getTime() - lastUpdateTime) / 1000); // drag
+			tmp.copy(entity.getSpeed()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
+			entity.getPos().add(tmp);
+
+			// rotations
+			entity.setRotate(entity.getRotate() + entity.getRotateSpeed() * (world.getTime() - lastUpdateTime) / 1000);
+		}
+	}
+
+	private void updateWorld() {
+		world.updateTime();
+		for (final Ship ship : world.getShips()) {
+			// economics management
+			updateShipEconomics(ship);
+
+			// move order
+			if (ship.getMoveOrder() != null) {
+				ship.getMoveOrder().eval();
+			}
+
+			// action order
+			final Order order = ship.getActionOrder();
+			if (order != null && !order.isDone()) {
+				order.eval();
+			}
+			if (order != null && order.isDone()) {
+				LOGGER.debug("order removed: " + order); //$NON-NLS-1$
+				ship.removeActionOrder();
+			}
+
+			// background orders
+			List<Order> bgOrdersToRemove = new ArrayList<>();
+			for (Order bgOrder : ship.getBgOrders()) {
+				if (bgOrder != null && !bgOrder.isDone()) {
+					bgOrder.eval();
+				}
+				if (bgOrder != null && bgOrder.isDone()) {
+					LOGGER.debug("order removed: " + bgOrder); //$NON-NLS-1$
+					bgOrdersToRemove.add(bgOrder);
+				}
+			}
+			ship.getBgOrders().removeAll(bgOrdersToRemove);
+		}
+	}
+
+	private void updateShipEconomics(final Ship ship) {
+
+		// adjust so that we do not have epsilon vibrations of resources
+		if (ship.getEnergy() * 0.99f > ship.getEnergyMax() && ship.getEnergyMax() > 0) {
+			ship.setEnergy(ship.getEnergyMax());
+		}
+		if (ship.getResources() * 0.99f > ship.getResourcesMax() && ship.getResourcesMax() > 0) {
+			ship.setResources(ship.getResourcesMax());
+		}
+
+		// Compute max storage available
+		float energyMax = 0;
+		float resourcesMax = 0;
+		for (Component cmp : ship.getComponents().values()) {
+			energyMax += cmp.getMaxStoredEnergy();
+			resourcesMax += cmp.getMaxStoredResources();
+		}
+		ship.setEnergyMax(energyMax);
+		ship.setResourcesMax(resourcesMax);
+
+		Collection<Set<ComponentType>> sortedComponentTypes = sortComponentTypesByCriticity(ship);
+		updateShipDts(ship, sortedComponentTypes);
+
+		// Energy and resources evolution with time
+		float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
+		if (ship.getEnergy() + energyDelta < 0) {
+			ship.setEnergy(0);
+		} else {
+			ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, energyMax));
+		}
+		float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
+		if (ship.getResources() + resourcesDelta < 0) {
+			ship.setResources(0);
+		} else {
+			ship.setResources(Math.min(ship.getResources() + resourcesDelta, resourcesMax));
+		}
+		float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
+		if (ship.getIntegrity() + integrityDelta < 0) {
+			ship.setIntegrity(0);
+		} else {
+			ship.setIntegrity(ship.getIntegrity() + integrityDelta);
+		}
+	}
+
+	/**
+	 * Returns a sorted collection of {@link ComponentType} by criticity (See {@link Order#getCriticity()})
+	 *
+	 * @param ship
+	 * @return
+	 */
+	private Collection<Set<ComponentType>> sortComponentTypesByCriticity(final Ship ship) {
+		Map<ComponentType, Integer> componentCriticities = new HashMap<>();
+		if (ship.getMoveOrder() != null) {
+			for (ComponentType compType : ship.getMoveOrder().getComponentTypes()) {
+				if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getMoveOrder().getCriticity()) {
+					componentCriticities.put(compType, ship.getMoveOrder().getCriticity());
+				}
+			}
+		}
+		if (ship.getActionOrder() != null) {
+			for (ComponentType compType : ship.getActionOrder().getComponentTypes()) {
+				if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getActionOrder().getCriticity()) {
+					componentCriticities.put(compType, ship.getActionOrder().getCriticity());
+				}
+			}
+		}
+		for (Entry<ComponentType, Component> entry : ship.getComponents().entrySet()) {
+			if (entry.getValue().getClass().isAnnotationPresent(AlwaysActive.class)) {
+				componentCriticities.put(entry.getKey(), 0);
+			}
+		}
+
+		Map<Integer, Set<ComponentType>> sortedComponentTypes = new TreeMap<>((o1, o2) -> o2 - o1);
+		for (Map.Entry<ComponentType, Integer> entry : componentCriticities.entrySet()) {
+			Set<ComponentType> set = sortedComponentTypes.get(entry.getValue());
+			if (set == null) {
+				set = new HashSet<>();
+				sortedComponentTypes.put(entry.getValue(), set);
+			}
+			set.add(entry.getKey());
+		}
+		return sortedComponentTypes.values();
+	}
+
+	private void updateShipDts(final Ship ship, Collection<Set<ComponentType>> sortedComponentTypes) {
+		ship.setEnergyDt(0);
+		ship.setResourcesDt(0);
+		ship.setIntegrityDt(0);
+		for (Set<ComponentType> cmpTypeSet : sortedComponentTypes) {
+			for (ComponentType cmpType : cmpTypeSet) {
+				Component cmp = ship.getComponents().get(cmpType);
+				float cmpPercentage = ship.getComponentsComposition().get(cmp.getClass().getAnnotation(ComponentKind.class).value());
+				if (cmp.isActive() && cmpPercentage > 0) {
+					if (ship.getEnergy() + ship.getEnergyDt() + cmp.getEnergyDt() >= 0 &&
+							ship.getResources() + ship.getResourcesDt() + cmp.getResourcesDt() >= 0) {
+						cmp.setFamished(false);
+						if (ship.getEnergy() >= ship.getEnergyMax() && cmp.getEnergyDt() > 0
+								|| ship.getResources() >= ship.getResourcesMax() && cmp.getResourcesDt() > 0) {
+							// TODO We assume here that a component that produce something in terms of economics does not serve any other purpose in the ship
+							// We should handle otherwise
+							cmp.setUseless(true);
+						} else {
+							ship.setEnergyDt(ship.getEnergyDt() + cmp.getEnergyDt());
+							ship.setResourcesDt(ship.getResourcesDt() + cmp.getResourcesDt());
+							ship.setIntegrityDt(ship.getIntegrityDt() + cmp.getIntegrityDt());
+							cmp.setUseless(false);
+						}
+						// LOGGER.debug("Active: " + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
+					} else {
+						cmp.setFamished(true);
+						// LOGGER.debug("Famished" + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
+					}
+				}
+			}
+		}
+	}
 
 }
