@@ -32,15 +32,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 		final float width = 256;
 
 		GL11.glScalef(massScale, massScale, 1);
-		// RenderUtils.renderCircle(0,
-		// width / 2f,
-		// 0,
-		// 0,
-		// new float[] { 1f, 1f, 1f, 1f },
-		// new float[] { 1f, 1f, 0f, 1f },
-		// new float[] { 1f, 1f, 1f, 1f });
 		RenderUtils.renderDisc(width / 2f);
-		// RenderUtils.renderQuad(-width / 2, -width / 2, width / 2, width / 2);
 		GL11.glScalef(1f / massScale, 1f / massScale, 1);
 	}
 
