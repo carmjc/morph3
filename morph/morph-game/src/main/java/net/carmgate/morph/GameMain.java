@@ -234,7 +234,7 @@ public class GameMain {
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
 			GL11.glLoadIdentity();
 
-			// GL11.glOrtho(0, window.getWidth(), 0, -window.getHeight(), 1, -1);
+			// GL11.glOrtho(-window.getWidth() / 2, window.getWidth(), window.getHeight() / 2, -window.getHeight(), 1, -1);
 			GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
 			GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
 
