@@ -48,13 +48,14 @@ public class ShipRenderer implements Renderer<Ship> {
 		try (BufferedInputStream shipBgInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture.bg"))); //$NON-NLS-1$
 				BufferedInputStream shipInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.laser.renderer.texture"))); //$NON-NLS-1$
-				BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.miningLaser.renderer.texture"))); //$NON-NLS-1$
+				BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
+						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.MiningLaser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor.renderer.texture")))) { //$NON-NLS-1$
 			shipBgTexture = TextureLoader.getTexture("PNG", shipBgInputStream);
 			shipTexture = TextureLoader.getTexture("PNG", shipInputStream);
 			cmpTextures.put(ComponentType.LASERS, TextureLoader.getTexture("PNG", laserInputStream));
-			// cmpTextures.put(ComponentType.MINING_LASERS, TextureLoader.getTexture("PNG", mlInputStream));
+			cmpTextures.put(ComponentType.MINING_LASERS, TextureLoader.getTexture("PNG", mlInputStream));
 			cmpTextures.put(ComponentType.REPAIRER, TextureLoader.getTexture("PNG", repairerInputStream));
 			cmpTextures.put(ComponentType.PROPULSORS, TextureLoader.getTexture("PNG", propInputStream));
 		} catch (IOException e) {

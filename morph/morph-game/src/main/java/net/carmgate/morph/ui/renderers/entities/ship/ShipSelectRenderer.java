@@ -89,7 +89,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 
 		GL11.glScalef(massScale, massScale, 1);
 		GL11.glColor4f(1, 1, 1, 0.3f);
-		GL11.glPushName(SelectRenderer.TargetType.PHYSICAL_ENTITY.ordinal());
+		GL11.glPushName(SelectRenderer.TargetType.SHIP.ordinal());
 		GL11.glPushName(ship.getId());
 		RenderUtils.renderDisc(width / 2f);
 		GL11.glPopName();

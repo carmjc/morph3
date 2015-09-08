@@ -14,6 +14,7 @@ import org.lwjgl.util.glu.GLU;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Activable;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
@@ -27,6 +28,7 @@ import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.inputs.UIEvent.EventType;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer.TargetType;
+import net.carmgate.morph.ui.renderers.entities.PhysicalEntitySelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipSelectRenderer;
 import net.carmgate.morph.ui.widgets.Widget;
 import net.carmgate.morph.ui.widgets.WidgetContainer;
@@ -62,6 +64,7 @@ public class Select implements MouseListener {
 	@Inject private UIContext uiContext;
 	@Inject private World world;
 	@Inject private ShipSelectRenderer shipSelectRenderer;
+	@Inject private PhysicalEntitySelectRenderer physicalEntitySelectRenderer;
 
 	public Select() {
 		// TODO Auto-generated constructor stub
@@ -141,11 +144,12 @@ public class Select implements MouseListener {
 
 		int targetTypeId = selectBuf.get(selectBufIndex++);
 		Ship pickedShip = null;
+		PhysicalEntity pickedEntity = null;
 		if (targetTypeId == SelectRenderer.TargetType.WIDGET.ordinal()) {
 			pickingResult.setTargetType(TargetType.WIDGET);
 			pickingResult.setTarget(uiContext.getWidgets().get(selectBuf.get(selectBufIndex++)));
 			LOGGER.debug("Widget selected");
-		} else if (targetTypeId == SelectRenderer.TargetType.PHYSICAL_ENTITY.ordinal()) {
+		} else if (targetTypeId == SelectRenderer.TargetType.SHIP.ordinal()) {
 			// get the matching element in the model
 			int shipId = selectBuf.get(selectBufIndex++);
 			for (Ship ship : world.getShips()) { // FIXME We should implement the same logic as for widgets with a big map
@@ -153,8 +157,18 @@ public class Select implements MouseListener {
 					pickedShip = ship;
 				}
 			}
-			pickingResult.setTargetType(TargetType.PHYSICAL_ENTITY);
+			pickingResult.setTargetType(TargetType.SHIP);
 			pickingResult.setTarget(pickedShip);
+		} else if (targetTypeId == SelectRenderer.TargetType.NON_SHIP_PHYSICAL_ENTITY.ordinal()) {
+			// get the matching element in the model
+			int entityId = selectBuf.get(selectBufIndex++);
+			for (PhysicalEntity entity : world.getNonShipsPhysicalEntities()) { // FIXME We should implement the same logic as for widgets with a big map
+				if (entity.getId() == entityId) {
+					pickedEntity = entity;
+				}
+			}
+			pickingResult.setTargetType(TargetType.NON_SHIP_PHYSICAL_ENTITY);
+			pickingResult.setTarget(pickedEntity);
 		} else if (targetTypeId == SelectRenderer.TargetType.COMPONENT.ordinal()) {
 			// get the matching element in the model
 			int shipId = selectBuf.get(selectBufIndex++);
@@ -205,6 +219,13 @@ public class Select implements MouseListener {
 			GL11.glTranslatef(-pos.x, -pos.y, 0);
 		}
 
+		for (PhysicalEntity entity : world.getNonShipsPhysicalEntities()) {
+			final Vector2f pos = entity.getPos();
+			GL11.glTranslatef(pos.x, pos.y, 0);
+			physicalEntitySelectRenderer.render(entity);
+			GL11.glTranslatef(-pos.x, -pos.y, 0);
+		}
+
 		GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
 		GL11.glScalef(1f / zoomFactor, 1f / zoomFactor, 1);
 	}
@@ -241,7 +262,7 @@ public class Select implements MouseListener {
 		if (pickingResult.getTargetType() == TargetType.WIDGET) {
 			uiContext.setSelectedWidget((Widget) pickingResult.getTarget());
 			LOGGER.debug("widget");
-		} else if (pickingResult.getTargetType() == TargetType.PHYSICAL_ENTITY) {
+		} else if (pickingResult.getTargetType() == TargetType.SHIP) {
 			uiContext.setSelectedShip((Ship) pickingResult.getTarget());
 			uiContext.setSelectedCmp(null);
 			LOGGER.debug("ship");
