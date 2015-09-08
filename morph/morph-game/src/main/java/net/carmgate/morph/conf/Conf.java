@@ -12,33 +12,45 @@ import org.slf4j.Logger;
 @Singleton
 public class Conf {
 
-   @Inject
-   private Logger LOGGER;
+	@Inject
+	private Logger LOGGER;
 
-   private final Properties prop;
+	private final Properties prop;
 
-   private Conf() {
-      prop = new Properties();
-      try (InputStream in = getClass().getResourceAsStream("/config.properties")) { //$NON-NLS-1$
-         prop.load(in);
-      } catch (final IOException e) {
-         LOGGER.error("Exception raised loading properties", e); //$NON-NLS-1$
-      }
-   }
+	private Conf() {
+		prop = new Properties();
+		try (InputStream in = getClass().getResourceAsStream("/config.properties")) { //$NON-NLS-1$
+			prop.load(in);
+		} catch (final IOException e) {
+			LOGGER.error("Exception raised loading properties", e); //$NON-NLS-1$
+		}
+	}
 
-   public float getFloatProperty(String key) {
-      return Float.parseFloat(prop.getProperty(key));
-   }
+	public Byte getCharProperty(String key) {
+		String property = prop.getProperty(key);
+		if (property == null) {
+			return null;
+		}
+		return property.getBytes()[0];
+	}
 
-   public int getIntProperty(String key) {
-      return Integer.parseInt(prop.getProperty(key));
-   }
+	public Float getFloatProperty(String key) {
+		String property = prop.getProperty(key);
+		if (property == null) {
+			return null;
+		}
+		return Float.parseFloat(property);
+	}
 
-   public int getCharProperty(String key) {
-      return prop.getProperty(key).getBytes()[0];
-   }
+	public Integer getIntProperty(String key) {
+		String property = prop.getProperty(key);
+		if (property == null) {
+			return null;
+		}
+		return Integer.parseInt(property);
+	}
 
-   public String getProperty(String key) {
-      return prop.getProperty(key);
-   }
+	public String getProperty(String key) {
+		return prop.getProperty(key);
+	}
 }

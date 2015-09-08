@@ -92,23 +92,13 @@ public class SimplePropulsor extends Component implements ForceSource {
 	}
 
 	@Override
-	public float getEnergyDt() {
-		return conf.getFloatProperty(getClass().getCanonicalName() + ".energyDt"); //$NON-NLS-1$
-	}
-
-	@Override
 	public Vector2f getForce() {
 		return force;
 	}
 
 	@Override
-	public void startBehavior() {
-		getShip().setEnergy(getShip().getEnergy() + getEnergyDt());
-		getShip().setResources(getShip().getResources() + getResourcesDt());
-
-		setLastActivation(world.getTime());
+	public final void initBehavior() {
 		setActive(true);
-		evalBehavior();
 
 		// Apply force to ship
 		getShip().getForceSources().add(this);

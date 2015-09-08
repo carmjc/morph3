@@ -20,6 +20,13 @@ public class MiningLaser extends Component {
 	private MiningLaserAnim laserAnim;
 	private float maxStoredResources;
 
+	@Override
+	public
+	void evalBehavior() {
+		// TODO Auto-generated method stub
+
+	}
+
 	@PostConstruct
 	public void init() {
 		laserAnim = animationFactory.newInstance(AnimationType.MINING_LASER);
@@ -27,29 +34,5 @@ public class MiningLaser extends Component {
 		laserAnim.setTarget(getTargetHolder());
 		setAnimation(laserAnim);
 		LOGGER.debug("laserAnimation added"); //$NON-NLS-1$
-
-		maxStoredResources = conf.getFloatProperty("component.miningLaser.maxStoredResources");
-	}
-
-	@Override
-	public float getEnergyDt() {
-		return conf.getFloatProperty("component.miningLaser.energyDt") * getShip().getComponentsComposition().get(ComponentType.MINING_LASERS); //$NON-NLS-1$
-	}
-
-	@Override
-	public float getResourcesDt() {
-		return conf.getFloatProperty("component.miningLaser.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.MINING_LASERS); //$NON-NLS-1$
-	}
-
-	@Override
-	public float getMaxStoredResources() {
-		return maxStoredResources * getShip().getComponentsComposition().get(ComponentType.MINING_LASERS);
-	}
-
-	@Override
-	public
-	void evalBehavior() {
-		// TODO Auto-generated method stub
-
 	}
 }

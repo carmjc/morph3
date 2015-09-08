@@ -17,29 +17,19 @@ public class Laser extends Component {
 
 	private LaserAnim laserAnim;;
 
+	@Override
+	public
+	void evalBehavior() {
+		// TODO Auto-generated method stub
+
+	}
+
 	@PostConstruct
 	private void init() {
 		laserAnim = animationFactory.newInstance(AnimationType.LASER);
 		laserAnim.setSourceHolder(getShipHolder());
 		laserAnim.setTargetHolder(getTargetHolder());
 		setAnimation(laserAnim);
-	}
-
-	@Override
-	public float getEnergyDt() {
-		return conf.getFloatProperty("component.laser.energyDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
-	}
-
-	@Override
-	public float getResourcesDt() {
-		return conf.getFloatProperty("component.laser.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
-	}
-
-	@Override
-	public
-	void evalBehavior() {
-		// TODO Auto-generated method stub
-
 	}
 
 }

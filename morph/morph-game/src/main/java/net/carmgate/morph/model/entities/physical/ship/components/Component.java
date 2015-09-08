@@ -2,6 +2,8 @@ package net.carmgate.morph.model.entities.physical.ship.components;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.World;
@@ -23,8 +25,10 @@ public abstract class Component implements Activable {
 	private boolean useless;
 	private Vector2f targetPosInWorld;
 	private long lastActivation;
+
 	@Inject private World world;
 	@Inject private Conf conf;
+	@Inject private Logger LOGGER;
 
 	public boolean canBeActivated() {
 		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0
@@ -49,32 +53,52 @@ public abstract class Component implements Activable {
 		return value;
 	}
 
-	public float getEnergyDt() {
-		return energyDt;
+	public final float getEnergyDt() {
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".energyDt");
+		if (value == null) {
+			value = 0f;
+		}
+		return value;
 	}
 
 	public int getId() {
 		return id;
 	}
 
-	public float getIntegrityDt() {
-		return integrityDt;
+	public final float getIntegrityDt() {
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".integrityDt");
+		if (value == null) {
+			value = 0f;
+		}
+		return value;
 	}
 
 	public long getLastActivation() {
 		return lastActivation;
 	}
 
-	public float getMaxStoredEnergy() {
-		return 0;
+	public final float getMaxStoredEnergy() {
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredEnergy");
+		if (value == null) {
+			value = 0f;
+		}
+		return value;
 	}
 
-	public float getMaxStoredResources() {
-		return 0;
+	public final float getMaxStoredResources() {
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredResource");
+		if (value == null) {
+			value = 0f;
+		}
+		return value;
 	}
 
-	public float getResourcesDt() {
-		return resourcesDt;
+	public final float getResourcesDt() {
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".resourceDt");
+		if (value == null) {
+			value = 0f;
+		}
+		return value;
 	}
 
 	public Ship getShip() {
@@ -95,6 +119,9 @@ public abstract class Component implements Activable {
 
 	public Vector2f getTargetPosInWorld() {
 		return targetPosInWorld;
+	}
+
+	public void initBehavior() {
 	}
 
 	@Override
@@ -119,10 +146,6 @@ public abstract class Component implements Activable {
 		this.animation = animation;
 	}
 
-	public void setEnergyDt(float energyDt) {
-		this.energyDt = energyDt; // FIXME We should add an efficiency factor coming from the real component
-	}
-
 	public void setFamished(boolean famished) {
 		this.famished = famished;
 	}
@@ -131,16 +154,8 @@ public abstract class Component implements Activable {
 		this.id = id;
 	}
 
-	public void setIntegrityDt(float integrityDt) {
-		this.integrityDt = integrityDt;
-	}
-
 	public void setLastActivation(long lastActivation) {
 		this.lastActivation = lastActivation;
-	}
-
-	public void setResourcesDt(float resourcesDt) {
-		this.resourcesDt = resourcesDt; // FIXME We should add an efficiency factor coming from the real component
 	}
 
 	public void setShip(Ship ship) {
@@ -162,6 +177,18 @@ public abstract class Component implements Activable {
 
 	public void setUseless(boolean useless) {
 		this.useless = useless;
+	}
+
+	@Override
+	public final void startBehavior() {
+		LOGGER.debug("startBehavior for " + this);
+
+		getShip().setEnergy(getShip().getEnergy() + getEnergyDt());
+		getShip().setResources(getShip().getResources() + getResourcesDt());
+		setLastActivation(world.getTime());
+
+		initBehavior();
+		evalBehavior();
 	}
 
 }
