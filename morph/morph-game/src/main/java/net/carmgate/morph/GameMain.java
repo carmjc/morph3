@@ -6,16 +6,10 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -39,7 +33,6 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.components.AlwaysActive;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
@@ -49,10 +42,6 @@ import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulso
 import net.carmgate.morph.model.entities.physical.ship.components.SolarPanelGenerator;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
-import net.carmgate.morph.orders.Order;
-import net.carmgate.morph.orders.OrderFactory;
-import net.carmgate.morph.orders.OrderType;
-import net.carmgate.morph.orders.ship.action.Attack;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.actions.Select;
@@ -65,13 +54,13 @@ import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
-import net.carmgate.morph.ui.widgets.ComponentPonderationWidget;
 import net.carmgate.morph.ui.widgets.WidgetContainer;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 
 @Singleton
 public class GameMain {
 
+	private static TrueTypeFont font;
 	@Inject private MEventManager eventManager;
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
@@ -80,20 +69,45 @@ public class GameMain {
 	@Inject private MouseManager mouseManager;
 	@Inject private KeyboardManager keyboardManager;
 	@Inject private PhysicalEntityFactory physicalEntityFactory;
-	@Inject private OrderFactory orderFactory;
+	// @Inject private OrderFactory orderFactory;
 	@Inject private ComponentFactory componentFactory;
 	@Inject private Messages messages;
 	@Inject private WidgetFactory widgetFactory;
-	@Inject private Select select;
 
+	@Inject private Select select;
 	// Computation attributes
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
 	private long lastUpdateTime = 0;
-	private static TrueTypeFont font;
 	private int nextWaveId = 1;
 
 	private boolean gameLoaded;
+
+	// TODO Find an other way to do this
+	@Deprecated
+	private void addWaves() {
+		if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
+			for (int i = 0; i < nextWaveId; i++) {
+				LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
+				Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
+				ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
+				ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
+				// Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
+				// attack.setTarget(world.getShips().get(0));
+				// ship.add(attack);
+				ship.setMass(0.5f);
+				ship.setEnergy(20);
+				ship.setResources(20);
+				ship.setIntegrity(1);
+				ship.setDurability(5);
+				ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
+				ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
+				ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
+				world.add(ship);
+			}
+			nextWaveId++;
+		}
+	}
 
 	/**
 	 * Initialise the GL display
@@ -118,6 +132,13 @@ public class GameMain {
 		LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
 
 		initView();
+	}
+
+	private void initGui() {
+		uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
+		// ComponentPonderationWidget componentPonderationWidget = widgetFactory.newInstance(ComponentPonderationWidget.class);
+		// componentPonderationWidget.setPosition(new float[] { 5, uiContext.getWindow().getHeight() - 50 });
+		// uiContext.getWidgetRoot().add(componentPonderationWidget);
 	}
 
 	/**
@@ -164,25 +185,6 @@ public class GameMain {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private void onGameLoaded(@Observes GameLoaded gameLoaded) {
-		this.gameLoaded = true;
-	}
-
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
-		new Thread((Runnable) () -> {
-			while (!GameMain.this.gameLoaded) {
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
-					LOGGER.error("Thread.sleep interrupted", e); //$NON-NLS-1$
-				}
-			}
-			loop();
-		}, "Game engine").start(); //$NON-NLS-1$
-	}
-
 	public void loop() {
 		// init OpenGL context
 		initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -197,7 +199,7 @@ public class GameMain {
 		// Rendering loop
 		while (true) {
 
-			// Reset
+			// Reset screen
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 
 			// Renders everything
@@ -206,7 +208,7 @@ public class GameMain {
 				renderPhysical();
 				renderGui();
 			} else {
-				select.render();
+				select.renderForSelect();
 			}
 			updateWorld();
 			// addWaves();
@@ -252,107 +254,23 @@ public class GameMain {
 		}
 	}
 
-	private void initGui() {
-		uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
-		ComponentPonderationWidget componentPonderationWidget = widgetFactory.newInstance(ComponentPonderationWidget.class);
-		componentPonderationWidget.setPosition(new float[] { 5, uiContext.getWindow().getHeight() - 50 });
-		uiContext.getWidgetRoot().add(componentPonderationWidget);
-	}
-
-	// TODO Find an other way to do this
-	@Deprecated
-	private void addWaves() {
-		if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
-			for (int i = 0; i < nextWaveId; i++) {
-				LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
-				Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
-				ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
-				ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
-				Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
-				attack.setTarget(world.getShips().get(0));
-				ship.add(attack);
-				ship.setMass(0.5f);
-				ship.setEnergy(20);
-				ship.setResources(20);
-				ship.setIntegrity(1);
-				ship.setDurability(5);
-				ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
-				ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
-				ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
-				world.add(ship);
-			}
-			nextWaveId++;
-		}
-	}
-
-	private void renderGui() {
-		renderGuiForSelectedShip();
-
-		float x = uiContext.getWindow().getWidth() / 2 - 2;
-		float y = uiContext.getWindow().getHeight() / 2 - 2;
-		int line = 0;
-		if (world.isTimeFrozen()) {
-			RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
-		}
-	}
-
-	private void renderGuiForSelectedShip() {
-		Ship ship = uiContext.getSelectedShip();
-		float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;
-		float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
-		int line = 1;
-		if (ship != null) {
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
-			if (ship.getMoveOrder() != null) {
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"), ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-			}
-			if (ship.getActionOrder() != null) {
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"), ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-			}
-			if (!ship.getBgOrders().isEmpty()) {
-				RenderUtils.renderText(font, borderLeftX, borderTopY, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false); //$NON-NLS-1$
-				for (Order bgOrder : ship.getBgOrders()) {
-					RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"), bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+	@SuppressWarnings("unused")
+	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
+		new Thread((Runnable) () -> {
+			while (!GameMain.this.gameLoaded) {
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+					LOGGER.error("Thread.sleep interrupted", e); //$NON-NLS-1$
 				}
 			}
-			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-				for (Component c : ship.getComponents().values()) {
-					Color color = Color.white;
-					if (c.isFamished()) {
-						color = Color.red;
-					}
-					if (!c.isActive() || c.isUseless()) {
-						color = Color.gray;
-					}
+			loop();
+		}, "Game engine").start(); //$NON-NLS-1$
+	}
 
-					GL11.glTranslatef(borderLeftX - 5, borderTopY + font.getLineHeight() * line - 10, 0);
-					ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
-					float[] cmpColor = cmpType.getColor();
-					GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
-					RenderUtils.renderQuad(0, 0, 5, 5);
-					GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
-
-					float energyDt = c.isUseless() ? 0 : c.getEnergyDt();
-					float resourcesDt = c.isUseless() ? 0 : c.getResourcesDt();
-					RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
-							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), energyDt, resourcesDt), line++, color, false); //$NON-NLS-1$
-
-				}
-			}
-		}
-
-		float borderRightX = -uiContext.getWindow().getWidth() / 2;
-		borderTopY = -uiContext.getWindow().getHeight() / 2;
-
-		GL11.glTranslatef(borderRightX, borderTopY, 0);
-		uiContext.getWidgetRoot().renderWidget();
-		GL11.glTranslatef(-borderRightX, -borderTopY, 0);
+	@SuppressWarnings("unused")
+	private void onGameLoaded(@Observes GameLoaded gameLoaded) {
+		this.gameLoaded = true;
 	}
 
 	@SuppressWarnings({ "unused" })
@@ -408,6 +326,80 @@ public class GameMain {
 		}
 	}
 
+	private void renderGui() {
+		renderGuiForSelectedShip();
+
+		float x = uiContext.getWindow().getWidth() / 2 - 2;
+		float y = uiContext.getWindow().getHeight() / 2 - 2;
+		int line = 0;
+		if (world.isTimeFrozen()) {
+			RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
+		}
+	}
+
+	private void renderGuiForSelectedShip() {
+		Ship ship = uiContext.getSelectedShip();
+		float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;
+		float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
+		int line = 1;
+		if (ship != null) {
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
+			// if (ship.getMoveOrder() != null) {
+			// RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"),
+			// ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+			// }
+			// if (ship.getActionOrder() != null) {
+			// RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"),
+			// ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+			// }
+			// if (!ship.getBgOrders().isEmpty()) {
+			// RenderUtils.renderText(font, borderLeftX, borderTopY, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false);
+			// //$NON-NLS-1$
+			// for (Order bgOrder : ship.getBgOrders()) {
+			// RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"),
+			// bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
+			// }
+			// }
+			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+				for (Component c : ship.getComponents().values()) {
+					Color color = Color.white;
+					if (c.isFamished()) {
+						color = Color.red;
+					}
+					if (!c.isActive() || c.isUseless()) {
+						color = Color.gray;
+					}
+
+					GL11.glTranslatef(borderLeftX - 5, borderTopY + font.getLineHeight() * line - 10, 0);
+					ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
+					float[] cmpColor = cmpType.getColor();
+					GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
+					RenderUtils.renderQuad(0, 0, 5, 5);
+					GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
+
+					float energyDt = c.isUseless() ? 0 : c.getEnergyDt();
+					float resourcesDt = c.isUseless() ? 0 : c.getResourcesDt();
+					RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
+							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), energyDt, resourcesDt), line++, color, false); //$NON-NLS-1$
+
+				}
+			}
+		}
+
+		float borderRightX = -uiContext.getWindow().getWidth() / 2;
+		borderTopY = -uiContext.getWindow().getHeight() / 2;
+
+		GL11.glTranslatef(borderRightX, borderTopY, 0);
+		uiContext.getWidgetRoot().renderWidget();
+		GL11.glTranslatef(-borderRightX, -borderTopY, 0);
+	}
+
 	private void renderPhysical() {
 		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
 		final float zoomFactor = uiContext.getViewport().getZoomFactor();
@@ -443,6 +435,7 @@ public class GameMain {
 			if (entity instanceof Ship && ((Ship) entity).isForceStop()) {
 				entity.getAccel().copy(Vector2f.NULL);
 				entity.getSpeed().copy(Vector2f.NULL);
+				((Ship) entity).setForceStop(false);
 				continue;
 			}
 
@@ -468,51 +461,7 @@ public class GameMain {
 		}
 	}
 
-	private void updateWorld() {
-		world.updateTime();
-		for (final Ship ship : world.getShips()) {
-			// economics management
-			updateShipEconomics(ship);
-
-			// move order
-			if (ship.getMoveOrder() != null) {
-				ship.getMoveOrder().eval();
-			}
-
-			// action order
-			final Order order = ship.getActionOrder();
-			if (order != null && !order.isDone()) {
-				order.eval();
-			}
-			if (order != null && order.isDone()) {
-				LOGGER.debug("order removed: " + order); //$NON-NLS-1$
-				ship.removeActionOrder();
-			}
-
-			// background orders
-			List<Order> bgOrdersToRemove = new ArrayList<>();
-			for (Order bgOrder : ship.getBgOrders()) {
-				if (bgOrder != null && !bgOrder.isDone()) {
-					bgOrder.eval();
-				}
-				if (bgOrder != null && bgOrder.isDone()) {
-					LOGGER.debug("order removed: " + bgOrder); //$NON-NLS-1$
-					bgOrdersToRemove.add(bgOrder);
-				}
-			}
-			ship.getBgOrders().removeAll(bgOrdersToRemove);
-		}
-	}
-
 	private void updateShipEconomics(final Ship ship) {
-
-		// adjust so that we do not have epsilon vibrations of resources
-		if (ship.getEnergy() * 0.99f > ship.getEnergyMax() && ship.getEnergyMax() > 0) {
-			ship.setEnergy(ship.getEnergyMax());
-		}
-		if (ship.getResources() * 0.99f > ship.getResourcesMax() && ship.getResourcesMax() > 0) {
-			ship.setResources(ship.getResourcesMax());
-		}
 
 		// Compute max storage available
 		float energyMax = 0;
@@ -524,100 +473,75 @@ public class GameMain {
 		ship.setEnergyMax(energyMax);
 		ship.setResourcesMax(resourcesMax);
 
-		Collection<Set<ComponentType>> sortedComponentTypes = sortComponentTypesByCriticity(ship);
-		updateShipDts(ship, sortedComponentTypes);
+		// adjust stored amounts so that we do not have epsilon vibrations of stored amounts
+		// if (ship.getEnergy() * 0.99f > ship.getEnergyMax() && ship.getEnergyMax() > 0) {
+		// ship.setEnergy(ship.getEnergyMax());
+		// }
+		// if (ship.getResources() * 0.99f > ship.getResourcesMax() && ship.getResourcesMax() > 0) {
+		// ship.setResources(ship.getResourcesMax());
+		// }
 
 		// Energy and resources evolution with time
-		float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
-		if (ship.getEnergy() + energyDelta < 0) {
-			ship.setEnergy(0);
-		} else {
-			ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, energyMax));
-		}
-		float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
-		if (ship.getResources() + resourcesDelta < 0) {
-			ship.setResources(0);
-		} else {
-			ship.setResources(Math.min(ship.getResources() + resourcesDelta, resourcesMax));
-		}
-		float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
-		if (ship.getIntegrity() + integrityDelta < 0) {
-			ship.setIntegrity(0);
-		} else {
-			ship.setIntegrity(ship.getIntegrity() + integrityDelta);
-		}
+		// float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
+		// if (ship.getEnergy() + energyDelta < 0) {
+		// ship.setEnergy(0);
+		// } else {
+		// ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, energyMax));
+		// }
+		// float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
+		// if (ship.getResources() + resourcesDelta < 0) {
+		// ship.setResources(0);
+		// } else {
+		// ship.setResources(Math.min(ship.getResources() + resourcesDelta, resourcesMax));
+		// }
+		// float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
+		// if (ship.getIntegrity() + integrityDelta < 0) {
+		// ship.setIntegrity(0);
+		// } else {
+		// ship.setIntegrity(ship.getIntegrity() + integrityDelta);
+		// }
 	}
 
-	/**
-	 * Returns a sorted collection of {@link ComponentType} by criticity (See {@link Order#getCriticity()})
-	 *
-	 * @param ship
-	 * @return
-	 */
-	private Collection<Set<ComponentType>> sortComponentTypesByCriticity(final Ship ship) {
-		Map<ComponentType, Integer> componentCriticities = new HashMap<>();
-		if (ship.getMoveOrder() != null) {
-			for (ComponentType compType : ship.getMoveOrder().getComponentTypes()) {
-				if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getMoveOrder().getCriticity()) {
-					componentCriticities.put(compType, ship.getMoveOrder().getCriticity());
+	private void updateWorld() {
+		world.updateTime();
+		for (final Ship ship : world.getShips()) {
+			// Take into account component updates
+			for (Component cmp : ship.getComponents().values()) {
+				if (cmp.isActive()) {
+					cmp.evalBehavior();
 				}
 			}
-		}
-		if (ship.getActionOrder() != null) {
-			for (ComponentType compType : ship.getActionOrder().getComponentTypes()) {
-				if (componentCriticities.get(compType) == null || componentCriticities.get(compType) > ship.getActionOrder().getCriticity()) {
-					componentCriticities.put(compType, ship.getActionOrder().getCriticity());
-				}
-			}
-		}
-		for (Entry<ComponentType, Component> entry : ship.getComponents().entrySet()) {
-			if (entry.getValue().getClass().isAnnotationPresent(AlwaysActive.class)) {
-				componentCriticities.put(entry.getKey(), 0);
-			}
-		}
 
-		Map<Integer, Set<ComponentType>> sortedComponentTypes = new TreeMap<>((o1, o2) -> o2 - o1);
-		for (Map.Entry<ComponentType, Integer> entry : componentCriticities.entrySet()) {
-			Set<ComponentType> set = sortedComponentTypes.get(entry.getValue());
-			if (set == null) {
-				set = new HashSet<>();
-				sortedComponentTypes.put(entry.getValue(), set);
-			}
-			set.add(entry.getKey());
-		}
-		return sortedComponentTypes.values();
-	}
+			// economics management
+			updateShipEconomics(ship);
 
-	private void updateShipDts(final Ship ship, Collection<Set<ComponentType>> sortedComponentTypes) {
-		ship.setEnergyDt(0);
-		ship.setResourcesDt(0);
-		ship.setIntegrityDt(0);
-		for (Set<ComponentType> cmpTypeSet : sortedComponentTypes) {
-			for (ComponentType cmpType : cmpTypeSet) {
-				Component cmp = ship.getComponents().get(cmpType);
-				float cmpPercentage = ship.getComponentsComposition().get(cmp.getClass().getAnnotation(ComponentKind.class).value());
-				if (cmp.isActive() && cmpPercentage > 0) {
-					if (ship.getEnergy() + ship.getEnergyDt() + cmp.getEnergyDt() >= 0 &&
-							ship.getResources() + ship.getResourcesDt() + cmp.getResourcesDt() >= 0) {
-						cmp.setFamished(false);
-						if (ship.getEnergy() >= ship.getEnergyMax() && cmp.getEnergyDt() > 0
-								|| ship.getResources() >= ship.getResourcesMax() && cmp.getResourcesDt() > 0) {
-							// TODO We assume here that a component that produce something in terms of economics does not serve any other purpose in the ship
-							// We should handle otherwise
-							cmp.setUseless(true);
-						} else {
-							ship.setEnergyDt(ship.getEnergyDt() + cmp.getEnergyDt());
-							ship.setResourcesDt(ship.getResourcesDt() + cmp.getResourcesDt());
-							ship.setIntegrityDt(ship.getIntegrityDt() + cmp.getIntegrityDt());
-							cmp.setUseless(false);
-						}
-						// LOGGER.debug("Active: " + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
-					} else {
-						cmp.setFamished(true);
-						// LOGGER.debug("Famished" + cmp.getClass().getSimpleName() + ": " + cmp.getEnergyDt() + "(ship: " + ship.getEnergyDt() + ")");
-					}
-				}
-			}
+			// // move order
+			// if (ship.getMoveOrder() != null) {
+			// ship.getMoveOrder().eval();
+			// }
+			//
+			// // action order
+			// final Order order = ship.getActionOrder();
+			// if (order != null && !order.isDone()) {
+			// order.eval();
+			// }
+			// if (order != null && order.isDone()) {
+			// LOGGER.debug("order removed: " + order); //$NON-NLS-1$
+			// ship.removeActionOrder();
+			// }
+			//
+			// // background orders
+			// List<Order> bgOrdersToRemove = new ArrayList<>();
+			// for (Order bgOrder : ship.getBgOrders()) {
+			// if (bgOrder != null && !bgOrder.isDone()) {
+			// bgOrder.eval();
+			// }
+			// if (bgOrder != null && bgOrder.isDone()) {
+			// LOGGER.debug("order removed: " + bgOrder); //$NON-NLS-1$
+			// bgOrdersToRemove.add(bgOrder);
+			// }
+			// }
+			// ship.getBgOrders().removeAll(bgOrdersToRemove);
 		}
 	}
 

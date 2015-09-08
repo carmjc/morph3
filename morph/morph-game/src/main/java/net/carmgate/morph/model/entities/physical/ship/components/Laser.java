@@ -12,27 +12,34 @@ import net.carmgate.morph.model.animations.LaserAnim;
 @ComponentKind(ComponentType.LASERS)
 public class Laser extends Component {
 
-   @Inject private AnimationFactory animationFactory;
-   @Inject private Conf conf;
+	@Inject private AnimationFactory animationFactory;
+	@Inject private Conf conf;
 
-   private LaserAnim laserAnim;;
+	private LaserAnim laserAnim;;
 
-   @PostConstruct
-   private void init() {
-      laserAnim = animationFactory.newInstance(AnimationType.LASER);
-      laserAnim.setSourceHolder(getShipHolder());
-      laserAnim.setTargetHolder(getTargetHolder());
-      setAnimation(laserAnim);
-   }
+	@PostConstruct
+	private void init() {
+		laserAnim = animationFactory.newInstance(AnimationType.LASER);
+		laserAnim.setSourceHolder(getShipHolder());
+		laserAnim.setTargetHolder(getTargetHolder());
+		setAnimation(laserAnim);
+	}
 
-   @Override
-   public float getEnergyDt() {
-      return conf.getFloatProperty("component.laser.energyDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
-   }
+	@Override
+	public float getEnergyDt() {
+		return conf.getFloatProperty("component.laser.energyDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
+	}
 
-   @Override
-   public float getResourcesDt() {
-      return conf.getFloatProperty("component.laser.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
-   }
+	@Override
+	public float getResourcesDt() {
+		return conf.getFloatProperty("component.laser.resourcesDt") * getShip().getComponentsComposition().get(ComponentType.LASERS); //$NON-NLS-1$
+	}
+
+	@Override
+	public
+	void evalBehavior() {
+		// TODO Auto-generated method stub
+
+	}
 
 }

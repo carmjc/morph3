@@ -34,19 +34,14 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 @Singleton
 public class ShipRenderer implements Renderer<Ship> {
 
-	@Inject private UIContext uiContext;
-	@Inject private World world;
-	@Inject private Conf conf;
-	@Inject private Logger LOGGER;
-
 	private static Map<ComponentType, Texture> cmpTextures = new HashMap<>();
 	private static Texture shipBgTexture;
 	private static Texture shipTexture;
+	@Inject private UIContext uiContext;
 
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-		newRendererEventMgr.fire(new NewRendererFound(this));
-	}
+	@Inject private World world;
+	@Inject private Conf conf;
+	@Inject private Logger LOGGER;
 
 	@Override
 	public void init() {
@@ -55,7 +50,7 @@ public class ShipRenderer implements Renderer<Ship> {
 				BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.laser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.miningLaser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$
-				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.propulsors.renderer.texture")))) { //$NON-NLS-1$
+				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor.renderer.texture")))) { //$NON-NLS-1$
 			shipBgTexture = TextureLoader.getTexture("PNG", shipBgInputStream);
 			shipTexture = TextureLoader.getTexture("PNG", shipInputStream);
 			cmpTextures.put(ComponentType.LASERS, TextureLoader.getTexture("PNG", laserInputStream));
@@ -65,6 +60,11 @@ public class ShipRenderer implements Renderer<Ship> {
 		} catch (IOException e) {
 			LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
+		newRendererEventMgr.fire(new NewRendererFound(this));
 	}
 
 	@Override
@@ -152,20 +152,36 @@ public class ShipRenderer implements Renderer<Ship> {
 				coreIndex++;
 			}
 			GL11.glTranslatef(compX, compY, zoom);
-			GL11.glRotatef(180, 0, 0, 1);
 
 			// draw the component
 			Texture texture = cmpTextures.get(cmp.getClass().getAnnotation(ComponentKind.class).value());
 			Color color = new Color(Color.white);
-			if (!cmp.isActive()) {
-				color.a = 0.1f;
+			if (cmp == uiContext.getSelectedCmp()) {
+				float colorScale = (int) (world.getTime() % 1000);
+				colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.6f;
+				RenderUtils.renderCircle(width / 2f + 10,
+						width / 2f + 10,
+						40 / zoom,
+						50 / zoom,
+						new float[] { 0f, 0f, 0f, 0f },
+						new float[] { 1f, 1f, 1f, 0.5f * colorScale },
+						new float[] { 0f, 0f, 0f, 0f });
+
+				// GL11.glColor4f(color.r, color.g, color.b, color.a);
+				// RenderUtils.renderDisc(width / 2);
 			}
+
+			// if (!cmp.canBeActivated()) {
+			// color.a = 0.2f;
+			// }
+			GL11.glColor4f(color.r, color.g, color.b, 0.5f * color.a);
+			RenderUtils.renderPartialDisc(width / 2, cmp.getAvailability());
+
+			GL11.glColor4f(color.r, color.g, color.b, color.a);
 			if (texture != null) {
-				GL11.glColor4f(color.r, color.g, color.b, color.a);
 				RenderUtils.renderSprite(width, texture);
 			}
 
-			GL11.glRotatef(-180, 0, 0, 1);
 			GL11.glTranslatef(-compX, -compY, zoom);
 		}
 

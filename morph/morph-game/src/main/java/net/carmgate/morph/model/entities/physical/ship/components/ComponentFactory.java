@@ -9,13 +9,16 @@ import net.carmgate.morph.events.mgt.MEventManager;
 @Singleton
 public class ComponentFactory {
 
-   @Inject private Instance<Component> components;
-   @Inject private MEventManager eventManager;
+	@Inject private Instance<Component> components;
+	@Inject private MEventManager eventManager;
 
-   public <U extends Component> U newInstance(Class<U> clazz) {
-      final U u = components.select(clazz).get();
-      eventManager.scanAndRegister(u);
-      return u;
-   }
+	private int idGen = 0;
+
+	public <U extends Component> Component newInstance(Class<U> clazz) {
+		final U u = components.select(clazz).get();
+		u.setId(idGen++);
+		eventManager.scanAndRegister(u);
+		return u;
+	}
 
 }

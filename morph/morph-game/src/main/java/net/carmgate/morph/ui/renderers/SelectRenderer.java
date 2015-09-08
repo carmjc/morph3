@@ -5,6 +5,7 @@ public interface SelectRenderer<T extends Renderable> extends Renderer<T> {
 
    public static enum TargetType {
       PHYSICAL_ENTITY,
-      WIDGET;
+      WIDGET,
+      COMPONENT;
    }
 }

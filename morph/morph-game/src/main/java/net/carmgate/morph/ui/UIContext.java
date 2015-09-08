@@ -11,6 +11,7 @@ import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.widgets.Widget;
 import net.carmgate.morph.ui.widgets.WidgetContainer;
@@ -18,72 +19,82 @@ import net.carmgate.morph.ui.widgets.WidgetContainer;
 @Singleton
 public class UIContext {
 
-   @Inject private ViewPort viewport;
-   @Inject private Window window;
-   @Inject private MEventManager eventManager;
+	@Inject private ViewPort viewport;
+	@Inject private Window window;
+	@Inject private MEventManager eventManager;
 
-   private RenderMode renderMode = RenderMode.NORMAL;
-   private Ship selectedShip;
-   private Widget selectedWidget;
-   private WidgetContainer widgetRoot;
-   private Map<Integer, Widget> widgets = new WeakHashMap<>();
+	private RenderMode renderMode = RenderMode.NORMAL;
+	private Ship selectedShip;
+	private Widget selectedWidget;
+	private WidgetContainer widgetRoot;
+	private Map<Integer, Widget> widgets = new WeakHashMap<>();
+	private Component selectedCmp;
 
-   @PostConstruct
-   private void init() {
-      eventManager.scanAndRegister(this);
-   }
+	public RenderMode getRenderMode() {
+		return renderMode;
+	}
 
-   public RenderMode getRenderMode() {
-      return renderMode;
-   }
+	public Component getSelectedCmp() {
+		return selectedCmp;
+	}
 
-   public ViewPort getViewport() {
-      return viewport;
-   }
+	public Ship getSelectedShip() {
+		return selectedShip;
+	}
 
-   public Window getWindow() {
-      return window;
-   }
+	public Widget getSelectedWidget() {
+		return selectedWidget;
+	}
 
-   public void setRenderMode(RenderMode renderMode) {
-      this.renderMode = renderMode;
-   }
+	public ViewPort getViewport() {
+		return viewport;
+	}
 
-   public void setSelectedShip(Ship selectedShip) {
-      this.selectedShip = selectedShip;
-   }
+	public WidgetContainer getWidgetRoot() {
+		return widgetRoot;
+	}
 
-   public Ship getSelectedShip() {
-      return selectedShip;
-   }
+	public Map<Integer, Widget> getWidgets() {
+		return widgets;
+	}
 
-   public void onShipDeath(@MObserves ShipDeath shipDeath) {
-      if (selectedShip == shipDeath.getShip()) {
-         selectedShip = null;
-      }
-   }
+	public Window getWindow() {
+		return window;
+	}
 
-   public Widget getSelectedWidget() {
-      return selectedWidget;
-   }
+	@PostConstruct
+	private void init() {
+		eventManager.scanAndRegister(this);
+	}
 
-   public void setSelectedWidget(Widget selectedWidget) {
-      this.selectedWidget = selectedWidget;
-   }
+	public void onShipDeath(@MObserves ShipDeath shipDeath) {
+		if (selectedShip == shipDeath.getShip()) {
+			selectedShip = null;
+		}
+	}
 
-   public WidgetContainer getWidgetRoot() {
-      return widgetRoot;
-   }
+	public void setRenderMode(RenderMode renderMode) {
+		this.renderMode = renderMode;
+	}
 
-   public Map<Integer, Widget> getWidgets() {
-      return widgets;
-   }
+	public void setSelectedCmp(Component pickedCmp) {
+		selectedCmp = pickedCmp;
+	}
 
-   public void setWidgetRoot(WidgetContainer widgetRoot) {
-      this.widgetRoot = widgetRoot;
-   }
+	public void setSelectedShip(Ship selectedShip) {
+		this.selectedShip = selectedShip;
+	}
 
-   public void setWidgets(Map<Integer, Widget> widgets) {
-      this.widgets = widgets;
-   }
+	public void setSelectedWidget(Widget selectedWidget) {
+		this.selectedWidget = selectedWidget;
+	}
+
+	public void setWidgetRoot(WidgetContainer widgetRoot) {
+		this.widgetRoot = widgetRoot;
+	}
+
+	public void setWidgets(Map<Integer, Widget> widgets) {
+		this.widgets = widgets;
+	}
+
 }

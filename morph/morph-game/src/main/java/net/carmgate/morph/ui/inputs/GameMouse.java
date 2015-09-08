@@ -18,7 +18,7 @@ public class GameMouse {
    private UIContext uiContext;
    private Vector2f posInWorld = new Vector2f();
 
-   public Vector2f getPosInWord() {
+   public Vector2f getPosInWorld() {
       float zoomFactor = uiContext.getViewport().getZoomFactor();
       Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
 

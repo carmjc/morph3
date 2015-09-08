@@ -93,38 +93,7 @@ public class RenderUtils {
 	}
 
 	public static void renderDisc(float radius) {
-		// render limit of effect zone
-		TextureImpl.bindNone();
-		float tExt = 0; // temporary data holder
-		float xInt;
-		float xExt;
-
-		xInt = 0; // radius
-		xExt = radius; // radius
-
-		float xExtBackup = xExt; // radius
-		final float yInt = 0;
-		float yExt = 0;
-		float yExtBackup = 0;
-		for (int i = 0; i < nbSegments; i++) {
-
-			tExt = xExt;
-			xExt = cos * xExt - sin * yExt;
-			yExt = sin * tExt + cos * yExt;
-
-			GL11.glBegin(GL11.GL_TRIANGLES);
-			GL11.glVertex2f(xInt, yInt);
-			GL11.glVertex2f(xExtBackup, yExtBackup);
-			GL11.glVertex2f(xExt, yExt);
-			GL11.glEnd();
-
-			xExtBackup = xExt;
-			yExtBackup = yExt;
-		}
-	}
-
-	public static void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
-		renderLine(from, to, width, width, blurWidth, colorInt, colorExt);
+		renderPartialDisc(radius, 1);
 	}
 
 	public static void renderLine(Vector2f from, Vector2f to, float widthFrom, float widthTo, float blurWidth, float[] colorInt, float[] colorExt) {
@@ -154,27 +123,41 @@ public class RenderUtils {
 		GL11.glEnd();
 	}
 
-	// TODO The "line" parameter should not be necessary
-	// The method should adapt to the number of lines printed so far
-	public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color) {
-		renderText(font, x, y, str, line, color, true);
+	public static void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
+		renderLine(from, to, width, width, blurWidth, colorInt, colorExt);
 	}
 
-	public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color, boolean alignLeft) {
-		if (!alignLeft) {
-			x -= font.getWidth(str);
+	public static void renderPartialDisc(float radius, float ratio) {
+		ratio = Math.max(0, Math.min(1, ratio));
+
+		// render limit of effect zone
+		TextureImpl.bindNone();
+		float tExt = 0; // temporary data holder
+		float xInt;
+		float xExt;
+
+		xInt = 0; // radius
+		xExt = radius; // radius
+
+		float xExtBackup = xExt; // radius
+		final float yInt = 0;
+		float yExt = 0;
+		float yExtBackup = 0;
+		for (int i = 0; i < nbSegments * ratio; i++) {
+
+			tExt = xExt;
+			xExt = cos * xExt - sin * yExt;
+			yExt = sin * tExt + cos * yExt;
+
+			GL11.glBegin(GL11.GL_TRIANGLES);
+			GL11.glVertex2f(xInt, yInt);
+			GL11.glVertex2f(xExtBackup, yExtBackup);
+			GL11.glVertex2f(xExt, yExt);
+			GL11.glEnd();
+
+			xExtBackup = xExt;
+			yExtBackup = yExt;
 		}
-		font.drawString(x, y + font.getHeight() * (line - 1), str, color);
-	}
-
-	/**
-	 * Renders a sprite centered on the current position.
-	 *
-	 * @param width
-	 * @param texture
-	 */
-	public static void renderSprite(final float width, Texture texture) {
-		renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1);
 	}
 
 	/**
@@ -193,6 +176,16 @@ public class RenderUtils {
 		GL11.glVertex2f(right, bottom);
 		GL11.glVertex2f(left, bottom);
 		GL11.glEnd();
+	}
+
+	/**
+	 * Renders a sprite centered on the current position.
+	 *
+	 * @param width
+	 * @param texture
+	 */
+	public static void renderSprite(final float width, Texture texture) {
+		renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1);
 	}
 
 	/**
@@ -217,5 +210,18 @@ public class RenderUtils {
 		GL11.glTexCoord2f(texCoordLeft, texCoordBottom);
 		GL11.glVertex2f(-width / 2, width / 2);
 		GL11.glEnd();
+	}
+
+	// TODO The "line" parameter should not be necessary
+	// The method should adapt to the number of lines printed so far
+	public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color) {
+		renderText(font, x, y, str, line, color, true);
+	}
+
+	public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color, boolean alignLeft) {
+		if (!alignLeft) {
+			x -= font.getWidth(str);
+		}
+		font.drawString(x, y + font.getHeight() * (line - 1), str, color);
 	}
 }
