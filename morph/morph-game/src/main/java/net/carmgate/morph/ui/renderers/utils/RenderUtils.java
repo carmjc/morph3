@@ -85,19 +85,19 @@ public class RenderUtils {
 	}
 
 	public static void renderAntialiasedDisc(float outerRadius, float[] colorMiddle, float zoom) {
-		RenderUtils.renderPartialCircle(1f, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
+		RenderUtils.renderPartialCircle(0, 1f, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
 				colorMiddle,
 				new float[] { 0, 0, 0, 0 });
 	}
 
-	public static void renderAntialiasedPartialDisc(float ratio, float outerRadius, float[] colorMiddle, float zoom) {
-		RenderUtils.renderPartialCircle(ratio, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
+	public static void renderAntialiasedPartialDisc(float ratioStart, float ratioEnd, float outerRadius, float[] colorMiddle, float zoom) {
+		RenderUtils.renderPartialCircle(ratioStart, ratioEnd, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
 				colorMiddle,
 				new float[] { 0, 0, 0, 0 });
 	}
 
 	public static void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt) {
-		renderPartialCircle(1f, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt);
+		renderPartialCircle(0, 1f, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt);
 	}
 
 	public static void renderDisc(float radius) {
@@ -135,7 +135,8 @@ public class RenderUtils {
 		renderLine(from, to, width, width, blurWidth, colorInt, colorExt);
 	}
 
-	public static void renderPartialCircle(float ratio, float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt,
+	public static void renderPartialCircle(float ratioStart, float ratioEnd, float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt,
+			float[] colorInt,
 			float[] colorMiddle, float[] colorExt) {
 		// render limit of effect zone
 		TextureImpl.bindNone();
@@ -155,8 +156,29 @@ public class RenderUtils {
 		temp.put(x);
 		temp.position(0);
 		temp.get(xBackup);
-		for (int i = 0; i < nbSegments * ratio; i++) {
 
+		for (int i = 0; i < (int) (nbSegments * ratioStart); i++) {
+			temp.clear();
+			temp.put(x);
+			temp.position(0);
+			temp.get(t);
+			for (int j = 0; j < 4; j++) {
+				x[j] = cos * x[j] - sin * y[j];
+				y[j] = sin * t[j] + cos * y[j];
+			}
+
+			temp.clear();
+			temp.put(x);
+			temp.position(0);
+			temp.get(xBackup);
+
+			temp.clear();
+			temp.put(y);
+			temp.position(0);
+			temp.get(yBackup);
+		}
+
+		for (int i = 0; i < nbSegments * (ratioEnd - ratioStart); i++) {
 			temp.clear();
 			temp.put(x);
 			temp.position(0);

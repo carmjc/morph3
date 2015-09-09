@@ -167,23 +167,19 @@ public class ShipRenderer implements Renderer<Ship> {
 						new float[] { 0f, 0f, 0f, 0f },
 						new float[] { 1f, 1f, 1f, 0.5f * colorScale * alpha },
 						new float[] { 0f, 0f, 0f, 0f });
-
-				// GL11.glColor4f(color.r, color.g, color.b, color.a);
-				// RenderUtils.renderDisc(width / 2);
 			}
 
-			// if (!cmp.canBeActivated()) {
-			// color.a = 0.2f;
-			// }
 			GL11.glColor4f(color.r, color.g, color.b, color.a * alpha);
 			if (texture != null) {
 				RenderUtils.renderSprite(width, texture);
 			}
 
-			GL11.glColor4f(0, 0, 0, 0.8f);
-			GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
-			RenderUtils.renderAntialiasedPartialDisc(1 - cmp.getAvailability(), width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha }, zoom);
-			GL11.glRotatef(ship.getRotate(), 0, 0, 1);
+			if (cmp.getAvailability() < 1) {
+				GL11.glColor4f(0, 0, 0, 0.8f);
+				GL11.glRotatef(-ship.getRotate() - 90, 0, 0, 1);
+				RenderUtils.renderAntialiasedPartialDisc(0 + cmp.getAvailability(), 1, width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha }, zoom);
+				GL11.glRotatef(ship.getRotate() + 90, 0, 0, 1);
+			}
 
 			GL11.glTranslatef(-compX, -compY, zoom);
 		}
