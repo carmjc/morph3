@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.ui.UIContext;
@@ -45,7 +44,6 @@ public class SetComponentTarget implements MouseListener {
 				&& inputHistory.getLastMouseEvent().getButton() == 1 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP
 				&& selectedCmp != null && !selectedCmp.isActive()) {
 
-			Ship selectedShip = selectedCmp.getShip();
 			PickingResult pickingResult = select.pick(Mouse.getX() - uiContext.getWindow().getWidth() / 2,
 					Mouse.getY() - uiContext.getWindow().getHeight() / 2);
 
