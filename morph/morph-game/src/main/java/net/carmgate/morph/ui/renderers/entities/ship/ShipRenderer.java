@@ -15,7 +15,6 @@ import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
@@ -53,12 +52,12 @@ public class ShipRenderer implements Renderer<Ship> {
 						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.MiningLaser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor.renderer.texture")))) { //$NON-NLS-1$
-			shipBgTexture = TextureLoader.getTexture("PNG", shipBgInputStream);
-			shipTexture = TextureLoader.getTexture("PNG", shipInputStream);
-			cmpTextures.put(ComponentType.LASERS, TextureLoader.getTexture("PNG", laserInputStream));
-			cmpTextures.put(ComponentType.MINING_LASERS, TextureLoader.getTexture("PNG", mlInputStream));
-			cmpTextures.put(ComponentType.REPAIRER, TextureLoader.getTexture("PNG", repairerInputStream));
-			cmpTextures.put(ComponentType.PROPULSORS, TextureLoader.getTexture("PNG", propInputStream));
+			shipBgTexture = RenderUtils.getTexture("PNG", shipBgInputStream);
+			shipTexture = RenderUtils.getTexture("PNG", shipInputStream);
+			cmpTextures.put(ComponentType.LASERS, RenderUtils.getTexture("PNG", laserInputStream));
+			cmpTextures.put(ComponentType.MINING_LASERS, RenderUtils.getTexture("PNG", mlInputStream));
+			cmpTextures.put(ComponentType.REPAIRER, RenderUtils.getTexture("PNG", repairerInputStream));
+			cmpTextures.put(ComponentType.PROPULSORS, RenderUtils.getTexture("PNG", propInputStream));
 		} catch (IOException e) {
 			LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
 		}
@@ -176,13 +175,15 @@ public class ShipRenderer implements Renderer<Ship> {
 			// if (!cmp.canBeActivated()) {
 			// color.a = 0.2f;
 			// }
-			GL11.glColor4f(color.r, color.g, color.b, 0.5f * color.a);
-			RenderUtils.renderPartialDisc(width / 2, cmp.getAvailability());
-
 			GL11.glColor4f(color.r, color.g, color.b, color.a);
 			if (texture != null) {
 				RenderUtils.renderSprite(width, texture);
 			}
+
+			GL11.glColor4f(0, 0, 0, 0.8f);
+			GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
+			RenderUtils.renderAntialiasedPartialDisc(1 - cmp.getAvailability(), width / 2 - 20, new float[] { 0, 0, 0, 0.8f }, zoom);
+			GL11.glRotatef(ship.getRotate(), 0, 0, 1);
 
 			GL11.glTranslatef(-compX, -compY, zoom);
 		}

@@ -15,7 +15,6 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
@@ -33,14 +32,14 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 @Singleton
 public class ComponentPonderationWidget extends Widget implements WidgetMouseListener {
 
+	private static Map<ComponentType, Texture> cmpTextures = new HashMap<>();
+	private static TrueTypeFont font;
 	@Inject private UIContext uiContext;
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
+
 	@Inject private GameMouse gameMouse;
 	@Inject private DragContext dragContext;
-
-	private static Map<ComponentType, Texture> cmpTextures = new HashMap<>();
-	private static TrueTypeFont font;
 	private ComponentType selectedCmpType;
 	private ComponentType otherCmpType;
 	private boolean leftAnchor;
@@ -49,52 +48,15 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 	private float componentPonderationWidgetHeight;
 	private float componentPonderationWidgetWidth;
 
-	@Override
-	public void renderWidget() {
-		if (font == null) {
-			init();
+	public float getCoeff(float oldMouseX) {
+		float dragStart = (oldMouseX - 5) / componentPonderationWidgetWidth;
+		if (dragStart < 0) {
+			dragStart = 0;
 		}
-
-		if (uiContext.getSelectedShip() == null) {
-			return;
+		if (dragStart > 1) {
+			dragStart = 1;
 		}
-
-		// Render component repartition gui
-		float height = componentPonderationWidgetHeight;
-		float width = componentPonderationWidgetWidth;
-
-		GL11.glColor4f(1, 1, 1, 1);
-		RenderUtils.renderQuad(0, 25, width + 1, 25 + height);
-
-		float aggregatedPonderation = 0;
-		int i = 0;
-		int nbCmpType = uiContext.getSelectedShip().getComponentsComposition().entrySet().size();
-		for (Entry<ComponentType, Float> ponderation : uiContext.getSelectedShip().getComponentsComposition().entrySet()) {
-			Activable cmp = uiContext.getSelectedShip().getComponents().get(ponderation.getKey());
-
-			RenderUtils.renderLine(new Vector2f(i * width / nbCmpType + width / nbCmpType / 2, 20),
-					new Vector2f(aggregatedPonderation * width + width * ponderation.getValue() / 2, 27), 1, 1, new float[] { 1, 1,
-							1, 0.25f }, new float[] { 0, 0, 0, 0 });
-
-			GL11.glTranslatef(i * width / nbCmpType + width / nbCmpType / 2, 0, 0);
-			String str = ponderation.getKey().name();
-			CharSequence ss = str.subSequence(0, 1);
-			Color color = new Color(Color.white);
-			RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 1, color);
-			GL11.glTranslatef(-i * width / nbCmpType - width / nbCmpType / 2, 0, 0);
-
-			GL11.glTranslatef(aggregatedPonderation * width, 25, 0);
-			float[] cmpColor = ponderation.getKey().getColor();
-			if (!cmp.isActive()) {
-				cmpColor = new float[] { 0.3f, 0.3f, 0.3f, 1 };
-			}
-			GL11.glColor4f(cmpColor[0], cmpColor[1], cmpColor[2], cmpColor[3]);
-			RenderUtils.renderQuad(1, 1, width * ponderation.getValue(), height - 1);
-			GL11.glTranslatef(-aggregatedPonderation * width, -25, 0);
-
-			aggregatedPonderation += ponderation.getValue();
-			i++;
-		}
+		return dragStart;
 	}
 
 	private void init() {
@@ -112,10 +74,10 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 				BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.miningLaser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.propulsors.renderer.texture")))) { //$NON-NLS-1$
-			cmpTextures.put(ComponentType.LASERS, TextureLoader.getTexture("PNG", laserInputStream));
-			cmpTextures.put(ComponentType.MINING_LASERS, TextureLoader.getTexture("PNG", mlInputStream));
-			cmpTextures.put(ComponentType.REPAIRER, TextureLoader.getTexture("PNG", repairerInputStream));
-			cmpTextures.put(ComponentType.PROPULSORS, TextureLoader.getTexture("PNG", propInputStream));
+			cmpTextures.put(ComponentType.LASERS, RenderUtils.getTexture("PNG", laserInputStream));
+			cmpTextures.put(ComponentType.MINING_LASERS, RenderUtils.getTexture("PNG", mlInputStream));
+			cmpTextures.put(ComponentType.REPAIRER, RenderUtils.getTexture("PNG", repairerInputStream));
+			cmpTextures.put(ComponentType.PROPULSORS, RenderUtils.getTexture("PNG", propInputStream));
 		} catch (IOException e) {
 			LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
 		}
@@ -123,20 +85,6 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 		componentPonderationWidgetHeight = conf.getFloatProperty("ui.componentPonderationWidget.height");
 		componentPonderationWidgetWidth = conf.getFloatProperty("ui.componentPonderationWidget.width");
 
-	}
-
-	@Override
-	public void renderInteractiveAreas() {
-		if (uiContext.getSelectedShip() == null) {
-			return;
-		}
-
-		// Render component repartition gui
-		float height = componentPonderationWidgetHeight;
-		float width = componentPonderationWidgetWidth;
-
-		GL11.glColor4f(1, 1, 1, 1);
-		RenderUtils.renderQuad(0, 25, width + 1, 25 + height);
 	}
 
 	@Override
@@ -206,15 +154,66 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 		}
 	}
 
-	public float getCoeff(float oldMouseX) {
-		float dragStart = (oldMouseX - 5) / componentPonderationWidgetWidth;
-		if (dragStart < 0) {
-			dragStart = 0;
+	@Override
+	public void renderInteractiveAreas() {
+		if (uiContext.getSelectedShip() == null) {
+			return;
 		}
-		if (dragStart > 1) {
-			dragStart = 1;
+
+		// Render component repartition gui
+		float height = componentPonderationWidgetHeight;
+		float width = componentPonderationWidgetWidth;
+
+		GL11.glColor4f(1, 1, 1, 1);
+		RenderUtils.renderQuad(0, 25, width + 1, 25 + height);
+	}
+
+	@Override
+	public void renderWidget() {
+		if (font == null) {
+			init();
 		}
-		return dragStart;
+
+		if (uiContext.getSelectedShip() == null) {
+			return;
+		}
+
+		// Render component repartition gui
+		float height = componentPonderationWidgetHeight;
+		float width = componentPonderationWidgetWidth;
+
+		GL11.glColor4f(1, 1, 1, 1);
+		RenderUtils.renderQuad(0, 25, width + 1, 25 + height);
+
+		float aggregatedPonderation = 0;
+		int i = 0;
+		int nbCmpType = uiContext.getSelectedShip().getComponentsComposition().entrySet().size();
+		for (Entry<ComponentType, Float> ponderation : uiContext.getSelectedShip().getComponentsComposition().entrySet()) {
+			Activable cmp = uiContext.getSelectedShip().getComponents().get(ponderation.getKey());
+
+			RenderUtils.renderLine(new Vector2f(i * width / nbCmpType + width / nbCmpType / 2, 20),
+					new Vector2f(aggregatedPonderation * width + width * ponderation.getValue() / 2, 27), 1, 1, new float[] { 1, 1,
+							1, 0.25f }, new float[] { 0, 0, 0, 0 });
+
+			GL11.glTranslatef(i * width / nbCmpType + width / nbCmpType / 2, 0, 0);
+			String str = ponderation.getKey().name();
+			CharSequence ss = str.subSequence(0, 1);
+			Color color = new Color(Color.white);
+			RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 1, color);
+			GL11.glTranslatef(-i * width / nbCmpType - width / nbCmpType / 2, 0, 0);
+
+			GL11.glTranslatef(aggregatedPonderation * width, 25, 0);
+			float[] cmpColor = ponderation.getKey().getColor();
+			if (!cmp.isActive()) {
+				cmpColor = new float[] { 0.3f, 0.3f, 0.3f, 1 };
+			}
+			GL11.glColor4f(cmpColor[0], cmpColor[1], cmpColor[2], cmpColor[3]);
+			RenderUtils.renderQuad(1, 1, width * ponderation.getValue(), height - 1);
+			GL11.glTranslatef(-aggregatedPonderation * width, -25, 0);
+
+			aggregatedPonderation += ponderation.getValue();
+			i++;
+		}
 	}
 
 }

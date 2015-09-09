@@ -7,43 +7,42 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.jboss.weld.environment.se.events.ContainerInitialized;
+import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.opengl.Texture;
+import org.slf4j.Logger;
+
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.entities.physical.Asteroid;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
-import org.jboss.weld.environment.se.events.ContainerInitialized;
-import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.slf4j.Logger;
-
 public class AsteroidRenderer implements Renderer<Asteroid> {
 
-   @Inject private Logger LOGGER;
-   @Inject private Conf conf;
-
    private static Texture asteroids1Texture;
-   private float massToSizeFactor;
+   @Inject private Logger LOGGER;
 
-   @SuppressWarnings("unused")
-   private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-      newRendererEventMgr.fire(new NewRendererFound(this));
-   }
+   @Inject private Conf conf;
+   private float massToSizeFactor;
 
    @Override
    public void init() {
       // load texture from PNG file if needed
       if (asteroids1Texture == null) {
          try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("asteroid.renderer.texture")))) { //$NON-NLS-1$
-            asteroids1Texture = TextureLoader.getTexture("PNG", fileInputStream);
+            asteroids1Texture = RenderUtils.getTexture("PNG", fileInputStream);
          } catch (IOException e) {
             LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
          }
       }
 
       massToSizeFactor = conf.getFloatProperty("asteroid.renderer.massToSizeFactor"); //$NON-NLS-1$
+   }
+
+   @SuppressWarnings("unused")
+   private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
+      newRendererEventMgr.fire(new NewRendererFound(this));
    }
 
    @Override

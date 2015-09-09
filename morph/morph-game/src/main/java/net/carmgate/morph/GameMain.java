@@ -157,14 +157,16 @@ public class GameMain {
 
 		// set clear color - Wont be needed once we have a background
 		GL11.glClearColor(0.2f, 0.2f, 0.2f, 0f);
+		GL11.glShadeModel(GL11.GL_SMOOTH);
 
 		// enable alpha blending
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
-		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		// GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+		// GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		// GL11.glEnable(GL11.GL_SMOOTH);
 
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();

@@ -1,10 +1,21 @@
 package net.carmgate.morph.ui.renderers.utils;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.util.glu.GLU;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.opengl.ImageDataFactory;
+import org.newdawn.slick.opengl.InternalTextureLoader;
+import org.newdawn.slick.opengl.LoadableImageData;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureImpl;
 import org.slf4j.Logger;
@@ -23,73 +34,70 @@ public class RenderUtils {
 
 	private static final Vector2f ortho = new Vector2f();
 
-	public static void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt) {
+	public static TextureImpl getTexture(String resourceName, InputStream in) throws IOException {
+		int textureID = InternalTextureLoader.createTextureID();
+		int target = GL11.GL_TEXTURE_2D;
+		TextureImpl texture = new TextureImpl(resourceName, target, textureID);
 
-		// render limit of effect zone
-		TextureImpl.bindNone();
-		float[] x = new float[] { 0, 0, 0, 0 };
-		float[] y = new float[] { 0, 0, 0, 0 };
-		float[] t = new float[] { 0, 0, 0, 0 };
-		float[] xBackup = new float[] { 0, 0, 0, 0 };
-		float[] yBackup = new float[] { 0, 0, 0, 0 };
-		FloatBuffer temp = FloatBuffer.allocate(4);
+		GL11.glBindTexture(target, textureID);
 
-		x[0] = innerRadius - blurWidthInt; // radius
-		x[1] = innerRadius;
-		x[2] = outerRadius;
-		x[3] = outerRadius + blurWidthExt;
+		ByteBuffer textureBuffer;
+		int width;
+		int height;
+		int texWidth;
+		int texHeight;
 
-		temp.clear();
-		temp.put(x);
-		temp.position(0);
-		temp.get(xBackup);
-		for (int i = 0; i < nbSegments; i++) {
+		LoadableImageData imageData = ImageDataFactory.getImageDataFor(resourceName);
+		textureBuffer = imageData.loadImage(new BufferedInputStream(in), false, null);
 
-			temp.clear();
-			temp.put(x);
-			temp.position(0);
-			temp.get(t);
-			for (int j = 0; j < 4; j++) {
-				x[j] = cos * x[j] - sin * y[j];
-				y[j] = sin * t[j] + cos * y[j];
-			}
-			GL11.glBegin(GL11.GL_QUADS);
-			GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
-			GL11.glVertex2f(x[0], y[0]);
-			GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
-			GL11.glVertex2f(xBackup[0], yBackup[0]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[1], yBackup[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[1], y[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[1], yBackup[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[1], y[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[2], y[2]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[2], yBackup[2]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[2], y[2]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[2], yBackup[2]);
-			GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
-			GL11.glVertex2f(xBackup[3], yBackup[3]);
-			GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
-			GL11.glVertex2f(x[3], y[3]);
-			GL11.glEnd();
+		width = imageData.getWidth();
+		height = imageData.getHeight();
 
-			temp.clear();
-			temp.put(x);
-			temp.position(0);
-			temp.get(xBackup);
+		texture.setTextureWidth(imageData.getTexWidth());
+		texture.setTextureHeight(imageData.getTexHeight());
 
-			temp.clear();
-			temp.put(y);
-			temp.position(0);
-			temp.get(yBackup);
+		texWidth = texture.getTextureWidth();
+		texHeight = texture.getTextureHeight();
+
+		IntBuffer temp = BufferUtils.createIntBuffer(16);
+		GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE, temp);
+		int max = temp.get(0);
+		if (texWidth > max || texHeight > max) {
+			throw new IOException("Attempt to allocate a texture to big for the current hardware");
 		}
+
+		int srcPixelFormat = GL11.GL_RGBA;
+
+		texture.setWidth(width);
+		texture.setHeight(height);
+
+		GL11.glTexParameteri(target, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
+		GL11.glTexParameteri(target, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+
+		// produce a texture from the byte buffer
+		GLU.gluBuild2DMipmaps(target, 4,
+				InternalTextureLoader.get2Fold(width),
+				InternalTextureLoader.get2Fold(height),
+				srcPixelFormat, GL11.GL_UNSIGNED_BYTE, textureBuffer);
+
+		return texture;
+
+	}
+
+	public static void renderAntialiasedDisc(float outerRadius, float[] colorMiddle, float zoom) {
+		RenderUtils.renderPartialCircle(1f, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
+				colorMiddle,
+				new float[] { 0, 0, 0, 0 });
+	}
+
+	public static void renderAntialiasedPartialDisc(float ratio, float outerRadius, float[] colorMiddle, float zoom) {
+		RenderUtils.renderPartialCircle(ratio, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
+				colorMiddle,
+				new float[] { 0, 0, 0, 0 });
+	}
+
+	public static void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt) {
+		renderPartialCircle(1f, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt);
 	}
 
 	public static void renderDisc(float radius) {
@@ -125,6 +133,77 @@ public class RenderUtils {
 
 	public static void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
 		renderLine(from, to, width, width, blurWidth, colorInt, colorExt);
+	}
+
+	public static void renderPartialCircle(float ratio, float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt,
+			float[] colorMiddle, float[] colorExt) {
+		// render limit of effect zone
+		TextureImpl.bindNone();
+		float[] x = new float[] { 0, 0, 0, 0 };
+		float[] y = new float[] { 0, 0, 0, 0 };
+		float[] t = new float[] { 0, 0, 0, 0 };
+		float[] xBackup = new float[] { 0, 0, 0, 0 };
+		float[] yBackup = new float[] { 0, 0, 0, 0 };
+		FloatBuffer temp = FloatBuffer.allocate(4);
+
+		x[0] = innerRadius - blurWidthInt; // radius
+		x[1] = innerRadius;
+		x[2] = outerRadius;
+		x[3] = outerRadius + blurWidthExt;
+
+		temp.clear();
+		temp.put(x);
+		temp.position(0);
+		temp.get(xBackup);
+		for (int i = 0; i < nbSegments * ratio; i++) {
+
+			temp.clear();
+			temp.put(x);
+			temp.position(0);
+			temp.get(t);
+			for (int j = 0; j < 4; j++) {
+				x[j] = cos * x[j] - sin * y[j];
+				y[j] = sin * t[j] + cos * y[j];
+			}
+			GL11.glBegin(GL11.GL_QUADS);
+			// if (innerRadius > 0) {
+			GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
+			GL11.glVertex2f(x[0], y[0]);
+			GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
+			GL11.glVertex2f(xBackup[0], yBackup[0]);
+			// }
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(xBackup[1], yBackup[1]);
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(x[1], y[1]);
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(xBackup[1], yBackup[1]);
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(x[1], y[1]);
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(x[2], y[2]);
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(xBackup[2], yBackup[2]);
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(x[2], y[2]);
+			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+			GL11.glVertex2f(xBackup[2], yBackup[2]);
+			GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
+			GL11.glVertex2f(xBackup[3], yBackup[3]);
+			GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
+			GL11.glVertex2f(x[3], y[3]);
+			GL11.glEnd();
+
+			temp.clear();
+			temp.put(x);
+			temp.position(0);
+			temp.get(xBackup);
+
+			temp.clear();
+			temp.put(y);
+			temp.position(0);
+			temp.get(yBackup);
+		}
 	}
 
 	public static void renderPartialDisc(float radius, float ratio) {
@@ -199,7 +278,9 @@ public class RenderUtils {
 	 * @param texCoordBottom
 	 */
 	public static void renderSpriteFromBigTexture(float width, Texture texture, float texCoordLeft, float texCoordTop, float texCoordRight, float texCoordBottom) {
+		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
 		texture.bind();
+
 		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glTexCoord2f(texCoordLeft, texCoordTop);
 		GL11.glVertex2f(-width / 2, -width / 2);
