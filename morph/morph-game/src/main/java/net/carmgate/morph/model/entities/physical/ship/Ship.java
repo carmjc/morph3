@@ -60,6 +60,7 @@ public class Ship extends PhysicalEntity {
 	public Vector2f debug4 = new Vector2f();
 
 	private boolean forceStop;
+	private long creationTime;
 
 	public void add(Component component, float compositionContribution) {
 		component.setShip(this);
@@ -67,6 +68,49 @@ public class Ship extends PhysicalEntity {
 		components.put(componentKind.value(), component);
 		componentsComposition.put(componentKind.value(), compositionContribution);
 	}
+
+	public Map<ComponentType, Component> getComponents() {
+		return components;
+	}
+
+	public Map<ComponentType, Float> getComponentsComposition() {
+		return componentsComposition;
+	}
+
+	public long getCreationTime() {
+		return creationTime;
+	}
+
+	// public MoveOrder getMoveOrder() {
+	// return moveOrder;
+	// }
+
+	// public List<Order> getBgOrders() {
+	// return bgOrders;
+	// }
+	//
+	public float getDurability() {
+		return durability;
+	}
+
+	public float getEnergy() {
+		return energy;
+	}
+
+	public float getEnergyDt() {
+		return energydt;
+	}
+
+	public float getEnergyMax() {
+		return energyMax;
+	}
+
+	// public void removeActionOrder() {
+	// if (actionOrder instanceof ForceSource) {
+	// getForceSources().remove(actionOrder);
+	// }
+	// actionOrder = null;
+	// }
 
 	// public void add(Order order) {
 	// order.setWorld(world);
@@ -114,17 +158,42 @@ public class Ship extends PhysicalEntity {
 		return integrity;
 	}
 
-	// public MoveOrder getMoveOrder() {
-	// return moveOrder;
-	// }
+	public float getIntegrityDt() {
+		return integrityDt;
+	}
 
 	public Player getPlayer() {
 		return owner;
 	}
 
+	public float getResources() {
+		return resources;
+	}
+
+	public float getResourcesDt() {
+		return resourcesdt;
+	}
+
+	public float getResourcesMax() {
+		return resourcesMax;
+	}
+
 	@Deprecated
 	public Surroundings getSurroundings() {
 		return surroundings;
+	}
+
+	public boolean isForceStop() {
+		return forceStop;
+	}
+
+	public void onShipDeath(@MObserves ShipDeath shipDeath) {
+		if (shipDeath.getShip() != this) {
+			HashMap<String, Object> inputs = new HashMap<>();
+			inputs.put("self", this);
+			inputs.put("ship", new ReadOnlyShip(shipDeath.getShip()));
+			scriptManager.callScript("onOtherShipDeath", getPlayer(), inputs, null);
+		}
 	}
 
 	// FIXME This will occur too regularly, event should be used only for non periodic events
@@ -146,108 +215,48 @@ public class Ship extends PhysicalEntity {
 		}
 	}
 
-	public void onShipDeath(@MObserves ShipDeath shipDeath) {
-		if (shipDeath.getShip() != this) {
-			HashMap<String, Object> inputs = new HashMap<>();
-			inputs.put("self", this);
-			inputs.put("ship", new ReadOnlyShip(shipDeath.getShip()));
-			scriptManager.callScript("onOtherShipDeath", getPlayer(), inputs, null);
-		}
-	}
-
-	// public void removeActionOrder() {
-	// if (actionOrder instanceof ForceSource) {
-	// getForceSources().remove(actionOrder);
-	// }
-	// actionOrder = null;
-	// }
-
-	public void setPlayer(Player owner) {
-		this.owner = owner;
-	}
-
-	public void setIntegrity(float integrity) {
-		this.integrity = integrity;
-	}
-
-	public float getEnergy() {
-		return energy;
-	}
-
-	public void setEnergy(float energy) {
-		this.energy = energy;
-	}
-
-	public float getEnergyDt() {
-		return energydt;
-	}
-
-	public void setEnergyDt(float energydt) {
-		this.energydt = energydt;
-	}
-
-	public float getResources() {
-		return resources;
-	}
-
-	public void setResources(float resources) {
-		this.resources = resources;
-	}
-
-	public float getResourcesDt() {
-		return resourcesdt;
-	}
-
-	public void setResourcesDt(float resourcesdt) {
-		this.resourcesdt = resourcesdt;
-	}
-
-	public Map<ComponentType, Component> getComponents() {
-		return components;
-	}
-
-	public void setForceStop(boolean forceStop) {
-		this.forceStop = forceStop;
-	}
-
-	public boolean isForceStop() {
-		return forceStop;
-	}
-
-	// public List<Order> getBgOrders() {
-	// return bgOrders;
-	// }
-	//
-	public float getDurability() {
-		return durability;
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
 	}
 
 	public void setDurability(float durability) {
 		this.durability = durability;
 	}
 
-	public float getIntegrityDt() {
-		return integrityDt;
+	public void setEnergy(float energy) {
+		this.energy = energy;
 	}
 
-	public void setIntegrityDt(float integrityDt) {
-		this.integrityDt = integrityDt;
-	}
-
-	public Map<ComponentType, Float> getComponentsComposition() {
-		return componentsComposition;
-	}
-
-	public float getEnergyMax() {
-		return energyMax;
+	public void setEnergyDt(float energydt) {
+		this.energydt = energydt;
 	}
 
 	public void setEnergyMax(float energyMax) {
 		this.energyMax = energyMax;
 	}
 
-	public float getResourcesMax() {
-		return resourcesMax;
+	public void setForceStop(boolean forceStop) {
+		this.forceStop = forceStop;
+	}
+
+	public void setIntegrity(float integrity) {
+		this.integrity = integrity;
+	}
+
+	public void setIntegrityDt(float integrityDt) {
+		this.integrityDt = integrityDt;
+	}
+
+	public void setPlayer(Player owner) {
+		this.owner = owner;
+	}
+
+	public void setResources(float resources) {
+		this.resources = resources;
+	}
+
+	public void setResourcesDt(float resourcesdt) {
+		this.resourcesdt = resourcesdt;
 	}
 
 	public void setResourcesMax(float resourcesMax) {

@@ -107,6 +107,7 @@ public class GameMain {
 			ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
 			ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
 			ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
+			ship.setCreationTime(world.getTime());
 			world.add(ship);
 		}
 		nextWaveId++;
@@ -319,7 +320,7 @@ public class GameMain {
 					if (anim != null) {
 						Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
 						if (anim.getAnimationEnd() > world.getTime()) {
-							renderer.render(anim);
+							renderer.render(anim, 1f);
 						}
 						if (anim.getAnimationEnd() + anim.getAnimationCoolDown() < world.getTime()) {
 							anim.setAnimationEnd(anim.getAnimationEnd() + anim.getAnimationCoolDown() + anim.getAnimationDuration());
@@ -397,7 +398,7 @@ public class GameMain {
 				final Vector2f pos = entity.getPos();
 				GL11.glTranslatef(pos.x, pos.y, 0);
 				Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
-				renderer.render(entity);
+				renderer.render(entity, 1f);
 				GL11.glTranslatef(-pos.x, -pos.y, 0);
 			}
 		}
@@ -407,7 +408,8 @@ public class GameMain {
 			for (final Ship ship : world.getShips()) {
 				final Vector2f pos = ship.getPos();
 				GL11.glTranslatef(pos.x, pos.y, 0);
-				shipRenderer.render(ship);
+				float alpha = Math.min(((float) world.getTime() - ship.getCreationTime()) / 10000, 1f);
+				shipRenderer.render(ship, alpha);
 				GL11.glTranslatef(-pos.x, -pos.y, 0);
 			}
 		}

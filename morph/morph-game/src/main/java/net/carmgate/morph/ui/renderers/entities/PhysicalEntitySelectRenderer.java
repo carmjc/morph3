@@ -30,7 +30,7 @@ public class PhysicalEntitySelectRenderer implements SelectRenderer<PhysicalEnti
 	}
 
 	@Override
-	public void render(PhysicalEntity entity) {
+	public void render(PhysicalEntity entity, float alpha) {
 		final float massScale = entity.getMass() * conf.getFloatProperty("asteroid.renderer.massToSizeFactor");
 		final float width = 128;
 

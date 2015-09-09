@@ -20,46 +20,46 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 public class AsteroidRenderer implements Renderer<Asteroid> {
 
-   private static Texture asteroids1Texture;
-   @Inject private Logger LOGGER;
+	private static Texture asteroids1Texture;
+	@Inject private Logger LOGGER;
 
-   @Inject private Conf conf;
-   private float massToSizeFactor;
+	@Inject private Conf conf;
+	private float massToSizeFactor;
 
-   @Override
-   public void init() {
-      // load texture from PNG file if needed
-      if (asteroids1Texture == null) {
-         try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("asteroid.renderer.texture")))) { //$NON-NLS-1$
-            asteroids1Texture = RenderUtils.getTexture("PNG", fileInputStream);
-         } catch (IOException e) {
-            LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
-         }
-      }
+	@Override
+	public void init() {
+		// load texture from PNG file if needed
+		if (asteroids1Texture == null) {
+			try (BufferedInputStream fileInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("asteroid.renderer.texture")))) { //$NON-NLS-1$
+				asteroids1Texture = RenderUtils.getTexture("PNG", fileInputStream);
+			} catch (IOException e) {
+				LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
+			}
+		}
 
-      massToSizeFactor = conf.getFloatProperty("asteroid.renderer.massToSizeFactor"); //$NON-NLS-1$
-   }
+		massToSizeFactor = conf.getFloatProperty("asteroid.renderer.massToSizeFactor"); //$NON-NLS-1$
+	}
 
-   @SuppressWarnings("unused")
-   private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-      newRendererEventMgr.fire(new NewRendererFound(this));
-   }
+	@SuppressWarnings("unused")
+	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
+		newRendererEventMgr.fire(new NewRendererFound(this));
+	}
 
-   @Override
-   public void render(Asteroid asteroid) {
-      float massScale = asteroid.getMass() * massToSizeFactor;
-      float width = 128f;
+	@Override
+	public void render(Asteroid asteroid, float alpha) {
+		float massScale = asteroid.getMass() * massToSizeFactor;
+		float width = 128f;
 
-      int i = 2; // TODO variabilize this
-      int j = 4;
+		int i = 2; // TODO variabilize this
+		int j = 4;
 
-      GL11.glColor4f(1, 1, 1, 1);
-      GL11.glScalef(massScale, massScale, 0);
-      GL11.glRotatef(asteroid.getRotate(), 0, 0, 1);
-      RenderUtils.renderSpriteFromBigTexture(width, asteroids1Texture, i / 8f, j / 8f, (i + 1) / 8f, (j + 1) / 8f);
-      GL11.glRotatef(-asteroid.getRotate(), 0, 0, 1);
-      GL11.glScalef(1 / massScale, 1 / massScale, 0);
+		GL11.glColor4f(1, 1, 1, 1);
+		GL11.glScalef(massScale, massScale, 0);
+		GL11.glRotatef(asteroid.getRotate(), 0, 0, 1);
+		RenderUtils.renderSpriteFromBigTexture(width, asteroids1Texture, i / 8f, j / 8f, (i + 1) / 8f, (j + 1) / 8f);
+		GL11.glRotatef(-asteroid.getRotate(), 0, 0, 1);
+		GL11.glScalef(1 / massScale, 1 / massScale, 0);
 
-   }
+	}
 
 }

@@ -69,22 +69,36 @@ public class ShipRenderer implements Renderer<Ship> {
 	}
 
 	@Override
-	public void render(Ship ship) {
+	public void render(Ship ship, float alpha) {
 
 		final float massScale = ship.getMass();
 		final float width = 256;
+		float zoom = uiContext.getViewport().getZoomFactor();
 
 		GL11.glScalef(massScale, massScale, 0);
-		GL11.glColor4f(1f, 1f, 1f, 0.6f);
+		GL11.glColor4f(1f, 1f, 1f, 0.6f * alpha);
 		GL11.glRotatef(ship.getRotate(), 0, 0, 1);
 
 		float[] color = ship.getPlayer().getColor();
-		GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3]);
+		GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3] * alpha);
 		RenderUtils.renderSprite(width, shipBgTexture);
-		GL11.glColor4f(color[0], color[1], color[2], color[3]);
+		GL11.glColor4f(color[0], color[1], color[2], color[3] * alpha);
 		RenderUtils.renderSprite(width, shipTexture);
 
-		renderComponents(ship);
+		// FIXME #23
+		if (ship == uiContext.getSelectedShip()) {
+			float colorScale = (int) (world.getTime() % 1000);
+			colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.6f;
+			RenderUtils.renderCircle(width / 2f + 10 / massScale,
+					width / 2f + 10 / massScale,
+					2 / zoom / massScale,
+					5 / zoom / massScale,
+					new float[] { 0f, 0f, 0f, 0f },
+					new float[] { 1f, 1f, 1f, 0.5f * colorScale * alpha },
+					new float[] { 0f, 0f, 0f, 0f });
+		}
+
+		renderComponents(ship, alpha);
 
 		GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
 		GL11.glScalef(1f / massScale, 1f / massScale, 0);
@@ -92,15 +106,15 @@ public class ShipRenderer implements Renderer<Ship> {
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
 			// Accel
 			Vector2f accel = new Vector2f(ship.getAccel());
-			RenderUtils.renderLine(Vector2f.NULL, accel, 2, 2, new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+			RenderUtils.renderLine(Vector2f.NULL, accel, 2, 2, new float[] { 1f, 0f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
 			// Speed
 			Vector2f speed = new Vector2f(ship.getSpeed());
-			RenderUtils.renderLine(Vector2f.NULL, speed, 2, 2, new float[] { 0f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+			RenderUtils.renderLine(Vector2f.NULL, speed, 2, 2, new float[] { 0f, 1f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
 
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug1, 2, 2, new float[] { 0f, 0f, 1f, 1f }, new float[] { 0f, 0f, 0f, 0f });
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug2, 2, 2, new float[] { 0.5f, 0.5f, 0.5f, 1f }, new float[] { 0f, 0f, 0f, 0f });
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug3, 2, 2, new float[] { 1f, 1f, 1f, 1f }, new float[] { 0f, 0f, 0f, 0f });
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug4, 2, 2, new float[] { 1f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
+			RenderUtils.renderLine(Vector2f.NULL, ship.debug1, 2, 2, new float[] { 0f, 0f, 1f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			RenderUtils.renderLine(Vector2f.NULL, ship.debug2, 2, 2, new float[] { 0.5f, 0.5f, 0.5f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			RenderUtils.renderLine(Vector2f.NULL, ship.debug3, 2, 2, new float[] { 1f, 1f, 1f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			RenderUtils.renderLine(Vector2f.NULL, ship.debug4, 2, 2, new float[] { 1f, 1f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
 		}
 
 	}
@@ -110,23 +124,9 @@ public class ShipRenderer implements Renderer<Ship> {
 	 * @param massScale
 	 * @param width
 	 */
-	private void renderComponents(Ship ship) {
+	private void renderComponents(Ship ship, float alpha) {
 		float zoom = uiContext.getViewport().getZoomFactor();
-		final float massScale = ship.getMass();
 		final float width = 512;
-
-		// FIXME #23
-		if (ship == uiContext.getSelectedShip()) {
-			float colorScale = (int) (world.getTime() % 1000);
-			colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.6f;
-			RenderUtils.renderCircle(width / 4f + 10 / massScale,
-					width / 4f + 10 / massScale,
-					2 / zoom / massScale,
-					5 / zoom / massScale,
-					new float[] { 0f, 0f, 0f, 0f },
-					new float[] { 1f, 1f, 1f, 0.5f * colorScale },
-					new float[] { 0f, 0f, 0f, 0f });
-		}
 
 		Collection<Component> components = ship.getComponents().values();
 		int propIndex = 0;
@@ -165,7 +165,7 @@ public class ShipRenderer implements Renderer<Ship> {
 						40 / zoom,
 						50 / zoom,
 						new float[] { 0f, 0f, 0f, 0f },
-						new float[] { 1f, 1f, 1f, 0.5f * colorScale },
+						new float[] { 1f, 1f, 1f, 0.5f * colorScale * alpha },
 						new float[] { 0f, 0f, 0f, 0f });
 
 				// GL11.glColor4f(color.r, color.g, color.b, color.a);
@@ -175,14 +175,14 @@ public class ShipRenderer implements Renderer<Ship> {
 			// if (!cmp.canBeActivated()) {
 			// color.a = 0.2f;
 			// }
-			GL11.glColor4f(color.r, color.g, color.b, color.a);
+			GL11.glColor4f(color.r, color.g, color.b, color.a * alpha);
 			if (texture != null) {
 				RenderUtils.renderSprite(width, texture);
 			}
 
 			GL11.glColor4f(0, 0, 0, 0.8f);
 			GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
-			RenderUtils.renderAntialiasedPartialDisc(1 - cmp.getAvailability(), width / 2 - 20, new float[] { 0, 0, 0, 0.8f }, zoom);
+			RenderUtils.renderAntialiasedPartialDisc(1 - cmp.getAvailability(), width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha }, zoom);
 			GL11.glRotatef(ship.getRotate(), 0, 0, 1);
 
 			GL11.glTranslatef(-compX, -compY, zoom);

@@ -35,7 +35,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 	}
 
 	@Override
-	public void render(Ship ship) {
+	public void render(Ship ship, float alpha) {
 		final float massScale = ship.getMass();
 		final float width = 256;
 

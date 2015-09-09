@@ -215,14 +215,14 @@ public class Select implements MouseListener {
 		for (Ship ship : world.getShips()) {
 			final Vector2f pos = ship.getPos();
 			GL11.glTranslatef(pos.x, pos.y, 0);
-			shipSelectRenderer.render(ship);
+			shipSelectRenderer.render(ship, 1f);
 			GL11.glTranslatef(-pos.x, -pos.y, 0);
 		}
 
 		for (PhysicalEntity entity : world.getNonShipsPhysicalEntities()) {
 			final Vector2f pos = entity.getPos();
 			GL11.glTranslatef(pos.x, pos.y, 0);
-			physicalEntitySelectRenderer.render(entity);
+			physicalEntitySelectRenderer.render(entity, 1f);
 			GL11.glTranslatef(-pos.x, -pos.y, 0);
 		}
 

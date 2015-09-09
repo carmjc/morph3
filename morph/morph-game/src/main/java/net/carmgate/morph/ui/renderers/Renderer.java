@@ -3,8 +3,8 @@ package net.carmgate.morph.ui.renderers;
 
 public interface Renderer<T extends Renderable> {
 
-   default void init() {
-   }
+	default void init() {
+	}
 
-   void render(T renderable);
+	void render(T renderable, float alpha);
 }
