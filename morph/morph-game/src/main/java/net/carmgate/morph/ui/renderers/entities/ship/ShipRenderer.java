@@ -79,24 +79,24 @@ public class ShipRenderer implements Renderer<Ship> {
 		GL11.glColor4f(1f, 1f, 1f, 0.6f * alpha);
 		GL11.glRotatef(ship.getRotate(), 0, 0, 1);
 
-		float[] color = ship.getPlayer().getColor();
-		GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3] * alpha);
-		RenderUtils.renderSprite(width, shipBgTexture);
-		GL11.glColor4f(color[0], color[1], color[2], color[3] * alpha);
-		RenderUtils.renderSprite(width, shipTexture);
-
 		// FIXME #23
 		if (ship == uiContext.getSelectedShip()) {
 			float colorScale = (int) (world.getTime() % 1000);
 			colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.6f;
-			RenderUtils.renderCircle(width / 2f + 10 / massScale,
-					width / 2f + 10 / massScale,
+			RenderUtils.renderCircle(width / 2f - 0 / massScale,
+					width / 2f - 0 / massScale,
 					2 / zoom / massScale,
 					5 / zoom / massScale,
 					new float[] { 0f, 0f, 0f, 0f },
 					new float[] { 1f, 1f, 1f, 0.5f * colorScale * alpha },
 					new float[] { 0f, 0f, 0f, 0f });
 		}
+
+		float[] color = ship.getPlayer().getColor();
+		GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3] * alpha);
+		RenderUtils.renderSprite(width, shipBgTexture);
+		GL11.glColor4f(color[0], color[1], color[2], color[3] * alpha);
+		RenderUtils.renderSprite(width, shipTexture);
 
 		renderComponents(ship, alpha);
 

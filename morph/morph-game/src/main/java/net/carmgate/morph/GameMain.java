@@ -408,7 +408,7 @@ public class GameMain {
 			for (final Ship ship : world.getShips()) {
 				final Vector2f pos = ship.getPos();
 				GL11.glTranslatef(pos.x, pos.y, 0);
-				float alpha = Math.min(((float) world.getTime() - ship.getCreationTime()) / 10000, 1f);
+				float alpha = Math.min(((float) world.getTime() - ship.getCreationTime()) / 2000, 1f);
 				shipRenderer.render(ship, alpha);
 				GL11.glTranslatef(-pos.x, -pos.y, 0);
 			}
