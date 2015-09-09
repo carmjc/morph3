@@ -204,6 +204,7 @@ public class GameMain {
 		}
 
 		addWaves();
+		updateWorld();
 
 		// Rendering loop
 		while (true) {
@@ -461,33 +462,12 @@ public class GameMain {
 		ship.setEnergyMax(energyMax);
 		ship.setResourcesMax(resourcesMax);
 
-		// adjust stored amounts so that we do not have epsilon vibrations of stored amounts
-		// if (ship.getEnergy() * 0.99f > ship.getEnergyMax() && ship.getEnergyMax() > 0) {
-		// ship.setEnergy(ship.getEnergyMax());
-		// }
-		// if (ship.getResources() * 0.99f > ship.getResourcesMax() && ship.getResourcesMax() > 0) {
-		// ship.setResources(ship.getResourcesMax());
-		// }
-
-		// Energy and resources evolution with time
-		// float energyDelta = ship.getEnergyDt() * (world.getTime() - lastUpdateTime) / 1000;
-		// if (ship.getEnergy() + energyDelta < 0) {
-		// ship.setEnergy(0);
-		// } else {
-		// ship.setEnergy(Math.min(ship.getEnergy() + energyDelta, energyMax));
-		// }
-		// float resourcesDelta = ship.getResourcesDt() * (world.getTime() - lastUpdateTime) / 1000;
-		// if (ship.getResources() + resourcesDelta < 0) {
-		// ship.setResources(0);
-		// } else {
-		// ship.setResources(Math.min(ship.getResources() + resourcesDelta, resourcesMax));
-		// }
-		// float integrityDelta = ship.getIntegrityDt() * (world.getTime() - lastUpdateTime) / 1000;
-		// if (ship.getIntegrity() + integrityDelta < 0) {
-		// ship.setIntegrity(0);
-		// } else {
-		// ship.setIntegrity(ship.getIntegrity() + integrityDelta);
-		// }
+		if (ship.getEnergy() > ship.getEnergyMax()) {
+			ship.setEnergy(ship.getEnergyMax());
+		}
+		if (ship.getResources() > ship.getResourcesMax()) {
+			ship.setResources(ship.getResourcesMax());
+		}
 	}
 
 	private void updateWorld() {

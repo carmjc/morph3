@@ -81,7 +81,7 @@ public abstract class Component implements Activable {
 	}
 
 	public final float getMaxStoredResources() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredResource");
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredResources");
 		if (value == null) {
 			value = 0f;
 		}

@@ -34,7 +34,7 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 public class ShipRenderer implements Renderer<Ship> {
 
 	private static Map<ComponentType, Texture> cmpTextures = new HashMap<>();
-	private static Texture shipBgTexture;
+	// private static Texture shipBgTexture;
 	private static Texture shipTexture;
 	@Inject private UIContext uiContext;
 
@@ -52,7 +52,7 @@ public class ShipRenderer implements Renderer<Ship> {
 						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.MiningLaser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor.renderer.texture")))) { //$NON-NLS-1$
-			shipBgTexture = RenderUtils.getTexture("PNG", shipBgInputStream);
+			// shipBgTexture = RenderUtils.getTexture("PNG", shipBgInputStream);
 			shipTexture = RenderUtils.getTexture("PNG", shipInputStream);
 			cmpTextures.put(ComponentType.LASERS, RenderUtils.getTexture("PNG", laserInputStream));
 			cmpTextures.put(ComponentType.MINING_LASERS, RenderUtils.getTexture("PNG", mlInputStream));
@@ -93,14 +93,49 @@ public class ShipRenderer implements Renderer<Ship> {
 		}
 
 		float[] color = ship.getPlayer().getColor();
-		GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3] * alpha);
-		RenderUtils.renderSprite(width, shipBgTexture);
+		// GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3] * alpha);
+		// RenderUtils.renderSprite(width, shipBgTexture);
 		GL11.glColor4f(color[0], color[1], color[2], color[3] * alpha);
 		RenderUtils.renderSprite(width, shipTexture);
 
 		renderComponents(ship, alpha);
 
 		GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
+
+		// Render energy and resource gauges
+		float delta = Math.max(30, 30 / zoom);
+		float thickness = Math.max(4, 4 / zoom);
+		float blurriness = 6 / zoom;
+		float offset = 0.2f; // must be inferior to 0.25
+		if (ship == uiContext.getSelectedShip()) {
+			if (ship.getEnergyMax() > 0) {
+				RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
+						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
+						new float[] { 0, 0, 0, 0f },
+						new float[] { 0.6f, 0.6f, 0.6f, 1 },
+						new float[] { 0, 0, 0, 0f });
+				RenderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getEnergy() / ship.getEnergyMax(),
+						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
+						new float[] { 0, 0, 0, 0f },
+						new float[] { 0, 0.5f, 1, 1 },
+						new float[] { 0, 0, 0, 0f });
+			}
+			if (ship.getResourcesMax() > 0) {
+				GL11.glScalef(-1, 1, 1);
+				RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
+						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
+						new float[] { 0, 0, 0, 0f },
+						new float[] { 0.6f, 0.6f, 0.6f, 1 },
+						new float[] { 0, 0, 0, 0f });
+				RenderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getResources() / ship.getResourcesMax(),
+						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
+						new float[] { 0, 0, 0, 0f },
+						new float[] { 139f / 255, 90f / 255, 43f / 255, 1 },
+						new float[] { 0, 0, 0, 0f });
+				GL11.glScalef(-1, 1, 1);
+			}
+		}
+
 		GL11.glScalef(1f / massScale, 1f / massScale, 0);
 
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {

@@ -17,7 +17,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="ship.svg">
+   sodipodi:docname="ship.svg"
+   inkscape:export-filename="D:\Users\jcouilla\git\morph3\morph\morph-game\src\main\resources\img\ship.png"
+   inkscape:export-xdpi="458.51001"
+   inkscape:export-ydpi="458.51001">
   <defs
      id="defs4">
     <linearGradient
@@ -57,7 +60,7 @@
        fx="339.91415"
        fy="502.57895"
        r="30.042906"
-       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-171.957,-165.13567)"
+       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-169.957,-165.13567)"
        gradientUnits="userSpaceOnUse"
        spreadMethod="pad" />
     <radialGradient
@@ -69,7 +72,7 @@
        fx="339.91415"
        fy="502.57895"
        r="30.042906"
-       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-47.785321,-164.99817)"
+       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-49.785321,-164.99817)"
        gradientUnits="userSpaceOnUse"
        spreadMethod="pad" />
     <radialGradient
@@ -81,7 +84,7 @@
        fx="339.91415"
        fy="502.57895"
        r="30.042906"
-       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-109.87116,-226.65481)"
+       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-109.87116,-224.65481)"
        gradientUnits="userSpaceOnUse"
        spreadMethod="pad" />
     <radialGradient
@@ -93,7 +96,7 @@
        fx="339.91415"
        fy="502.57895"
        r="30.042906"
-       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-109.87116,-103.34151)"
+       gradientTransform="matrix(1.5000002,2.7118524e-7,-2.4019276e-7,1.3285721,-109.87116,-105.34151)"
        gradientUnits="userSpaceOnUse"
        spreadMethod="pad" />
     <radialGradient
@@ -116,9 +119,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.33"
-     inkscape:cx="378.99912"
-     inkscape:cy="572.87554"
+     inkscape:zoom="4.66"
+     inkscape:cx="412.81393"
+     inkscape:cy="542.85262"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -167,10 +170,6 @@
        orientation="1,0"
        id="guide4156" />
     <sodipodi:guide
-       position="272.96138,589.69958"
-       orientation="0,1"
-       id="guide4158" />
-    <sodipodi:guide
        position="250.64378,509.87126"
        orientation="0,1"
        id="guide4160" />
@@ -206,6 +205,22 @@
        position="237.76824,639.91418"
        orientation="0,1"
        id="guide7202" />
+    <sodipodi:guide
+       position="326.71674,515.02147"
+       orientation="0,1"
+       id="guide4172" />
+    <sodipodi:guide
+       position="390.55794,585.08585"
+       orientation="0,1"
+       id="guide4174" />
+    <sodipodi:guide
+       position="347.63555,610.14516"
+       orientation="0,1"
+       id="guide4176" />
+    <sodipodi:guide
+       position="350.97382,490.11909"
+       orientation="0,1"
+       id="guide4178" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -222,28 +237,31 @@
   <g
      inkscape:groupmode="layer"
      id="layer7"
-     inkscape:label="Calque 3" />
+     inkscape:label="Calque 3"
+     style="display:none" />
   <g
      inkscape:label="Calque 1"
      inkscape:groupmode="layer"
      id="layer1"
      style="display:inline">
     <path
-       style="fill:#a2a2a2;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
-       d="m 400,472.08052 c -15.02146,0 -15.02146,-9.41788 -15.02146,-9.41788 0,0 -0.42919,-10.30043 -15.02146,-10.30043 -14.59227,0 -69.95708,0.88255 -69.95708,10.30043 0,9.41788 0,69.95707 0,79.82832 0,9.87125 69.95708,9.87125 69.95708,9.87125 0,0 15.02146,0.68004 15.02146,-9.87125 0,-10.55129 15.02146,-10.55129 15.02146,-10.55129 0,0 15.02146,0.68004 15.02146,10.55129 0,9.87125 15.02146,9.87125 15.02146,9.87125 0,0 69.95708,0.68004 69.95708,-9.87125 0,-10.55129 0,-69.52789 0,-79.82832 0,-10.30043 -54.93562,-10.30043 -69.95708,-10.30043 -15.02146,0 -15.02146,10.30043 -15.02146,10.30043 0,0 0,9.41788 -15.02146,9.41788 z"
+       style="fill:#a2a2a2;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 339.88813,442.42326 C 309.87125,442.21706 300,452.36221 300,472.53388 l 0.026,59.53095 c -0.026,20.29738 9.84525,30.1783 39.93797,29.83094 45.01457,0.34736 71.13341,-0.60273 120.12184,0.12571 30.04295,0.22165 39.87916,-9.70444 39.88813,-30.23633 L 500,472.1047 c 0.009,-19.74249 -9.87124,-29.88764 -40.14177,-29.70748 -29.81531,-0.18016 -89.90115,0.10191 -119.9701,0.026 z"
        id="path4166"
        inkscape:connector-curvature="0"
        inkscape:export-xdpi="460"
-       inkscape:export-ydpi="460" />
+       inkscape:export-ydpi="460"
+       sodipodi:nodetypes="cccccsscc" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
-     inkscape:label="Calque 2">
+     inkscape:label="Calque 2"
+     style="display:none">
     <ellipse
        style="opacity:1;fill:none;fill-opacity:1;stroke:url(#radialGradient6589);stroke-opacity:1"
        id="path6517"
-       cx="337.91415"
+       cx="339.91415"
        cy="502.0101"
        rx="30.042906"
        ry="29.929585"
@@ -252,7 +270,7 @@
     <ellipse
        style="opacity:1;fill:none;fill-opacity:1;stroke:url(#radialGradient6589-8);stroke-opacity:1"
        id="path6517-3"
-       cx="462.08582"
+       cx="460.08582"
        cy="502.14761"
        rx="30.042906"
        ry="29.929585"
@@ -262,7 +280,7 @@
        style="opacity:1;fill:none;fill-opacity:1;stroke:url(#radialGradient6589-2);stroke-opacity:1"
        id="path6517-9"
        cx="400"
-       cy="440.49097"
+       cy="442.49097"
        rx="30.042906"
        ry="29.929585"
        inkscape:export-xdpi="460"
@@ -271,7 +289,7 @@
        style="opacity:1;fill:none;fill-opacity:1;stroke:url(#radialGradient6589-9);stroke-opacity:1"
        id="path6517-8"
        cx="400"
-       cy="563.80426"
+       cy="561.80426"
        rx="30.042906"
        ry="29.929585"
        inkscape:export-xdpi="460"
