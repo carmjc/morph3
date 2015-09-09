@@ -14,15 +14,10 @@ import net.carmgate.morph.model.geometry.Vector2f;
 
 public abstract class Component implements Activable {
 	private int id;
-	private float energyDt = 0;
-	private float resourcesDt = 0;
-	private float integrityDt = 0;
 	private boolean active;
-	private boolean famished; // FIXME rename this
 	private Animation animation;
 	private final Holder<Ship> shipHolder = new Holder<>();
 	private final Holder<PhysicalEntity> targetHolder = new Holder<>();
-	private boolean useless;
 	private Vector2f targetPosInWorld;
 	private long lastActivation;
 
@@ -129,14 +124,6 @@ public abstract class Component implements Activable {
 		return active;
 	}
 
-	public boolean isFamished() {
-		return famished;
-	}
-
-	public boolean isUseless() {
-		return useless;
-	}
-
 	@Override
 	public void setActive(boolean active) {
 		this.active = active;
@@ -144,10 +131,6 @@ public abstract class Component implements Activable {
 
 	public void setAnimation(Animation animation) {
 		this.animation = animation;
-	}
-
-	public void setFamished(boolean famished) {
-		this.famished = famished;
 	}
 
 	public void setId(int id) {
@@ -173,10 +156,6 @@ public abstract class Component implements Activable {
 
 	public void setTargetPosInWorld(Vector2f targetPosInWorld) {
 		this.targetPosInWorld = targetPosInWorld;
-	}
-
-	public void setUseless(boolean useless) {
-		this.useless = useless;
 	}
 
 	@Override

@@ -5,5 +5,5 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NeedsTarget {
-
+	// public TargetType[]value() default {};
 }

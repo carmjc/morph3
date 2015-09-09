@@ -47,7 +47,8 @@ public class ShipRenderer implements Renderer<Ship> {
 	public void init() {
 		try (BufferedInputStream shipBgInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture.bg"))); //$NON-NLS-1$
 				BufferedInputStream shipInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture"))); //$NON-NLS-1$
-				BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.laser.renderer.texture"))); //$NON-NLS-1$
+				BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader
+						.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.Laser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
 						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.MiningLaser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$

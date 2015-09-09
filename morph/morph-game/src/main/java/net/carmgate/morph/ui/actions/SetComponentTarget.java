@@ -58,7 +58,6 @@ public class SetComponentTarget implements MouseListener {
 				}
 				if (selectedCmp.canBeActivated()) {
 					selectedCmp.startBehavior();
-					uiContext.setSelectedCmp(null);
 				}
 			} else if (pickingResult.getTarget() instanceof PhysicalEntity) {
 				selectedCmp.setTarget((PhysicalEntity) pickingResult.getTarget());
@@ -68,7 +67,6 @@ public class SetComponentTarget implements MouseListener {
 				}
 				if (selectedCmp.canBeActivated()) {
 					selectedCmp.startBehavior();
-					uiContext.setSelectedCmp(null);
 				}
 			}
 		}

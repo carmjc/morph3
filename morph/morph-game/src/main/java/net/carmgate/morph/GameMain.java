@@ -26,6 +26,9 @@ import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.events.WorldEventFactory;
+import net.carmgate.morph.events.WorldEventType;
+import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
@@ -73,6 +76,7 @@ public class GameMain {
 	@Inject private ComponentFactory componentFactory;
 	@Inject private Messages messages;
 	@Inject private WidgetFactory widgetFactory;
+	@Inject private WorldEventFactory worldEventFactory;
 
 	@Inject private Select select;
 	// Computation attributes
@@ -86,27 +90,27 @@ public class GameMain {
 	// TODO Find an other way to do this
 	@Deprecated
 	private void addWaves() {
-		if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
-			for (int i = 0; i < nextWaveId; i++) {
-				LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
-				Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
-				ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
-				ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
-				// Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
-				// attack.setTarget(world.getShips().get(0));
-				// ship.add(attack);
-				ship.setMass(0.5f);
-				ship.setEnergy(20);
-				ship.setResources(20);
-				ship.setIntegrity(1);
-				ship.setDurability(5);
-				ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
-				ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
-				ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
-				world.add(ship);
-			}
-			nextWaveId++;
+		// if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
+		for (int i = 0; i < nextWaveId; i++) {
+			LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
+			Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
+			ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
+			ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
+			// Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
+			// attack.setTarget(world.getShips().get(0));
+			// ship.add(attack);
+			ship.setMass(0.5f);
+			ship.setEnergy(20);
+			ship.setResources(20);
+			ship.setIntegrity(1);
+			ship.setDurability(1);
+			ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
+			ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
+			ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
+			world.add(ship);
 		}
+		nextWaveId++;
+		// }
 	}
 
 	/**
@@ -196,6 +200,8 @@ public class GameMain {
 			renderer.init();
 		}
 
+		addWaves();
+
 		// Rendering loop
 		while (true) {
 
@@ -211,7 +217,6 @@ public class GameMain {
 				select.renderForSelect();
 			}
 			updateWorld();
-			// addWaves();
 
 			// Fire deferred events
 			eventManager.deferredFire();
@@ -350,29 +355,10 @@ public class GameMain {
 			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
 			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
 			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
-			// if (ship.getMoveOrder() != null) {
-			// RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.moveOrder"),
-			// ship.getMoveOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-			// }
-			// if (ship.getActionOrder() != null) {
-			// RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.actionOrder"),
-			// ship.getActionOrder().getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-			// }
-			// if (!ship.getBgOrders().isEmpty()) {
-			// RenderUtils.renderText(font, borderLeftX, borderTopY, messages.getString("ui.selectedShip.backgroundOrders"), line++, Color.white, false);
-			// //$NON-NLS-1$
-			// for (Order bgOrder : ship.getBgOrders()) {
-			// RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.backgroundOrder"),
-			// bgOrder.getClass().getSimpleName()), line++, Color.white, false); //$NON-NLS-1$
-			// }
-			// }
 			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
 				for (Component c : ship.getComponents().values()) {
 					Color color = Color.white;
-					if (c.isFamished()) {
-						color = Color.red;
-					}
-					if (!c.isActive() || c.isUseless()) {
+					if (!c.isActive()) {
 						color = Color.gray;
 					}
 
@@ -383,10 +369,8 @@ public class GameMain {
 					RenderUtils.renderQuad(0, 0, 5, 5);
 					GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
 
-					float energyDt = c.isUseless() ? 0 : c.getEnergyDt();
-					float resourcesDt = c.isUseless() ? 0 : c.getResourcesDt();
 					RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
-							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), energyDt, resourcesDt), line++, color, false); //$NON-NLS-1$
+							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false); //$NON-NLS-1$
 
 				}
 			}
@@ -505,6 +489,13 @@ public class GameMain {
 	private void updateWorld() {
 		world.updateTime();
 		for (final Ship ship : world.getShips()) {
+			// Check if the ship is still alive
+			if (ship.getIntegrity() <= 0) {
+				final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
+				shipDead.setDeadShip(ship);
+				eventManager.addEvent(shipDead);
+			}
+
 			// Take into account component updates
 			for (Component cmp : ship.getComponents().values()) {
 				if (cmp.isActive()) {
