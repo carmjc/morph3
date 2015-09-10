@@ -90,20 +90,17 @@ public class GameMain {
 	// TODO Find an other way to do this
 	@Deprecated
 	private void addWaves() {
-		// if (world.getTime() > 7000 * nextWaveId * nextWaveId) {
 		for (int i = 0; i < nextWaveId; i++) {
 			LOGGER.debug("Adding wave " + nextWaveId); //$NON-NLS-1$
 			Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
 			ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
 			ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
-			// Attack attack = orderFactory.newInstance(OrderType.ATTACK, ship);
-			// attack.setTarget(world.getShips().get(0));
-			// ship.add(attack);
 			ship.setMass(0.5f);
 			ship.setEnergy(20);
 			ship.setResources(20);
 			ship.setIntegrity(1);
 			ship.setDurability(1);
+			ship.setRotation(new Random().nextFloat() * 360);
 			ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
 			ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
 			ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
@@ -111,7 +108,6 @@ public class GameMain {
 			world.add(ship);
 		}
 		nextWaveId++;
-		// }
 	}
 
 	/**
@@ -127,7 +123,6 @@ public class GameMain {
 			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.create();
 			Display.setTitle(conf.getProperty("ui.window.title")); //$NON-NLS-1$
-			// Display.setVSyncEnabled(true);
 			Display.setResizable(true);
 		} catch (final LWJGLException e) {
 			e.printStackTrace();
@@ -141,9 +136,6 @@ public class GameMain {
 
 	private void initGui() {
 		uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
-		// ComponentPonderationWidget componentPonderationWidget = widgetFactory.newInstance(ComponentPonderationWidget.class);
-		// componentPonderationWidget.setPosition(new float[] { 5, uiContext.getWindow().getHeight() - 50 });
-		// uiContext.getWidgetRoot().add(componentPonderationWidget);
 	}
 
 	/**
@@ -165,9 +157,6 @@ public class GameMain {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
-		// GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
-		// GL11.glEnable(GL11.GL_LINE_SMOOTH);
-		// GL11.glEnable(GL11.GL_SMOOTH);
 
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
@@ -179,7 +168,6 @@ public class GameMain {
 		GL11.glLoadIdentity();
 
 		if (font == null) {
-			// Font awtFont = new Font("Verdana", Font.PLAIN, 11);
 			Font awtFont;
 			try {
 				awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ui.font"))); //$NON-NLS-1$
@@ -446,7 +434,27 @@ public class GameMain {
 			entity.getPos().add(tmp);
 
 			// rotations
-			entity.setRotate(entity.getRotate() + entity.getRotateSpeed() * (world.getTime() - lastUpdateTime) / 1000);
+			Float rotationTarget = entity.getRotationTarget();
+			if (rotationTarget != null) {
+				while (rotationTarget < entity.getRotation() - 180) {
+					rotationTarget += 360;
+					entity.setRotationTarget(rotationTarget);
+				}
+				while (rotationTarget > entity.getRotation() + 180) {
+					rotationTarget -= 360;
+					entity.setRotationTarget(rotationTarget);
+				}
+
+				if (entity.getRotation() - rotationTarget < -1) {
+					entity.setRotationSpeed(180);
+				} else if (entity.getRotation() - rotationTarget > 1) {
+					entity.setRotationSpeed(-180);
+				} else		{
+					entity.setRotationSpeed(0);
+					entity.setRotation(rotationTarget);
+				}
+				entity.setRotation(entity.getRotation() + entity.getRotationSpeed() * (world.getTime() - lastUpdateTime) / 1000);
+			}
 		}
 	}
 
@@ -489,34 +497,6 @@ public class GameMain {
 
 			// economics management
 			updateShipEconomics(ship);
-
-			// // move order
-			// if (ship.getMoveOrder() != null) {
-			// ship.getMoveOrder().eval();
-			// }
-			//
-			// // action order
-			// final Order order = ship.getActionOrder();
-			// if (order != null && !order.isDone()) {
-			// order.eval();
-			// }
-			// if (order != null && order.isDone()) {
-			// LOGGER.debug("order removed: " + order); //$NON-NLS-1$
-			// ship.removeActionOrder();
-			// }
-			//
-			// // background orders
-			// List<Order> bgOrdersToRemove = new ArrayList<>();
-			// for (Order bgOrder : ship.getBgOrders()) {
-			// if (bgOrder != null && !bgOrder.isDone()) {
-			// bgOrder.eval();
-			// }
-			// if (bgOrder != null && bgOrder.isDone()) {
-			// LOGGER.debug("order removed: " + bgOrder); //$NON-NLS-1$
-			// bgOrdersToRemove.add(bgOrder);
-			// }
-			// }
-			// ship.getBgOrders().removeAll(bgOrdersToRemove);
 		}
 	}
 

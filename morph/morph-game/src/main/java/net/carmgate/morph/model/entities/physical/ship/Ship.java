@@ -37,9 +37,6 @@ public class Ship extends PhysicalEntity {
 
 	private Player owner;
 	@Deprecated private final Surroundings surroundings = new Surroundings();
-	// private Order actionOrder;
-	// private MoveOrder moveOrder;
-	// private final List<Order> bgOrders = new ArrayList<>();
 	private float durability;
 	private final Map<ComponentType, Component> components = new HashMap<>();
 	private final Map<ComponentType, Float> componentsComposition = new TreeMap<>();
@@ -81,10 +78,6 @@ public class Ship extends PhysicalEntity {
 		return creationTime;
 	}
 
-	// public MoveOrder getMoveOrder() {
-	// return moveOrder;
-	// }
-
 	// public List<Order> getBgOrders() {
 	// return bgOrders;
 	// }
@@ -97,6 +90,10 @@ public class Ship extends PhysicalEntity {
 		return energy;
 	}
 
+	// public MoveOrder getMoveOrder() {
+	// return moveOrder;
+	// }
+
 	public float getEnergyDt() {
 		return energydt;
 	}
@@ -104,13 +101,6 @@ public class Ship extends PhysicalEntity {
 	public float getEnergyMax() {
 		return energyMax;
 	}
-
-	// public void removeActionOrder() {
-	// if (actionOrder instanceof ForceSource) {
-	// getForceSources().remove(actionOrder);
-	// }
-	// actionOrder = null;
-	// }
 
 	// public void add(Order order) {
 	// order.setWorld(world);
@@ -161,6 +151,13 @@ public class Ship extends PhysicalEntity {
 	public float getIntegrityDt() {
 		return integrityDt;
 	}
+
+	// public void removeActionOrder() {
+	// if (actionOrder instanceof ForceSource) {
+	// getForceSources().remove(actionOrder);
+	// }
+	// actionOrder = null;
+	// }
 
 	public Player getPlayer() {
 		return owner;

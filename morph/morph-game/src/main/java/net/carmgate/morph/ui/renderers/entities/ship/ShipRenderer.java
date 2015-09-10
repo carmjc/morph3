@@ -77,7 +77,7 @@ public class ShipRenderer implements Renderer<Ship> {
 
 		GL11.glScalef(massScale, massScale, 0);
 		GL11.glColor4f(1f, 1f, 1f, 0.6f * alpha);
-		GL11.glRotatef(ship.getRotate(), 0, 0, 1);
+		GL11.glRotatef(ship.getRotation(), 0, 0, 1);
 
 		// FIXME #23
 		if (ship == uiContext.getSelectedShip()) {
@@ -96,11 +96,17 @@ public class ShipRenderer implements Renderer<Ship> {
 		// GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3] * alpha);
 		// RenderUtils.renderSprite(width, shipBgTexture);
 		GL11.glColor4f(color[0], color[1], color[2], color[3] * alpha);
-		RenderUtils.renderSprite(width, shipTexture);
+		float skewRatio = 1f;
+		if (ship.getRotationSpeed() > 0) {
+			skewRatio = 0.9f;
+		} else if (ship.getRotationSpeed() < 0) {
+			skewRatio = -0.9f;
+		}
+		RenderUtils.renderSprite(width, shipTexture, skewRatio);
 
 		renderComponents(ship, alpha);
 
-		GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
+		GL11.glRotatef(-ship.getRotation(), 0, 0, 1);
 
 		// Render energy and resource gauges
 		float delta = Math.max(30, 30 / zoom);
@@ -211,9 +217,9 @@ public class ShipRenderer implements Renderer<Ship> {
 
 			if (cmp.getAvailability() < 1) {
 				GL11.glColor4f(0, 0, 0, 0.8f);
-				GL11.glRotatef(-ship.getRotate() - 90, 0, 0, 1);
+				GL11.glRotatef(-ship.getRotation() - 90, 0, 0, 1);
 				RenderUtils.renderAntialiasedPartialDisc(0 + cmp.getAvailability(), 1, width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha }, zoom);
-				GL11.glRotatef(ship.getRotate() + 90, 0, 0, 1);
+				GL11.glRotatef(ship.getRotation() + 90, 0, 0, 1);
 			}
 
 			GL11.glTranslatef(-compX, -compY, zoom);

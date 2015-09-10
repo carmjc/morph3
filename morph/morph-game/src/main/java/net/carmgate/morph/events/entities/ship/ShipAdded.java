@@ -1,16 +1,16 @@
 package net.carmgate.morph.events.entities.ship;
 
 import net.carmgate.morph.events.WorldEvent;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 
 public class ShipAdded implements WorldEvent {
-   private Ship ship;
+   private PhysicalEntity ship;
 
-   public void setAddedShip(Ship ship) {
+   public void setAddedShip(PhysicalEntity ship) {
       this.ship = ship;
    }
 
-   public Ship getShip() {
+   public PhysicalEntity getShip() {
       return ship;
    }
 

@@ -9,61 +9,70 @@ import net.carmgate.morph.ui.renderers.Renderable;
 
 public abstract class PhysicalEntity implements Renderable {
 
-   private int id;
-   private final Vector2f pos = new Vector2f();
-   private final Vector2f speed = new Vector2f();
-   private final Vector2f accel = new Vector2f();
-   private float rotate = 0f;
-   private float rotateSpeed = 0f;
-   private final Set<ForceSource> forceSources = new HashSet<>();
-   protected float mass;
+	private int id;
+	private final Vector2f pos = new Vector2f();
+	private final Vector2f speed = new Vector2f();
+	private final Vector2f accel = new Vector2f();
+	private float rotate = 0f;
+	private float rotateSpeed = 0f;
+	private final Set<ForceSource> forceSources = new HashSet<>();
+	protected float mass;
+	private Float rotationTarget;
 
-   public final Vector2f getAccel() {
-      return accel;
-   }
+	public final Vector2f getAccel() {
+		return accel;
+	}
 
-   public final Vector2f getPos() {
-      return pos;
-   }
+	public final Set<ForceSource> getForceSources() {
+		return forceSources;
+	}
 
-   public final Vector2f getSpeed() {
-      return speed;
-   }
+	public int getId() {
+		return id;
+	}
 
-   public final Set<ForceSource> getForceSources() {
-      return forceSources;
-   }
+	public final float getMass() {
+		return mass;
+	}
 
-   public final float getMass() {
-      return mass;
-   }
+	public final Vector2f getPos() {
+		return pos;
+	}
 
-   public void setMass(float mass) {
-      this.mass = mass;
-   }
+	public float getRotation() {
+		return rotate;
+	}
 
-   public float getRotate() {
-      return rotate;
-   }
+	public float getRotationSpeed() {
+		return rotateSpeed;
+	}
 
-   public void setRotate(float rotate) {
-      this.rotate = rotate;
-   }
+	public Float getRotationTarget() {
+		return rotationTarget;
+	}
 
-   public float getRotateSpeed() {
-      return rotateSpeed;
-   }
+	public final Vector2f getSpeed() {
+		return speed;
+	}
 
-   public void setRotateSpeed(float rotateSpeed) {
-      this.rotateSpeed = rotateSpeed;
-   }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-   public int getId() {
-      return id;
-   }
+	public void setMass(float mass) {
+		this.mass = mass;
+	}
 
-   public void setId(int id) {
-      this.id = id;
-   }
+	public void setRotation(float rotate) {
+		this.rotate = rotate;
+	}
+
+	public void setRotationSpeed(float rotateSpeed) {
+		this.rotateSpeed = rotateSpeed;
+	}
+
+	public void setRotationTarget(float rotationTarget) {
+		this.rotationTarget = rotationTarget;
+	}
 
 }

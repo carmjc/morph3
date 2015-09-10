@@ -29,12 +29,12 @@ public class LaserAnim extends Animation {
       setAnimationEnd(0);
    }
 
-   public Ship getSource() {
+   public PhysicalEntity getSource() {
       return sourceHolder.get();
    }
 
-   public Ship getTarget() {
-      return (Ship) targetHolder.get();
+   public PhysicalEntity getTarget() {
+      return (PhysicalEntity) targetHolder.get();
    }
 
    public void setTargetHolder(Holder<PhysicalEntity> targetHolder) {

@@ -50,7 +50,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 
 			GL11.glScalef(massScale, massScale, 0);
 			GL11.glColor4f(1f, 1f, 1f, 0.6f);
-			GL11.glRotatef(ship.getRotate(), 0, 0, 1);
+			GL11.glRotatef(ship.getRotation(), 0, 0, 1);
 
 			for (Component cmp : components) {
 				float compX;
@@ -83,7 +83,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 				GL11.glTranslatef(-compX / compScale, -compY / compScale, 0);
 			}
 
-			GL11.glRotatef(-ship.getRotate(), 0, 0, 1);
+			GL11.glRotatef(-ship.getRotation(), 0, 0, 1);
 			GL11.glScalef(1f / massScale, 1f / massScale, 0);
 		}
 

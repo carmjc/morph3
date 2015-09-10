@@ -55,9 +55,9 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
 
 		GL11.glColor4f(1, 1, 1, 1);
 		GL11.glScalef(massScale, massScale, 0);
-		GL11.glRotatef(asteroid.getRotate(), 0, 0, 1);
-		RenderUtils.renderSpriteFromBigTexture(width, asteroids1Texture, i / 8f, j / 8f, (i + 1) / 8f, (j + 1) / 8f);
-		GL11.glRotatef(-asteroid.getRotate(), 0, 0, 1);
+		GL11.glRotatef(asteroid.getRotation(), 0, 0, 1);
+		RenderUtils.renderSpriteFromBigTexture(width, asteroids1Texture, i / 8f, j / 8f, (i + 1) / 8f, (j + 1) / 8f, 1);
+		GL11.glRotatef(-asteroid.getRotation(), 0, 0, 1);
 		GL11.glScalef(1 / massScale, 1 / massScale, 0);
 
 	}

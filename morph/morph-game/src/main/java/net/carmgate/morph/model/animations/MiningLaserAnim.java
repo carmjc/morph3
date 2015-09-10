@@ -25,7 +25,7 @@ public class MiningLaserAnim extends Animation {
       setAnimationCoolDown(conf.getIntProperty("miningLaser.anim.cooldown")); //$NON-NLS-1$
    }
 
-   public Ship getSource() {
+   public PhysicalEntity getSource() {
       return sourceHolder.get();
    }
 

@@ -286,7 +286,17 @@ public class RenderUtils {
 	 * @param texture
 	 */
 	public static void renderSprite(final float width, Texture texture) {
-		renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1);
+		renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1, 1);
+	}
+
+	/**
+	 * Renders a sprite centered on the current position.
+	 *
+	 * @param width
+	 * @param texture
+	 */
+	public static void renderSprite(final float width, Texture texture, float skewRatio) {
+		renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1, skewRatio);
 	}
 
 	/**
@@ -299,19 +309,29 @@ public class RenderUtils {
 	 * @param texCoordRight
 	 * @param texCoordBottom
 	 */
-	public static void renderSpriteFromBigTexture(float width, Texture texture, float texCoordLeft, float texCoordTop, float texCoordRight, float texCoordBottom) {
+	public static void renderSpriteFromBigTexture(float width, Texture texture, float texCoordLeft, float texCoordTop, float texCoordRight,
+			float texCoordBottom, float skewRatio) {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
 		texture.bind();
 
-		GL11.glBegin(GL11.GL_QUADS);
+		float absSkewRatio = Math.abs(skewRatio);
+		if (skewRatio > 0) {
+			skewRatio = 1 / skewRatio;
+		}
+
+		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+		GL11.glTexCoord2f((texCoordLeft + texCoordRight) / 2, (texCoordTop + texCoordBottom) / 2);
+		GL11.glVertex2f(0, 0);
 		GL11.glTexCoord2f(texCoordLeft, texCoordTop);
-		GL11.glVertex2f(-width / 2, -width / 2);
+		GL11.glVertex2f(-width / 2 * absSkewRatio, -width / 2 * skewRatio);
 		GL11.glTexCoord2f(texCoordRight, texCoordTop);
-		GL11.glVertex2f(width / 2, -width / 2);
+		GL11.glVertex2f(width / 2 * absSkewRatio, -width / 2 / skewRatio);
 		GL11.glTexCoord2f(texCoordRight, texCoordBottom);
-		GL11.glVertex2f(width / 2, width / 2);
+		GL11.glVertex2f(width / 2 * absSkewRatio, width / 2 / skewRatio);
 		GL11.glTexCoord2f(texCoordLeft, texCoordBottom);
-		GL11.glVertex2f(-width / 2, width / 2);
+		GL11.glVertex2f(-width / 2 * absSkewRatio, width / 2 * skewRatio);
+		GL11.glTexCoord2f(texCoordLeft, texCoordTop);
+		GL11.glVertex2f(-width / 2 * absSkewRatio, -width / 2 * skewRatio);
 		GL11.glEnd();
 	}
 

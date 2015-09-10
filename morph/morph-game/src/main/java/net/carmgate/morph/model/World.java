@@ -77,6 +77,10 @@ public class World {
 		physicalEntities.add(entity);
 	}
 
+	public void add(Player player) {
+		players.put(player.getName(), player);
+	}
+
 	private void add(Ship ship) {
 		// TODO modify this so that ships have limited line of sight
 		// Fill the ship
@@ -92,12 +96,16 @@ public class World {
 		worldEventMgr.fire(shipAdded);
 	}
 
-	public void add(Player player) {
-		players.put(player.getName(), player);
+	public List<PhysicalEntity> getNonShipsPhysicalEntities() {
+		return nonShipsPhysicalEntities;
 	}
 
 	public Set<PhysicalEntity> getPhysicalEntities() {
 		return physicalEntities;
+	}
+
+	public Map<String, Player> getPlayers() {
+		return players;
 	}
 
 	/**
@@ -133,14 +141,18 @@ public class World {
 		}, "model init").start(); //$NON-NLS-1$
 	}
 
-	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
-		LOGGER.debug("Ship death: " + shipDeath.getShip()); //$NON-NLS-1$
-		remove(shipDeath.getShip());
+	public boolean isTimeFrozen() {
+		return timeFrozen;
 	}
 
 	protected void onEntityRemovel(@MObserves PhysicalEntityToBeRemoved event) {
 		LOGGER.debug("Removing " + event.getEntity().getClass().getName()); //$NON-NLS-1$
 		remove(event.getEntity());
+	}
+
+	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
+		LOGGER.debug("Ship death: " + shipDeath.getShip()); //$NON-NLS-1$
+		remove(shipDeath.getShip());
 	}
 
 	private void remove(PhysicalEntity entity) {
@@ -156,7 +168,14 @@ public class World {
 	private void remove(Ship ship) {
 		ships.remove(ship);
 		physicalEntities.remove(ship);
-		// TODO send event
+	}
+
+	public void setTimeFactor(int timeFactor) {
+		this.timeFactor = timeFactor;
+	}
+
+	public void toggleTimeFrozen() {
+		timeFrozen = !timeFrozen;
 	}
 
 	public void updateTime() {
@@ -166,26 +185,6 @@ public class World {
 			time += (newUpdateTime - lastUpdateTime) * timeFactor;
 		}
 		lastUpdateTime = newUpdateTime;
-	}
-
-	public List<PhysicalEntity> getNonShipsPhysicalEntities() {
-		return nonShipsPhysicalEntities;
-	}
-
-	public void setTimeFactor(int timeFactor) {
-		this.timeFactor = timeFactor;
-	}
-
-	public boolean isTimeFrozen() {
-		return timeFrozen;
-	}
-
-	public void toggleTimeFrozen() {
-		timeFrozen = !timeFrozen;
-	}
-
-	public Map<String, Player> getPlayers() {
-		return players;
 	}
 
 }

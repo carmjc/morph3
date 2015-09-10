@@ -1,5 +1,6 @@
 package net.carmgate.morph.model.entities.physical.ship;
 
+import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.geometry.Vector2f;
 
 /**
@@ -7,9 +8,9 @@ import net.carmgate.morph.model.geometry.Vector2f;
  */
 public class ReadOnlyShip {
 
-   private Ship ship;
+   private PhysicalEntity ship;
 
-   public ReadOnlyShip(Ship ship) {
+   public ReadOnlyShip(PhysicalEntity ship) {
       this.ship = ship;
    }
 
