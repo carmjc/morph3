@@ -270,13 +270,12 @@ public class Select implements MouseListener {
 			Component cmp = (Component) pickingResult.getTarget();
 			uiContext.setSelectedShip(cmp.getShip());
 			uiContext.setSelectedCmp(cmp);
-			if (cmp.canBeActivated()) {
-				if (cmp.getTarget() == null && !world.isTimeFrozen()
-						&& cmp.getClass().isAnnotationPresent(NeedsTarget.class)) {
-					world.toggleTimeFrozen();
-				} else {
-					cmp.startBehavior();
-				}
+			if (cmp.getTarget() == null && !world.isTimeFrozen()
+					&& cmp.getClass().isAnnotationPresent(NeedsTarget.class)) {
+				world.toggleTimeFrozen();
+			} else if (cmp.canBeActivated()) {
+				cmp.startBehavior();
+
 			}
 			LOGGER.debug("cmp");
 		} else {

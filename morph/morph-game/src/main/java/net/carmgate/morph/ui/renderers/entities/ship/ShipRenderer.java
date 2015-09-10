@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
@@ -72,6 +74,7 @@ public class ShipRenderer implements Renderer<Ship> {
 	public void render(Ship ship, float alpha) {
 
 		final float massScale = ship.getMass();
+		final float compScale = 3.292f * 2;
 		final float width = 256;
 		float zoom = uiContext.getViewport().getZoomFactor();
 
@@ -144,6 +147,32 @@ public class ShipRenderer implements Renderer<Ship> {
 
 		GL11.glScalef(1f / massScale, 1f / massScale, 0);
 
+		// draw component range
+		Component selectedCmp = uiContext.getSelectedCmp();
+		if (selectedCmp != null && selectedCmp.getShip() == ship && selectedCmp.getRange() != 0) {
+			renderRange(selectedCmp, new float[] { 1, 1, 1, 0.4f });
+		}
+
+		if (selectedCmp != null && selectedCmp.getShip() == ship && selectedCmp.getRange() != 0) {
+			// draw component target selection
+			float blur = 2 + new Random().nextFloat();
+			Vector2f targetPos = selectedCmp.getTargetPosInWorld();
+			if (targetPos != null) {
+				float radius = 20 / zoom;
+				PhysicalEntity target = selectedCmp.getTarget();
+				if (target != null) {
+					if (target instanceof Ship) {
+						radius = ((Ship) target).getMass() * 150;
+					}
+				}
+
+				GL11.glTranslatef(targetPos.x - ship.getPos().x, targetPos.y - ship.getPos().y, 0);
+				renderCircling(blur, radius, (int) (radius / 4), new float[] { 1f, 0.5f, 0.5f });
+				GL11.glTranslatef(-targetPos.x + ship.getPos().x, -targetPos.y + ship.getPos().y, 0);
+			}
+
+		}
+
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
 			// Accel
 			Vector2f accel = new Vector2f(ship.getAccel());
@@ -158,6 +187,24 @@ public class ShipRenderer implements Renderer<Ship> {
 			RenderUtils.renderLine(Vector2f.NULL, ship.debug4, 2, 2, new float[] { 1f, 1f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
 		}
 
+	}
+
+	private void renderCircling(float blur, float radius, int nbSegments, float[] color) {
+		float timeAngle;
+		float zoom = uiContext.getViewport().getZoomFactor();
+		timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
+		GL11.glRotatef(timeAngle, 0, 0, 1);
+		RenderUtils.renderSegmentedCircle(
+				radius + blur,
+				radius + blur,
+				blur / zoom,
+				blur / zoom,
+				new float[] { color[0], color[1], color[2], 0 },
+				new float[] { color[0], color[1], color[2], 1 },
+				new float[] { color[0], color[1], color[2], 0 },
+				nbSegments);
+		RenderUtils.renderAntialiasedDisc(radius + blur, 2 / zoom, new float[] { color[0], color[1], color[2], 0.1f });
+		GL11.glRotatef(-timeAngle, 0, 0, 1);
 	}
 
 	/**
@@ -178,22 +225,25 @@ public class ShipRenderer implements Renderer<Ship> {
 		GL11.glScalef(1 / compScale, 1 / compScale, 1);
 
 		for (Component cmp : components) {
-			float compX;
-			float compY;
-			if (cmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS) {
-				compX = conf.getFloatProperty("ship." + shipType + ".comps.prop." + propIndex + ".x");
-				compY = conf.getFloatProperty("ship." + shipType + ".comps.prop." + propIndex + ".y");
-				propIndex++;
-			} else if (cmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.LASERS) {
-				compX = conf.getFloatProperty("ship." + shipType + ".comps.turret." + turretIndex + ".x");
-				compY = conf.getFloatProperty("ship." + shipType + ".comps.turret." + turretIndex + ".y");
-				turretIndex++;
-			} else {
-				compX = conf.getFloatProperty("ship." + shipType + ".comps.core." + coreIndex + ".x");
-				compY = conf.getFloatProperty("ship." + shipType + ".comps.core." + coreIndex + ".y");
-				coreIndex++;
+			if (cmp.getPosInShip().isNull()) {
+				float compX;
+				float compY;
+				if (cmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS) {
+					compX = conf.getFloatProperty("ship." + shipType + ".comps.prop." + propIndex + ".x");
+					compY = conf.getFloatProperty("ship." + shipType + ".comps.prop." + propIndex + ".y");
+					propIndex++;
+				} else if (cmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.LASERS) {
+					compX = conf.getFloatProperty("ship." + shipType + ".comps.turret." + turretIndex + ".x");
+					compY = conf.getFloatProperty("ship." + shipType + ".comps.turret." + turretIndex + ".y");
+					turretIndex++;
+				} else {
+					compX = conf.getFloatProperty("ship." + shipType + ".comps.core." + coreIndex + ".x");
+					compY = conf.getFloatProperty("ship." + shipType + ".comps.core." + coreIndex + ".y");
+					coreIndex++;
+				}
+				cmp.getPosInShip().copy(compX, compY);
 			}
-			GL11.glTranslatef(compX, compY, zoom);
+			GL11.glTranslatef(cmp.getPosInShip().x, cmp.getPosInShip().y, zoom);
 
 			// draw the component
 			Texture texture = cmpTextures.get(cmp.getClass().getAnnotation(ComponentKind.class).value());
@@ -222,10 +272,27 @@ public class ShipRenderer implements Renderer<Ship> {
 				GL11.glRotatef(ship.getRotation() + 90, 0, 0, 1);
 			}
 
-			GL11.glTranslatef(-compX, -compY, zoom);
+			GL11.glTranslatef(-cmp.getPosInShip().x, -cmp.getPosInShip().y, zoom);
 		}
 
 		GL11.glScalef(compScale, compScale, 1);
+
+	}
+
+	private void renderRange(Component selectedCmp, float[] color) {
+		float zoom = uiContext.getViewport().getZoomFactor();
+		final float compScale = 3.292f * 2;
+		float blur = 2 + new Random().nextFloat();
+		int nbSegments = (int) (selectedCmp.getRange() / 10);
+		float timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
+		renderCircling(blur, selectedCmp.getRange(), (int) (selectedCmp.getRange() / 10), new float[] { 0.4f, 0.4f, 0.4f });
+
+		Vector2f from = new Vector2f(selectedCmp.getPosInShip()).scale(selectedCmp.getShip().getMass() / compScale).rotate(selectedCmp.getShip().getRotation());
+		Vector2f to = new Vector2f(0, selectedCmp.getRange() + blur).rotate(timeAngle - 90 / nbSegments);
+		Vector2f vect = new Vector2f(to).sub(from);
+		vect.scale((128 / compScale + 2 / zoom) / vect.length());
+		from.add(vect);
+		RenderUtils.renderLine(from, to, 0, blur / zoom, color, new float[] { 0, 0, 0, 0 });
 	}
 
 }

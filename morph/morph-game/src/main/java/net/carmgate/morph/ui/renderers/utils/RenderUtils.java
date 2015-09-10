@@ -27,7 +27,7 @@ public class RenderUtils {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RenderUtils.class);
 
-	private static final int nbSegments = 100;
+	private static final int nbSegments = 1000;
 	private static final double deltaAngle = (float) (2 * Math.PI / nbSegments);
 	private static final float cos = (float) Math.cos(deltaAngle);
 	private static final float sin = (float) Math.sin(deltaAngle);
@@ -84,8 +84,8 @@ public class RenderUtils {
 
 	}
 
-	public static void renderAntialiasedDisc(float outerRadius, float[] colorMiddle, float zoom) {
-		RenderUtils.renderPartialCircle(0, 1f, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
+	public static void renderAntialiasedDisc(float outerRadius, float blurWidthExt, float[] colorMiddle) {
+		RenderUtils.renderPartialCircle(0, 1f, 0, outerRadius, 0, blurWidthExt, new float[] { 0, 0, 0, 0 },
 				colorMiddle,
 				new float[] { 0, 0, 0, 0 });
 	}
@@ -138,6 +138,48 @@ public class RenderUtils {
 	public static void renderPartialCircle(float ratioStart, float ratioEnd, float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt,
 			float[] colorInt,
 			float[] colorMiddle, float[] colorExt) {
+
+		renderPartialSegmentedCircle(ratioStart, ratioEnd, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt, 0);
+	}
+
+	public static void renderPartialDisc(float radius, float ratio) {
+		ratio = Math.max(0, Math.min(1, ratio));
+
+		// render limit of effect zone
+		TextureImpl.bindNone();
+		float tExt = 0; // temporary data holder
+		float xInt;
+		float xExt;
+
+		xInt = 0; // radius
+		xExt = radius; // radius
+
+		float xExtBackup = xExt; // radius
+		final float yInt = 0;
+		float yExt = 0;
+		float yExtBackup = 0;
+		for (int i = 0; i < nbSegments * ratio; i++) {
+
+			tExt = xExt;
+			xExt = cos * xExt - sin * yExt;
+			yExt = sin * tExt + cos * yExt;
+
+			GL11.glBegin(GL11.GL_TRIANGLES);
+			GL11.glVertex2f(xInt, yInt);
+			GL11.glVertex2f(xExtBackup, yExtBackup);
+			GL11.glVertex2f(xExt, yExt);
+			GL11.glEnd();
+
+			xExtBackup = xExt;
+			yExtBackup = yExt;
+		}
+	}
+
+	public static void renderPartialSegmentedCircle(float ratioStart, float ratioEnd, float innerRadius, float outerRadius, float blurWidthInt,
+			float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt, int nbSubSegments) {
+		int currentSubSegment = 0;
+		boolean oneSegmentDrawn = false;
+
 		// render limit of effect zone
 		TextureImpl.bindNone();
 		float[] x = new float[] { 0, 0, 0, 0 };
@@ -178,7 +220,8 @@ public class RenderUtils {
 			temp.get(yBackup);
 		}
 
-		for (int i = 0; i < nbSegments * (ratioEnd - ratioStart); i++) {
+		float remainingNbSegments = nbSegments * (ratioEnd - ratioStart);
+		for (int i = 0; i < remainingNbSegments; i++) {
 			temp.clear();
 			temp.put(x);
 			temp.position(0);
@@ -187,34 +230,46 @@ public class RenderUtils {
 				x[j] = cos * x[j] - sin * y[j];
 				y[j] = sin * t[j] + cos * y[j];
 			}
-			GL11.glBegin(GL11.GL_QUADS);
-			// if (innerRadius > 0) {
-			GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
-			GL11.glVertex2f(x[0], y[0]);
-			GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
-			GL11.glVertex2f(xBackup[0], yBackup[0]);
-			// }
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[1], yBackup[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[1], y[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[1], yBackup[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[1], y[1]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[2], y[2]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[2], yBackup[2]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(x[2], y[2]);
-			GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
-			GL11.glVertex2f(xBackup[2], yBackup[2]);
-			GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
-			GL11.glVertex2f(xBackup[3], yBackup[3]);
-			GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
-			GL11.glVertex2f(x[3], y[3]);
-			GL11.glEnd();
+
+			if (nbSubSegments == 0 ||
+					i >= remainingNbSegments * (2 * currentSubSegment) / (2 * nbSubSegments)
+					&& i < remainingNbSegments * (1 + 2 * currentSubSegment) / (2 * nbSubSegments)) {
+				GL11.glBegin(GL11.GL_QUADS);
+				// if (innerRadius > 0) {
+				GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
+				GL11.glVertex2f(x[0], y[0]);
+				GL11.glColor4f(colorInt[0], colorInt[1], colorInt[2], colorInt[3]);
+				GL11.glVertex2f(xBackup[0], yBackup[0]);
+				// }
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(xBackup[1], yBackup[1]);
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(x[1], y[1]);
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(xBackup[1], yBackup[1]);
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(x[1], y[1]);
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(x[2], y[2]);
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(xBackup[2], yBackup[2]);
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(x[2], y[2]);
+				GL11.glColor4f(colorMiddle[0], colorMiddle[1], colorMiddle[2], colorMiddle[3]);
+				GL11.glVertex2f(xBackup[2], yBackup[2]);
+				GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
+				GL11.glVertex2f(xBackup[3], yBackup[3]);
+				GL11.glColor4f(colorExt[0], colorExt[1], colorExt[2], colorExt[3]);
+				GL11.glVertex2f(x[3], y[3]);
+				GL11.glEnd();
+
+				oneSegmentDrawn = true;
+			} else {
+				if (oneSegmentDrawn) {
+					currentSubSegment++;
+					oneSegmentDrawn = false;
+				}
+			}
 
 			temp.clear();
 			temp.put(x);
@@ -225,39 +280,6 @@ public class RenderUtils {
 			temp.put(y);
 			temp.position(0);
 			temp.get(yBackup);
-		}
-	}
-
-	public static void renderPartialDisc(float radius, float ratio) {
-		ratio = Math.max(0, Math.min(1, ratio));
-
-		// render limit of effect zone
-		TextureImpl.bindNone();
-		float tExt = 0; // temporary data holder
-		float xInt;
-		float xExt;
-
-		xInt = 0; // radius
-		xExt = radius; // radius
-
-		float xExtBackup = xExt; // radius
-		final float yInt = 0;
-		float yExt = 0;
-		float yExtBackup = 0;
-		for (int i = 0; i < nbSegments * ratio; i++) {
-
-			tExt = xExt;
-			xExt = cos * xExt - sin * yExt;
-			yExt = sin * tExt + cos * yExt;
-
-			GL11.glBegin(GL11.GL_TRIANGLES);
-			GL11.glVertex2f(xInt, yInt);
-			GL11.glVertex2f(xExtBackup, yExtBackup);
-			GL11.glVertex2f(xExt, yExt);
-			GL11.glEnd();
-
-			xExtBackup = xExt;
-			yExtBackup = yExt;
 		}
 	}
 
@@ -277,6 +299,10 @@ public class RenderUtils {
 		GL11.glVertex2f(right, bottom);
 		GL11.glVertex2f(left, bottom);
 		GL11.glEnd();
+	}
+
+	public static void renderSegmentedCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt, int nbSegments) {
+		renderPartialSegmentedCircle(0, 1f, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt, nbSegments);
 	}
 
 	/**

@@ -14,21 +14,25 @@ import net.carmgate.morph.model.geometry.Vector2f;
 
 public abstract class Component implements Activable {
 	private int id;
+	private Vector2f posInShip = new Vector2f();
 	private boolean active;
 	private Animation animation;
 	private final Holder<Ship> shipHolder = new Holder<>();
 	private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 	private Vector2f targetPosInWorld;
 	private long lastActivation;
-
 	@Inject private World world;
+
 	@Inject private Conf conf;
 	@Inject private Logger LOGGER;
-
 	public boolean canBeActivated() {
+		Vector2f targetPosInWorldClone = targetPosInWorld != null ? new Vector2f(targetPosInWorld) : null;
 		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0
 				&& (getLastActivation() == 0 || getAvailability() >= 1)
-				&& !isActive();
+				&& !isActive()
+				&& (!getClass().isAnnotationPresent(NeedsTarget.class)
+						|| targetPosInWorldClone != null
+						&& (getRange() == 0 || targetPosInWorldClone.sub(getShip().getPos()).length() <= getRange()));
 	}
 
 	public Animation getAnimation() {
@@ -82,6 +86,18 @@ public abstract class Component implements Activable {
 
 	public final float getMaxStoredResources() {
 		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredResources");
+		if (value == null) {
+			value = 0f;
+		}
+		return value;
+	}
+
+	public Vector2f getPosInShip() {
+		return posInShip;
+	}
+
+	public final float getRange() {
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".range");
 		if (value == null) {
 			value = 0f;
 		}

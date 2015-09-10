@@ -64,10 +64,13 @@ public class World {
 	private final Map<String, Player> players = new HashMap<>();
 	private long lastUpdateTime = 0;
 	private long time = 0;
-	private float timeFactor = 1f;
-	private boolean timeFrozen = false;
-	private Ship playerShip;
+	private long absoluteTime = 0;
 
+	private float timeFactor = 1f;
+
+	private boolean timeFrozen = false;
+
+	private Ship playerShip;
 	public void add(PhysicalEntity entity) {
 		if (entity instanceof Ship) {
 			add((Ship) entity);
@@ -77,11 +80,9 @@ public class World {
 		nonShipsPhysicalEntities.add(entity);
 		physicalEntities.add(entity);
 	}
-
 	public void add(Player player) {
 		players.put(player.getName(), player);
 	}
-
 	private void add(Ship ship) {
 		// TODO modify this so that ships have limited line of sight
 		// Fill the ship
@@ -95,6 +96,10 @@ public class World {
 		final ShipAdded shipAdded = worldEventFactory.newInstance(WorldEventType.SHIP_ADDED);
 		shipAdded.setAddedShip(ship);
 		worldEventMgr.fire(shipAdded);
+	}
+
+	public long getAbsoluteTime() {
+		return absoluteTime;
 	}
 
 	public List<PhysicalEntity> getNonShipsPhysicalEntities() {
@@ -194,6 +199,7 @@ public class World {
 		if (lastUpdateTime != 0) {
 			float timeFactor = timeFrozen ? 0 : this.timeFactor;
 			time += (newUpdateTime - lastUpdateTime) * timeFactor;
+			absoluteTime += newUpdateTime - lastUpdateTime;
 		}
 		lastUpdateTime = newUpdateTime;
 	}
