@@ -66,6 +66,7 @@ public class World {
 	private long time = 0;
 	private float timeFactor = 1f;
 	private boolean timeFrozen = false;
+	private Ship playerShip;
 
 	public void add(PhysicalEntity entity) {
 		if (entity instanceof Ship) {
@@ -108,6 +109,10 @@ public class World {
 		return players;
 	}
 
+	public Ship getPlayerShip() {
+		return playerShip;
+	}
+
 	/**
 	 * Do not use this method if you intend to modify this list.
 	 */
@@ -137,6 +142,12 @@ public class World {
 				gameLoadedEvent.fire(new GameLoaded());
 			} catch (final Exception e) {
 				LOGGER.error("Cannot open init file", e); //$NON-NLS-1$
+			}
+
+			for (Ship ship : getShips()) {
+				if ("Me".equals(ship.getPlayer().getName())) {
+					playerShip = ship;
+				}
 			}
 		}, "model init").start(); //$NON-NLS-1$
 	}

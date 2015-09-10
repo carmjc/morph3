@@ -25,6 +25,7 @@ import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
+import net.carmgate.morph.ai.AI;
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.WorldEventFactory;
 import net.carmgate.morph.events.WorldEventType;
@@ -41,8 +42,8 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentFacto
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
+import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
 import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
-import net.carmgate.morph.model.entities.physical.ship.components.SolarPanelGenerator;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.UIContext;
@@ -77,12 +78,14 @@ public class GameMain {
 	@Inject private Messages messages;
 	@Inject private WidgetFactory widgetFactory;
 	@Inject private WorldEventFactory worldEventFactory;
+	@Inject private AI ai;
 
 	@Inject private Select select;
 	// Computation attributes
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
 	private long lastUpdateTime = 0;
+	private long aiLastUpdateTime = 0;
 	private int nextWaveId = 1;
 
 	private boolean gameLoaded;
@@ -103,7 +106,7 @@ public class GameMain {
 			ship.setRotation(new Random().nextFloat() * 360);
 			ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
 			ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
-			ship.add(componentFactory.newInstance(SolarPanelGenerator.class), 1f / 8);
+			ship.add(componentFactory.newInstance(SimpleGenerator.class), 1f / 8);
 			ship.setCreationTime(world.getTime());
 			world.add(ship);
 		}
@@ -248,6 +251,16 @@ public class GameMain {
 
 			mouseManager.handleMouseEvent();
 			keyboardManager.handleKeyboardEvent();
+
+			// Update AI
+			if (world.getTime() - aiLastUpdateTime > 500) {
+				for (Ship ship : world.getShips()) {
+					if ("Other".equals(ship.getPlayer().getName())) {
+						ai.run(ship);
+					}
+				}
+				aiLastUpdateTime = world.getTime();
+			}
 		}
 	}
 
@@ -480,6 +493,7 @@ public class GameMain {
 
 	private void updateWorld() {
 		world.updateTime();
+
 		for (final Ship ship : world.getShips()) {
 			// Check if the ship is still alive
 			if (ship.getIntegrity() <= 0) {
