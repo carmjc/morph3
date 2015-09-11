@@ -20,13 +20,12 @@ public class InputHistory {
 	private final Deque<UIEvent> stack = new LinkedList<>();
 
 	public void addEvent(UIEvent event) {
-		// Specifically remove double Mouse.MOVE
-		if (event.getEventType() == EventType.MOUSE_MOVE
-				&& getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE) {
-			return;
-		}
-
 		stack.addFirst(event);
+
+		// Specifically remove double Mouse.MOVE
+		if (getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE && getLastMouseEvent(1).getEventType() == EventType.MOUSE_MOVE) {
+			consumeEvents(getLastMouseEvent());
+		}
 
 		if (stack.size() > STACK_SIZE) {
 			stack.removeLast();
@@ -77,6 +76,10 @@ public class InputHistory {
 
 	public UIEvent getLastMouseEvent(int n) {
 		return getLastEvent(HardwareType.MOUSE, n);
+	}
+
+	public Deque<UIEvent> getStack() {
+		return stack;
 	}
 
 	public int size() {

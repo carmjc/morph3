@@ -84,6 +84,8 @@ public class SetComponentTarget implements MouseListener {
 				selectedCmp.startBehavior();
 			}
 			dragContext.reset();
+
+			inputHistory.consumeEvents(inputHistory.getLastMouseEvent(), inputHistory.getLastMouseEvent(1), inputHistory.getLastMouseEvent(2));
 		}
 
 		// TODO There should be a way to abort this

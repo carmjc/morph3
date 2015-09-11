@@ -49,6 +49,7 @@ import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.actions.Select;
+import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.renderers.RenderMode;
@@ -79,8 +80,9 @@ public class GameMain {
 	@Inject private WidgetFactory widgetFactory;
 	@Inject private WorldEventFactory worldEventFactory;
 	@Inject private AI ai;
-
 	@Inject private Select select;
+	@Inject private InputHistory inputHistory;
+
 	// Computation attributes
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
@@ -344,6 +346,12 @@ public class GameMain {
 		int line = 0;
 		if (world.isTimeFrozen()) {
 			RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
+		}
+
+		String[] strArray = inputHistory.toString().split("\n");
+		line = -strArray.length + 1;
+		for (String str : strArray) {
+			RenderUtils.renderText(font, -x, y, str, line++, Color.white, true);
 		}
 	}
 
