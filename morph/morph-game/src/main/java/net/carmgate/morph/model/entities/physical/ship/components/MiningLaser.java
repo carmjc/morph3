@@ -7,6 +7,7 @@ import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.MiningLaserAnim;
+import net.carmgate.morph.model.entities.physical.Asteroid;
 
 @NeedsTarget
 @ComponentKind(ComponentType.MINING_LASERS)
@@ -16,6 +17,12 @@ public class MiningLaser extends Component {
 	@Inject private World world;
 
 	private MiningLaserAnim laserAnim;
+
+	@Override
+	public boolean acceptsTarget(Object target) {
+		// TODO Use distance to accept or not
+		return target instanceof Asteroid;
+	}
 
 	@Override
 	public

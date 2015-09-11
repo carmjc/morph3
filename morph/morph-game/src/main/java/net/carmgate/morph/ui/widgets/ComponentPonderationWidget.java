@@ -25,6 +25,7 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.actions.DragContext;
+import net.carmgate.morph.ui.actions.DragContext.DragType;
 import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
@@ -89,7 +90,7 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 
 	@Override
 	public void onDrag() {
-		if (dragContext.dragInProgress()) {
+		if (dragContext.dragInProgress(DragType.WIDGET)) {
 			Float dragStart = getCoeff(dragContext.getOldMousePosInWindow().x);
 			float drag = getCoeff(gameMouse.getX());
 			LOGGER.debug("Old: " + dragStart + " - New: " + drag);
@@ -148,7 +149,7 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 			}
 		}
 
-		if (!dragContext.dragInProgress()) {
+		if (!dragContext.dragInProgress(DragType.WIDGET)) {
 			selectedCmpType = null;
 			otherCmpType = null;
 		}

@@ -38,7 +38,7 @@ import net.carmgate.morph.ui.widgets.WidgetMouseListener;
 public class Select implements MouseListener {
 
 	public static class PickingResult {
-		private TargetType targetType;
+		private TargetType targetType = null;
 		private Object target;
 
 		public Object getTarget() {
@@ -80,13 +80,14 @@ public class Select implements MouseListener {
 		if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
 				&& inputHistory.getLastMouseEvent(1).getButton() == 0
 				&& inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP) {
-			LOGGER.debug("click detected"); //$NON-NLS-1$
+			// LOGGER.debug("click detected"); //$NON-NLS-1$
 			select(Mouse.getX() - uiContext.getWindow().getWidth() / 2, Mouse.getY() - uiContext.getWindow().getHeight() / 2);
+			inputHistory.consumeEvents(inputHistory.getLastMouseEvent(), inputHistory.getLastMouseEvent(1));
 		}
 	}
 
 	public PickingResult pick(int x, int y) {
-		LOGGER.debug("Picking at " + x + " " + y); //$NON-NLS-1$ //$NON-NLS-2$
+		// LOGGER.debug("Picking at " + x + " " + y); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// get viewport
 		IntBuffer viewport = BufferUtils.createIntBuffer(16);
@@ -125,7 +126,7 @@ public class Select implements MouseListener {
 		{
 			result += selectBuf.get(i) + ", "; //$NON-NLS-1$
 		}
-		LOGGER.debug("hits: " + hits + ", result : " + result + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		// LOGGER.debug("hits: " + hits + ", result : " + result + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		// Get the model elements picked
 		// The current index we are looking for in the select buffer
@@ -133,6 +134,10 @@ public class Select implements MouseListener {
 
 		// The picked entity if any
 		PickingResult pickingResult = new PickingResult();
+
+		if (hits == 0) {
+			return pickingResult;
+		}
 
 		// Iterate over the hits
 		// for (int i = 0; i < hits; i++) {
@@ -188,6 +193,7 @@ public class Select implements MouseListener {
 			pickingResult.setTarget(pickedCmp);
 		}
 		// }
+		// LOGGER.debug("Select " + pickingResult.getTargetType());
 		return pickingResult;
 	}
 
@@ -261,11 +267,11 @@ public class Select implements MouseListener {
 
 		if (pickingResult.getTargetType() == TargetType.WIDGET) {
 			uiContext.setSelectedWidget((Widget) pickingResult.getTarget());
-			LOGGER.debug("widget");
+			// LOGGER.debug("widget");
 		} else if (pickingResult.getTargetType() == TargetType.SHIP) {
 			uiContext.setSelectedShip((Ship) pickingResult.getTarget());
 			uiContext.setSelectedCmp(null);
-			LOGGER.debug("ship");
+			// LOGGER.debug("ship");
 		} else if (pickingResult.getTargetType() == TargetType.COMPONENT) {
 			Component cmp = (Component) pickingResult.getTarget();
 			uiContext.setSelectedShip(cmp.getShip());

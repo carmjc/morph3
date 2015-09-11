@@ -26,12 +26,30 @@ public class Conf {
 		}
 	}
 
+	public String[] getArrayProperty(String key) {
+		String property = getProperty(key);
+		String[] strValue = property!= null ? property.split(";") : null;
+		return strValue;
+	}
+
 	public Byte getCharProperty(String key) {
 		String property = prop.getProperty(key);
 		if (property == null) {
 			return null;
 		}
 		return property.getBytes()[0];
+	}
+
+	public float[] getFloatArrayProperty(String key) {
+		String[] strValue = getArrayProperty(key);
+		float[] value = null;
+		if (strValue != null) {
+			value = new float[strValue.length];
+			for (int i = 0; i < value.length; i++) {
+				value[i] = Float.parseFloat(strValue[i]);
+			}
+		}
+		return value;
 	}
 
 	public Float getFloatProperty(String key) {

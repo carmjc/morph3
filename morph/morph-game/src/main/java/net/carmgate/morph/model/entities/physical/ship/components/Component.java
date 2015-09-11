@@ -21,10 +21,15 @@ public abstract class Component implements Activable {
 	private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 	private Vector2f targetPosInWorld;
 	private long lastActivation;
-	@Inject private World world;
 
+	@Inject private World world;
 	@Inject private Conf conf;
 	@Inject private Logger LOGGER;
+
+	public boolean acceptsTarget(Object target) {
+		return false;
+	}
+
 	public boolean canBeActivated() {
 		Vector2f targetPosInWorldClone = targetPosInWorld != null ? new Vector2f(targetPosInWorld) : null;
 		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0
@@ -50,6 +55,10 @@ public abstract class Component implements Activable {
 			value = 1;
 		}
 		return value;
+	}
+
+	public float[] getColor() {
+		return conf.getFloatArrayProperty(getClass().getCanonicalName() + ".color");
 	}
 
 	public final float getEnergyDt() {

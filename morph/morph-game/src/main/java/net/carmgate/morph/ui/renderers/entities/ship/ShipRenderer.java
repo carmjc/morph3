@@ -25,8 +25,12 @@ import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
+import net.carmgate.morph.model.entities.physical.ship.components.NeedsTarget;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.actions.DragContext;
+import net.carmgate.morph.ui.actions.DragContext.DragType;
+import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
@@ -43,6 +47,8 @@ public class ShipRenderer implements Renderer<Ship> {
 	@Inject private World world;
 	@Inject private Conf conf;
 	@Inject private Logger LOGGER;
+	@Inject private GameMouse gameMouse;
+	@Inject private DragContext dragContext;
 
 	@Override
 	public void init() {
@@ -105,8 +111,8 @@ public class ShipRenderer implements Renderer<Ship> {
 		} else if (ship.getRotationSpeed() < 0) {
 			skewRatio = -0.9f;
 		}
-		RenderUtils.renderSprite(width, shipTexture, skewRatio);
 
+		RenderUtils.renderSprite(width, shipTexture, skewRatio);
 		renderComponents(ship, alpha);
 
 		GL11.glRotatef(-ship.getRotation(), 0, 0, 1);
@@ -149,13 +155,41 @@ public class ShipRenderer implements Renderer<Ship> {
 
 		// draw component range
 		Component selectedCmp = uiContext.getSelectedCmp();
-		if (selectedCmp != null && selectedCmp.getShip() == ship && selectedCmp.getRange() != 0) {
-			renderRange(selectedCmp, new float[] { 1, 1, 1, 0.4f });
+		if (selectedCmp != null && selectedCmp.getShip() == ship && selectedCmp.getRange() != 0 && dragContext.dragInProgress(DragType.COMPONENT)) {
+			float[] cmpColor = selectedCmp.getColor();
+			if (cmpColor == null) {
+				cmpColor = new float[] { 1, 1, 1, 0.4f };
+			}
+			renderRange(selectedCmp, cmpColor);
+			if (selectedCmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS && selectedCmp.getTargetPosInWorld() != null) {
+				GL11.glTranslatef(-ship.getPos().x + selectedCmp.getTargetPosInWorld().x, -ship.getPos().y + selectedCmp.getTargetPosInWorld().y, 0);
+
+				GL11.glScalef(massScale, massScale, 0);
+				GL11.glRotatef(ship.getRotation(), 0, 0, 1);
+				float backupAlpha = alpha;
+				alpha = alpha * 0.2f;
+				GL11.glColor4f(1f, 1f, 1f, 0.6f * alpha);
+				RenderUtils.renderSprite(width, shipTexture, skewRatio);
+				renderComponents(ship, alpha);
+				alpha = backupAlpha;
+				GL11.glRotatef(-ship.getRotation(), 0, 0, 1);
+				GL11.glScalef(1 / massScale, 1 / massScale, 0);
+
+				for (Component cmp : ship.getComponents().values()) {
+					if (cmp != selectedCmp && cmp.getClass().isAnnotationPresent(NeedsTarget.class)) {
+						cmpColor = cmp.getColor();
+						if (cmpColor == null) {
+							cmpColor = new float[] { 1, 1, 1, 0.4f };
+						}
+						renderRange(cmp, cmpColor);
+					}
+				}
+				GL11.glTranslatef(ship.getPos().x - selectedCmp.getTargetPosInWorld().x, ship.getPos().y - selectedCmp.getTargetPosInWorld().y, 0);
+			}
 		}
 
 		if (selectedCmp != null && selectedCmp.getShip() == ship && selectedCmp.getRange() != 0) {
 			// draw component target selection
-			float blur = 2 + new Random().nextFloat();
 			Vector2f targetPos = selectedCmp.getTargetPosInWorld();
 			if (targetPos != null) {
 				float radius = 20 / zoom;
@@ -167,7 +201,8 @@ public class ShipRenderer implements Renderer<Ship> {
 				}
 
 				GL11.glTranslatef(targetPos.x - ship.getPos().x, targetPos.y - ship.getPos().y, 0);
-				renderCircling(blur, radius, (int) (radius / 4), new float[] { 1f, 0.5f, 0.5f });
+				float blur = 2 + new Random().nextFloat();
+				renderCircling(radius + blur, blur / zoom, (int) (radius / 4), new float[] { 1f, 0.5f, 0.5f, 1 });
 				GL11.glTranslatef(-targetPos.x + ship.getPos().x, -targetPos.y + ship.getPos().y, 0);
 			}
 
@@ -189,21 +224,20 @@ public class ShipRenderer implements Renderer<Ship> {
 
 	}
 
-	private void renderCircling(float blur, float radius, int nbSegments, float[] color) {
+	private void renderCircling(float radius, float blur, int nbSegments, float[] color) {
 		float timeAngle;
-		float zoom = uiContext.getViewport().getZoomFactor();
 		timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
 		GL11.glRotatef(timeAngle, 0, 0, 1);
 		RenderUtils.renderSegmentedCircle(
-				radius + blur,
-				radius + blur,
-				blur / zoom,
-				blur / zoom,
+				radius,
+				radius,
+				blur,
+				blur,
 				new float[] { color[0], color[1], color[2], 0 },
-				new float[] { color[0], color[1], color[2], 1 },
+				new float[] { color[0], color[1], color[2], color[3] },
 				new float[] { color[0], color[1], color[2], 0 },
 				nbSegments);
-		RenderUtils.renderAntialiasedDisc(radius + blur, 2 / zoom, new float[] { color[0], color[1], color[2], 0.1f });
+		RenderUtils.renderAntialiasedDisc(radius, blur, new float[] { color[0], color[1], color[2], color[3] * 0.1f });
 		GL11.glRotatef(-timeAngle, 0, 0, 1);
 	}
 
@@ -285,7 +319,7 @@ public class ShipRenderer implements Renderer<Ship> {
 		float blur = 2 + new Random().nextFloat();
 		int nbSegments = (int) (selectedCmp.getRange() / 10);
 		float timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
-		renderCircling(blur, selectedCmp.getRange(), (int) (selectedCmp.getRange() / 10), new float[] { 0.4f, 0.4f, 0.4f });
+		renderCircling(selectedCmp.getRange() + blur, blur / zoom, (int) (selectedCmp.getRange() / 10), color);
 
 		Vector2f from = new Vector2f(selectedCmp.getPosInShip()).scale(selectedCmp.getShip().getMass() / compScale).rotate(selectedCmp.getShip().getRotation());
 		Vector2f to = new Vector2f(0, selectedCmp.getRange() + blur).rotate(timeAngle - 90 / nbSegments);
