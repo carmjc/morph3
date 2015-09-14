@@ -54,6 +54,7 @@ public class DragContext {
 	}
 
 	public void setDragType(DragType dragType) {
+		LOGGER.debug("dragging " + dragType);
 		this.dragType = dragType;
 	}
 

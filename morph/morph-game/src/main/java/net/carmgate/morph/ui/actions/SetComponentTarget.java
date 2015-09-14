@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
-import org.lwjgl.input.Mouse;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.model.World;
@@ -42,11 +41,17 @@ public class SetComponentTarget implements MouseListener {
 
 	@Override
 	public void onMouseEvent() {
-		if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
-				&& inputHistory.getLastMouseEvent(1).getButton() == 0
-				&& inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
+		if (inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_DOWN
+				// && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
 				&& !dragContext.dragInProgress()) {
-			TargetType targetType = select.select(Mouse.getX() - uiContext.getWindow().getWidth() / 2, Mouse.getY() - uiContext.getWindow().getHeight() / 2);
+			select.select();
+		}
+
+		if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
+				&& inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
+				// && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
+				&& !dragContext.dragInProgress()) {
+			TargetType targetType = select.select();
 			if (targetType == TargetType.COMPONENT) {
 				dragContext.setOldFP(uiContext.getViewport().getFocalPoint());
 				dragContext.setOldMousePosInWindow(gameMouse.getX(), gameMouse.getY());
@@ -57,25 +62,21 @@ public class SetComponentTarget implements MouseListener {
 			}
 		}
 
-		if (dragContext.dragInProgress(DragType.COMPONENT)) {
+		if (dragContext.dragInProgress(DragType.COMPONENT) && uiContext.getSelectedCmp() != null) {
 			Component selectedCmp = uiContext.getSelectedCmp();
-			PickingResult pickingResult = select.pick(Mouse.getX() - uiContext.getWindow().getWidth() / 2,
-					Mouse.getY() - uiContext.getWindow().getHeight() / 2);
-			if (pickingResult.getTarget() instanceof Ship && ((Ship) pickingResult.getTarget()).getPlayer().getName().equals("Me")) {
-				selectedCmp.setTarget(null);
-			} else if (pickingResult.getTarget() == null) {
+			PickingResult pickingResult = gameMouse.pick();
+			if (pickingResult == null || pickingResult.getTarget() == null) {
 				Vector2f targetPosInWorld = new Vector2f(gameMouse.getPosInWorld());
 				selectedCmp.setTarget(null);
 				selectedCmp.setTargetPosInWorld(targetPosInWorld);
+			} else if (pickingResult.getTarget() instanceof Ship && ((Ship) pickingResult.getTarget()).getPlayer().getName().equals("Me")) {
+				selectedCmp.setTarget(null);
 			} else if (pickingResult.getTarget() instanceof PhysicalEntity) {
 				selectedCmp.setTarget((PhysicalEntity) pickingResult.getTarget());
 			}
-
 		}
 
-		if (inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_MOVE
-				&& inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP
-				&& dragContext.dragInProgress(DragType.COMPONENT)) {
+		if (inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP) {
 			Component selectedCmp = uiContext.getSelectedCmp();
 			if (world.isTimeFrozen()) {
 				world.toggleTimeFrozen();
@@ -84,11 +85,7 @@ public class SetComponentTarget implements MouseListener {
 				selectedCmp.startBehavior();
 			}
 			dragContext.reset();
-
-			inputHistory.consumeEvents(inputHistory.getLastMouseEvent(), inputHistory.getLastMouseEvent(1), inputHistory.getLastMouseEvent(2));
 		}
-
-		// TODO There should be a way to abort this
 	}
 
 }

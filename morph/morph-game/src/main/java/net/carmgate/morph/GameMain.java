@@ -49,7 +49,7 @@ import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
-import net.carmgate.morph.ui.actions.Select;
+import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
@@ -75,14 +75,13 @@ public class GameMain {
 	@Inject private MouseManager mouseManager;
 	@Inject private KeyboardManager keyboardManager;
 	@Inject private PhysicalEntityFactory physicalEntityFactory;
-	// @Inject private OrderFactory orderFactory;
 	@Inject private ComponentFactory componentFactory;
 	@Inject private Messages messages;
 	@Inject private WidgetFactory widgetFactory;
 	@Inject private WorldEventFactory worldEventFactory;
 	@Inject private AI ai;
-	@Inject private Select select;
 	@Inject private InputHistory inputHistory;
+	@Inject private GameMouse gameMouse;
 
 	// Computation attributes
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
@@ -198,7 +197,7 @@ public class GameMain {
 			renderer.init();
 		}
 
-		addWaves();
+		// addWaves();
 		updateWorld();
 
 		// Rendering loop
@@ -213,7 +212,7 @@ public class GameMain {
 				renderPhysical();
 				renderGui();
 			} else {
-				select.renderForSelect();
+				gameMouse.renderForSelect();
 			}
 			updateWorld();
 

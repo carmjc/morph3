@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
-import org.lwjgl.input.Mouse;
 
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
@@ -27,7 +26,6 @@ public class DragWorld implements MouseListener {
 	@Inject private UIContext uiContext;
 	@Inject private GameMouse gameMouse;
 	@Inject private DragContext dragContext;
-	@Inject private Select select;
 
 	@SuppressWarnings("unused")
 	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
@@ -45,9 +43,8 @@ public class DragWorld implements MouseListener {
 				&& inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
 				&& !dragContext.dragInProgress()) {
 
-			PickingResult pickingResult = select.pick(Mouse.getX() - uiContext.getWindow().getWidth() / 2,
-					Mouse.getY() - uiContext.getWindow().getHeight() / 2);
-			if (pickingResult.getTargetType() != null) {
+			PickingResult pickingResult = gameMouse.pick();
+			if (pickingResult != null && pickingResult.getTargetType() != null) {
 				return;
 			}
 

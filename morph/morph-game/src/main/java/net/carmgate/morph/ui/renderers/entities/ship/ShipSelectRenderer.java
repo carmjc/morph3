@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
@@ -28,6 +29,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 
 	@Inject	private Conf conf;
 	@Inject private UIContext uiContext;
+	@Inject private World world;
 
 	@SuppressWarnings("unused")
 	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
@@ -46,7 +48,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 		int shipType = 0;
 		float compScale = 3.292f * 2;
 
-		if (ship == uiContext.getSelectedShip()) {
+		if (ship == world.getPlayerShip()) {
 
 			GL11.glScalef(massScale, massScale, 0);
 			GL11.glColor4f(1f, 1f, 1f, 0.6f);

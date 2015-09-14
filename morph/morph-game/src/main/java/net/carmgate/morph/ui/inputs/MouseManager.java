@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import org.lwjgl.input.Mouse;
 import org.slf4j.Logger;
 
+import net.carmgate.morph.ui.inputs.InputHistory.SameMouseEvent;
 import net.carmgate.morph.ui.inputs.UIEvent.EventType;
 
 @Singleton
@@ -25,13 +26,20 @@ public class MouseManager {
 		LOGGER.debug("Added new mouse listener: " + mouseListener.getClass().getName()); //$NON-NLS-1$
 	}
 
+	public void dispatchEvent() {
+		for (final MouseListener mouseListener : mouseListeners) {
+			mouseListener.onMouseEvent();
+		}
+	}
+
 	public void handleMouseEvent() {
 		if (Mouse.next()) {
+
 			final int dWheel = Mouse.getDWheel();
 			if (dWheel != 0) {
-				LOGGER.debug("Logged a mouse wheel: " + dWheel); //$NON-NLS-1$
 				final UIEvent event = new UIEvent(EventType.MOUSE_WHEEL, dWheel, new int[] { Mouse.getEventX(), Mouse.getEventY() });
 				inputHistory.addEvent(event);
+				dispatchEvent();
 			}
 
 			// add interaction to ui context
@@ -44,6 +52,7 @@ public class MouseManager {
 				}
 				final UIEvent event = new UIEvent(evtType, Mouse.getEventButton(), new int[] { Mouse.getEventX(), Mouse.getEventY() });
 				inputHistory.addEvent(event);
+				// dispatchEvent();
 			}
 
 			final int dx = Mouse.getDX();
@@ -54,15 +63,17 @@ public class MouseManager {
 					inputHistory.addEvent(event);
 				}
 			}
+			dispatchEvent();
 
-			for (final MouseListener mouseListener : mouseListeners) {
-				mouseListener.onMouseEvent();
-			}
+
 
 			// Try to clean input history
-			if (inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
-					&& inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP) {
-				inputHistory.consumeEvents(inputHistory.getLastMouseEvent(), inputHistory.getLastMouseEvent(1));
+			if (inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP) {
+				inputHistory.consumeEvents(inputHistory.getLastMouseEvent(),
+						inputHistory.getLastMatchingEvent(new SameMouseEvent(EventType.MOUSE_BUTTON_DOWN, inputHistory.getLastMouseEvent().getButton())));
+			}
+			if (inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE) {
+				inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
 			}
 		}
 	}

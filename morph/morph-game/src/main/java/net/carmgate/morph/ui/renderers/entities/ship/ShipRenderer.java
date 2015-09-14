@@ -156,12 +156,14 @@ public class ShipRenderer implements Renderer<Ship> {
 		// draw component range
 		Component selectedCmp = uiContext.getSelectedCmp();
 		if (selectedCmp != null && selectedCmp.getShip() == ship && selectedCmp.getRange() != 0 && dragContext.dragInProgress(DragType.COMPONENT)) {
+			LOGGER.debug("dragged");
 			float[] cmpColor = selectedCmp.getColor();
 			if (cmpColor == null) {
 				cmpColor = new float[] { 1, 1, 1, 0.4f };
 			}
 			renderRange(selectedCmp, cmpColor);
-			if (selectedCmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS && selectedCmp.getTargetPosInWorld() != null) {
+			if (selectedCmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS
+					&& selectedCmp.getTargetPosInWorld() != null) {
 				GL11.glTranslatef(-ship.getPos().x + selectedCmp.getTargetPosInWorld().x, -ship.getPos().y + selectedCmp.getTargetPosInWorld().y, 0);
 
 				GL11.glScalef(massScale, massScale, 0);

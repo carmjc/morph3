@@ -3,6 +3,7 @@ package net.carmgate.morph.ui.inputs;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,6 +15,22 @@ import net.carmgate.morph.ui.inputs.UIEvent.HardwareType;
 
 @Singleton
 public class InputHistory {
+	public static class SameMouseEvent implements Predicate<UIEvent> {
+		private int button;
+		private EventType eventType;
+
+		public SameMouseEvent(EventType eventType, int button) {
+			this.eventType = eventType;
+			this.button = button;
+		}
+
+		@Override
+		public boolean test(UIEvent t) {
+			return t != null && t.getButton() == button && t.getEventType() == eventType;
+		}
+
+	}
+
 	private static final int STACK_SIZE = 100;
 
 	@Inject private Logger LOGGER;
@@ -36,6 +53,10 @@ public class InputHistory {
 		for (UIEvent event : events) {
 			stack.remove(event);
 		}
+
+		// if (getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE && getLastMouseEvent(1).getEventType() == EventType.MOUSE_MOVE) {
+		// stack.remove(getLastMouseEvent().getEventType());
+		// }
 	}
 
 	public UIEvent getLastEvent(HardwareType type) {
@@ -68,6 +89,21 @@ public class InputHistory {
 
 	public UIEvent getLastKeyboardEvent(int n) {
 		return getLastEvent(HardwareType.KEYBOARD, n);
+	}
+
+	public UIEvent getLastMatchingEvent(Predicate<UIEvent> predicate) {
+		try {
+			UIEvent first = UIEvent.NOOP;
+			for (final UIEvent event : stack) {
+				if (predicate.test(event)) {
+					return event;
+				}
+			}
+			return first;
+		} catch (NoSuchElementException e) {
+			return UIEvent.NOOP;
+		}
+
 	}
 
 	public UIEvent getLastMouseEvent() {
