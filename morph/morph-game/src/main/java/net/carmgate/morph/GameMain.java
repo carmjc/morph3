@@ -42,6 +42,7 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentFacto
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.Laser;
+import net.carmgate.morph.model.entities.physical.ship.components.MiningLaser;
 import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
 import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
 import net.carmgate.morph.model.geometry.Vector2f;
@@ -109,6 +110,7 @@ public class GameMain {
 			ship.add(componentFactory.newInstance(Laser.class), 1f / 8);
 			ship.add(componentFactory.newInstance(SimplePropulsor.class), 3f / 4);
 			ship.add(componentFactory.newInstance(SimpleGenerator.class), 1f / 8);
+			ship.add(componentFactory.newInstance(MiningLaser.class), 1f / 8);
 			ship.setCreationTime(world.getTime());
 			world.add(ship);
 		}

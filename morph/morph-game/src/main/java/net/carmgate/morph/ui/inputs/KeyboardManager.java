@@ -25,11 +25,13 @@ public class KeyboardManager {
 			EventType type;
 			if (Keyboard.getEventKeyState()) {
 				type = EventType.KEYBOARD_DOWN;
+				UIEvent uiEvent = new UIEvent(type, Keyboard.getEventCharacter());
+				inputHistory.addEvent(uiEvent);
 			} else {
 				type = EventType.KEYBOARD_UP;
 			}
-			UIEvent uiEvent = new UIEvent(type, Keyboard.getEventCharacter());
-			inputHistory.addEvent(uiEvent);
+			// UIEvent uiEvent = new UIEvent(type, Keyboard.getEventCharacter());
+			// inputHistory.addEvent(uiEvent);
 		}
 
 		keyboardListeners.forEach(kl -> {
