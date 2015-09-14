@@ -13,6 +13,8 @@ import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 
 public abstract class Component implements Activable {
+	public static final float SCALE = 3.292f * 2;
+
 	private int id;
 	private Vector2f posInShip = new Vector2f();
 	private boolean active;
@@ -25,10 +27,6 @@ public abstract class Component implements Activable {
 	@Inject private World world;
 	@Inject private Conf conf;
 	@Inject private Logger LOGGER;
-
-	public boolean acceptsTarget(Object target) {
-		return false;
-	}
 
 	public boolean canBeActivated() {
 		Vector2f targetPosInWorldClone = targetPosInWorld != null ? new Vector2f(targetPosInWorld) : null;
@@ -147,6 +145,10 @@ public abstract class Component implements Activable {
 	@Override
 	public boolean isActive() {
 		return active;
+	}
+
+	public boolean isPosWithinRange(Vector2f pos) {
+		return getRange() == 0 || pos.clone().sub(getShip().getPos()).length() <= getRange();
 	}
 
 	@Override

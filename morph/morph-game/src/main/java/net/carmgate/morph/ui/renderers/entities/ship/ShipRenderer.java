@@ -80,7 +80,6 @@ public class ShipRenderer implements Renderer<Ship> {
 	public void render(Ship ship, float alpha) {
 
 		final float massScale = ship.getMass();
-		final float compScale = 3.292f * 2;
 		final float width = 256;
 		float zoom = uiContext.getViewport().getZoomFactor();
 
@@ -156,26 +155,14 @@ public class ShipRenderer implements Renderer<Ship> {
 		// draw component range
 		Component selectedCmp = uiContext.getSelectedCmp();
 		if (selectedCmp != null && selectedCmp.getShip() == ship && selectedCmp.getRange() != 0 && dragContext.dragInProgress(DragType.COMPONENT)) {
-			LOGGER.debug("dragged");
 			float[] cmpColor = selectedCmp.getColor();
 			if (cmpColor == null) {
 				cmpColor = new float[] { 1, 1, 1, 0.4f };
 			}
-			renderRange(selectedCmp, cmpColor);
+			renderRange(selectedCmp, cmpColor, true);
 			if (selectedCmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS
 					&& selectedCmp.getTargetPosInWorld() != null) {
 				GL11.glTranslatef(-ship.getPos().x + selectedCmp.getTargetPosInWorld().x, -ship.getPos().y + selectedCmp.getTargetPosInWorld().y, 0);
-
-				GL11.glScalef(massScale, massScale, 0);
-				GL11.glRotatef(ship.getRotation(), 0, 0, 1);
-				float backupAlpha = alpha;
-				alpha = alpha * 0.2f;
-				GL11.glColor4f(1f, 1f, 1f, 0.6f * alpha);
-				RenderUtils.renderSprite(width, shipTexture, skewRatio);
-				renderComponents(ship, alpha);
-				alpha = backupAlpha;
-				GL11.glRotatef(-ship.getRotation(), 0, 0, 1);
-				GL11.glScalef(1 / massScale, 1 / massScale, 0);
 
 				for (Component cmp : ship.getComponents().values()) {
 					if (cmp != selectedCmp && cmp.getClass().isAnnotationPresent(NeedsTarget.class)) {
@@ -183,7 +170,7 @@ public class ShipRenderer implements Renderer<Ship> {
 						if (cmpColor == null) {
 							cmpColor = new float[] { 1, 1, 1, 0.4f };
 						}
-						renderRange(cmp, cmpColor);
+						renderRange(cmp, cmpColor, false);
 					}
 				}
 				GL11.glTranslatef(ship.getPos().x - selectedCmp.getTargetPosInWorld().x, ship.getPos().y - selectedCmp.getTargetPosInWorld().y, 0);
@@ -257,8 +244,7 @@ public class ShipRenderer implements Renderer<Ship> {
 		int turretIndex = 0;
 		int coreIndex = 0;
 		int shipType = 0;
-		float compScale = 3.292f * 2;
-		GL11.glScalef(1 / compScale, 1 / compScale, 1);
+		GL11.glScalef(1 / Component.SCALE, 1 / Component.SCALE, 1);
 
 		for (Component cmp : components) {
 			if (cmp.getPosInShip().isNull()) {
@@ -311,24 +297,26 @@ public class ShipRenderer implements Renderer<Ship> {
 			GL11.glTranslatef(-cmp.getPosInShip().x, -cmp.getPosInShip().y, zoom);
 		}
 
-		GL11.glScalef(compScale, compScale, 1);
+		GL11.glScalef(Component.SCALE, Component.SCALE, 1);
 
 	}
 
-	private void renderRange(Component selectedCmp, float[] color) {
+	private void renderRange(Component selectedCmp, float[] color, boolean withLine) {
 		float zoom = uiContext.getViewport().getZoomFactor();
-		final float compScale = 3.292f * 2;
 		float blur = 2 + new Random().nextFloat();
 		int nbSegments = (int) (selectedCmp.getRange() / 10);
 		float timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
 		renderCircling(selectedCmp.getRange() + blur, blur / zoom, (int) (selectedCmp.getRange() / 10), color);
 
-		Vector2f from = new Vector2f(selectedCmp.getPosInShip()).scale(selectedCmp.getShip().getMass() / compScale).rotate(selectedCmp.getShip().getRotation());
-		Vector2f to = new Vector2f(0, selectedCmp.getRange() + blur).rotate(timeAngle - 90 / nbSegments);
-		Vector2f vect = new Vector2f(to).sub(from);
-		vect.scale((128 / compScale + 2 / zoom) / vect.length());
-		from.add(vect);
-		RenderUtils.renderLine(from, to, 0, blur / zoom, color, new float[] { 0, 0, 0, 0 });
+		if (withLine) {
+			Vector2f from = new Vector2f(selectedCmp.getPosInShip()).scale(selectedCmp.getShip().getMass() / Component.SCALE)
+					.rotate(selectedCmp.getShip().getRotation());
+			Vector2f to = new Vector2f(0, selectedCmp.getRange() + blur).rotate(timeAngle - 90 / nbSegments);
+			Vector2f vect = new Vector2f(to).sub(from);
+			vect.scale((128 / Component.SCALE + 2 / zoom) / vect.length());
+			from.add(vect);
+			RenderUtils.renderLine(from, to, 0, blur / zoom, color, new float[] { 0, 0, 0, 0 });
+		}
 	}
 
 }

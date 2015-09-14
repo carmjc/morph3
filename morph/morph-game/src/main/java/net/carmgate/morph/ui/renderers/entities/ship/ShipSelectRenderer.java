@@ -46,9 +46,8 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 		int turretIndex = 0;
 		int coreIndex = 0;
 		int shipType = 0;
-		float compScale = 3.292f * 2;
 
-		if (ship == world.getPlayerShip()) {
+		if (ship == world.getPlayerShip() && ship == uiContext.getSelectedShip()) {
 
 			GL11.glScalef(massScale, massScale, 0);
 			GL11.glColor4f(1f, 1f, 1f, 0.6f);
@@ -70,19 +69,19 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 					compY = conf.getFloatProperty("ship." + shipType + ".comps.core." + coreIndex + ".y");
 					coreIndex++;
 				}
-				GL11.glTranslatef(compX / compScale, compY / compScale, 0);
+				GL11.glTranslatef(compX / Component.SCALE, compY / Component.SCALE, 0);
 
 				// draw the component
 				GL11.glColor4f(0, 1, 1, 1);
 				GL11.glPushName(SelectRenderer.TargetType.COMPONENT.ordinal());
 				GL11.glPushName(ship.getId());
 				GL11.glPushName(cmp.getId());
-				RenderUtils.renderDisc(256 / compScale);
+				RenderUtils.renderDisc(256 / Component.SCALE);
 				GL11.glPopName();
 				GL11.glPopName();
 				GL11.glPopName();
 
-				GL11.glTranslatef(-compX / compScale, -compY / compScale, 0);
+				GL11.glTranslatef(-compX / Component.SCALE, -compY / Component.SCALE, 0);
 			}
 
 			GL11.glRotatef(-ship.getRotation(), 0, 0, 1);

@@ -29,14 +29,14 @@ public class KeyboardManager {
 				inputHistory.addEvent(uiEvent);
 			} else {
 				type = EventType.KEYBOARD_UP;
+				UIEvent uiEvent = new UIEvent(type, Keyboard.getEventCharacter());
+				inputHistory.addEvent(uiEvent);
 			}
-			// UIEvent uiEvent = new UIEvent(type, Keyboard.getEventCharacter());
-			// inputHistory.addEvent(uiEvent);
-		}
 
-		keyboardListeners.forEach(kl -> {
-			kl.onKeyboardEvent();
-		});
+			keyboardListeners.forEach(kl -> {
+				kl.onKeyboardEvent();
+			});
+		}
 	}
 
 	public void removeKeyboardListener(KeyboardListener listener) {

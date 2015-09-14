@@ -35,6 +35,11 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 		return angle;
 	}
 
+	@Override
+	public Vector2f clone() {
+		return new Vector2f(this);
+	}
+
 	public Vector2f copy(float x, float y) {
 		this.x = x;
 		this.y = y;

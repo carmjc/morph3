@@ -23,11 +23,6 @@ public class SimplePropulsor extends Component implements ForceSource {
 	private final Vector2f force = new Vector2f();
 	private final Vector2f tmpVect = new Vector2f();
 
-	@Override
-	public boolean acceptsTarget(Object object) {
-		return true;
-	}
-
 	private void endBehavior() {
 		setActive(false);
 		setTarget(null);

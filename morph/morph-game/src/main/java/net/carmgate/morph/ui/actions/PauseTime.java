@@ -29,10 +29,11 @@ public class PauseTime implements KeyboardListener {
 	@Override
 	public void onKeyboardEvent() {
 		if (inputHistory.getLastKeyboardEvent(1).getButton() == conf.getCharProperty("action.pauseTime.key")
+				&& inputHistory.getLastKeyboardEvent(1).getEventType() == EventType.KEYBOARD_DOWN
 				&& inputHistory.getLastKeyboardEvent().getEventType() == EventType.KEYBOARD_UP) {
 			world.toggleTimeFrozen();
 			LOGGER.debug("Freeze");
-			inputHistory.consumeEvents(inputHistory.getLastKeyboardEvent(), inputHistory.getLastKeyboardEvent(1));
+			inputHistory.consumeEvents(inputHistory.getLastKeyboardEvent());
 		}
 	}
 

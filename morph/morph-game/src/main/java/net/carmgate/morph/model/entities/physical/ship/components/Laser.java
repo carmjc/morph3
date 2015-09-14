@@ -24,12 +24,6 @@ public class Laser extends Component {
 	private LaserAnim laserAnim;;
 
 	@Override
-	public boolean acceptsTarget(Object target) {
-		// TODO use distance to accept or not
-		return target instanceof Ship;
-	}
-
-	@Override
 	public
 	void evalBehavior() {
 		if (world.getTime() - getLastActivation() > 5000) {

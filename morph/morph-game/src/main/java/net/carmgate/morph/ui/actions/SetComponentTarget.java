@@ -76,7 +76,8 @@ public class SetComponentTarget implements MouseListener {
 			}
 		}
 
-		if (inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP) {
+		if (inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP
+				&& uiContext.getSelectedCmp() != null) {
 			Component selectedCmp = uiContext.getSelectedCmp();
 			if (world.isTimeFrozen()) {
 				world.toggleTimeFrozen();
