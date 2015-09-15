@@ -18,7 +18,6 @@ public class SimplePropulsor extends Component implements ForceSource {
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
 
-	private float desiredDistance = 0;
 	private final Vector2f force = new Vector2f();
 	private final Vector2f tmpVect = new Vector2f();
 
@@ -36,10 +35,9 @@ public class SimplePropulsor extends Component implements ForceSource {
 
 		// target offset
 		tmpVect.copy(getTargetPosInWorld()).sub(getShip().getPos());
-		float actualDistance = tmpVect.length() - desiredDistance;
+		float actualDistance = tmpVect.length();
 
 		float epsilon = conf.getFloatProperty("order.moveOrder.epsilon"); //$NON-NLS-1$
-		LOGGER.debug("actualDistance: " + actualDistance + " - epsilon: " + epsilon + " - speed: " + getShip().getSpeed().length());
 		if (actualDistance < epsilon && getShip().getSpeed().lengthSquared() < epsilon) {
 			if (!getShip().isForceStop()) {
 				getShip().setForceStop(true);
@@ -78,10 +76,6 @@ public class SimplePropulsor extends Component implements ForceSource {
 		}
 	}
 
-	public float getDesiredDistance() {
-		return desiredDistance;
-	}
-
 	@Override
 	public Vector2f getForce() {
 		return force;
@@ -93,10 +87,6 @@ public class SimplePropulsor extends Component implements ForceSource {
 
 		// Apply force to ship
 		getShip().getForceSources().add(this);
-	}
-
-	public void setDesiredDistance(float desiredDistance) {
-		this.desiredDistance = desiredDistance;
 	}
 
 }

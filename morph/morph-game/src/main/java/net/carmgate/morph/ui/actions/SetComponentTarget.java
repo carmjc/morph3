@@ -44,7 +44,9 @@ public class SetComponentTarget implements MouseListener {
 		if (inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_DOWN
 				// && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
 				&& !dragContext.dragInProgress()) {
-			select.select();
+			if (gameMouse.pick() != null && gameMouse.pick().getTargetType() == TargetType.COMPONENT) {
+				select.select();
+			}
 		}
 
 		if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
@@ -73,6 +75,14 @@ public class SetComponentTarget implements MouseListener {
 				selectedCmp.setTarget(null);
 			} else if (pickingResult.getTarget() instanceof PhysicalEntity) {
 				selectedCmp.setTarget((PhysicalEntity) pickingResult.getTarget());
+			}
+
+			if (selectedCmp.getTargetPosInWorld() != null
+					&& selectedCmp.getShip().getPos().distanceToSquared(selectedCmp.getTargetPosInWorld()) > selectedCmp.getRange()
+					* selectedCmp.getRange()) {
+				Vector2f newVect = selectedCmp.getTargetPosInWorld().clone().sub(selectedCmp.getShip().getPos());
+				newVect.scale((selectedCmp.getRange() - 1) / newVect.length());
+				selectedCmp.getTargetPosInWorld().copy(newVect).add(selectedCmp.getShip().getPos());
 			}
 		}
 

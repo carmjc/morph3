@@ -53,6 +53,10 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 		return this;
 	}
 
+	public float distanceToSquared(Vector2f to) {
+		return (to.x - x) * (to.x - x) + (to.y - y) * (to.y - y);
+	}
+
 	public boolean isNull() {
 		return x == 0 && y ==0;
 	}

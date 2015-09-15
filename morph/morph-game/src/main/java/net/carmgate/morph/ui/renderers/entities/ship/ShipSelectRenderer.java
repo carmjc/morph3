@@ -18,6 +18,7 @@ import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
@@ -47,7 +48,7 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 		int coreIndex = 0;
 		int shipType = 0;
 
-		if (ship == world.getPlayerShip() && ship == uiContext.getSelectedShip()) {
+		if (uiContext.getRenderMode() == RenderMode.DEBUG || ship == world.getPlayerShip() && ship == uiContext.getSelectedShip()) {
 
 			GL11.glScalef(massScale, massScale, 0);
 			GL11.glColor4f(1f, 1f, 1f, 0.6f);

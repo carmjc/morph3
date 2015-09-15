@@ -29,13 +29,10 @@ public abstract class Component implements Activable {
 	@Inject private Logger LOGGER;
 
 	public boolean canBeActivated() {
-		Vector2f targetPosInWorldClone = targetPosInWorld != null ? new Vector2f(targetPosInWorld) : null;
-		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0
-				&& (getLastActivation() == 0 || getAvailability() >= 1)
-				&& !isActive()
+		return hasResources()
+				&& isAvailable()
 				&& (!getClass().isAnnotationPresent(NeedsTarget.class)
-						|| targetPosInWorldClone != null
-						&& (getRange() == 0 || targetPosInWorldClone.sub(getShip().getPos()).length() <= getRange()));
+						|| isPosWithinRange(targetPosInWorld));
 	}
 
 	public Animation getAnimation() {
@@ -139,6 +136,10 @@ public abstract class Component implements Activable {
 		return targetPosInWorld;
 	}
 
+	public boolean hasResources() {
+		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0;
+	}
+
 	public void initBehavior() {
 	}
 
@@ -147,8 +148,12 @@ public abstract class Component implements Activable {
 		return active;
 	}
 
+	public boolean isAvailable() {
+		return (getLastActivation() == 0 || getAvailability() >= 1) && !isActive();
+	}
+
 	public boolean isPosWithinRange(Vector2f pos) {
-		return getRange() == 0 || pos.clone().sub(getShip().getPos()).length() <= getRange();
+		return pos != null && (getRange() == 0 || pos.clone().sub(getShip().getPos()).lengthSquared() <= getRange() * getRange());
 	}
 
 	@Override
