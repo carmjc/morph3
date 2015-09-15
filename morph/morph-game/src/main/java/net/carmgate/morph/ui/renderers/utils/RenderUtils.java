@@ -25,8 +25,13 @@ import net.carmgate.morph.model.geometry.Vector2f;
 
 public class RenderUtils {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RenderUtils.class);
+	public static enum Align {
+		LEFT,
+		CENTER,
+		RIGHT;
+	}
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(RenderUtils.class);
 	private static final int nbSegments = 1000;
 	private static final double deltaAngle = (float) (2 * Math.PI / nbSegments);
 	private static final float cos = (float) Math.cos(deltaAngle);
@@ -364,17 +369,19 @@ public class RenderUtils {
 	// TODO The "line" parameter should not be necessary
 	// The method should adapt to the number of lines printed so far
 	public static void renderText(AngelCodeFont font, float x, float y, String str, int line, Color color) {
-		renderText(font, x, y, str, line, color, true);
+		renderText(font, x, y, str, line, color, Align.LEFT);
 	}
 
-	public static void renderText(AngelCodeFont font, float x, float y, String str, int line, Color color, boolean alignLeft) {
-		if (!alignLeft) {
+	public static void renderText(AngelCodeFont font, float x, float y, String str, int line, Color color, Align align) {
+		if (align == Align.RIGHT) {
 			x -= font.getWidth(str);
+		} else if (align == Align.CENTER) {
+			x -= font.getWidth(str) / 2;
 		}
 		font.drawString(x, y + font.getLineHeight() * (line - 1), str, color);
 	}
 
-	public static void renderText(AngelCodeFont font, String str, int line, Color color, boolean alignLeft) {
-		renderText(font, 0, 0, str, line, color, alignLeft);
+	public static void renderText(AngelCodeFont font, String str, int line, Color color, Align align) {
+		renderText(font, 0, 0, str, line, color, align);
 	}
 }

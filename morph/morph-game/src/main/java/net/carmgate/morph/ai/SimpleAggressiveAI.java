@@ -27,7 +27,7 @@ public class SimpleAggressiveAI implements AI {
 		} else {
 			Vector2f shipPosToTarget = new Vector2f(ship.getPos()).sub(laser.getTarget().getPos());
 			if (shipPosToTarget.lengthSquared() > laser.getRange() * laser.getRange()
-					&& prop.isAvailable()) {
+					&& prop.isAvailable() && world.getPlayerShip().getSpeed().lengthSquared() == 0) {
 				LOGGER.debug("Too far to activate lasers");
 				Vector2f targetPos = new Vector2f(world.getPlayerShip().getPos());
 				Vector2f toTarget = new Vector2f(targetPos).sub(ship.getPos());

@@ -74,6 +74,7 @@ import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
+import net.carmgate.morph.ui.renderers.utils.RenderUtils.Align;
 import net.carmgate.morph.ui.widgets.WidgetContainer;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 
@@ -390,14 +391,14 @@ public class GameMain {
 		float y = uiContext.getWindow().getHeight() / 2 - 2;
 		int line = 0;
 		if (world.isTimeFrozen()) {
-			RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
+			RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, Align.RIGHT); //$NON-NLS-1$
 		}
 
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
 			String[] strArray = inputHistory.toString().split("\n");
 			line = -strArray.length + 1;
 			for (String str : strArray) {
-				RenderUtils.renderText(font, -x, y, str, line++, Color.white, true);
+				RenderUtils.renderText(font, -x, y, str, line++, Color.white, Align.LEFT);
 			}
 		}
 	}
@@ -409,13 +410,13 @@ public class GameMain {
 		int line = 1;
 		if (ship != null) {
 			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
-				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, Align.RIGHT); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, Align.RIGHT); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, Align.RIGHT); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, Align.RIGHT); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, Align.RIGHT); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, Align.RIGHT); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, Align.RIGHT); //$NON-NLS-1$
 
 				for (Component c : ship.getComponents().values()) {
 					Color color = Color.white;
@@ -431,7 +432,7 @@ public class GameMain {
 					GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getLineHeight() * line - 10), 0);
 
 					RenderUtils.renderText(font, borderLeftX - 10, borderTopY,
-							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, false); //$NON-NLS-1$
+							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), c.getResourcesDt()), line++, color, Align.RIGHT); //$NON-NLS-1$
 
 				}
 			}
