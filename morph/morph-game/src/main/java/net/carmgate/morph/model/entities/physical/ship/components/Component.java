@@ -187,8 +187,6 @@ public abstract class Component implements Activable {
 
 	@Override
 	public final void startBehavior() {
-		LOGGER.debug("startBehavior for " + this);
-
 		getShip().setEnergy(getShip().getEnergy() + getEnergyDt());
 		getShip().setResources(getShip().getResources() + getResourcesDt());
 		setLastActivation(world.getTime());

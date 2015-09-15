@@ -136,7 +136,7 @@ public class InputHistory {
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("inputHistory:\n");
+		sb.append("Input History:\n");
 		for (UIEvent e : stack) {
 			sb.append("  " + e.getEventType().name() + "[" + e.getButton() + "]");
 			if (e.getEventType() == EventType.MOUSE_MOVE) {

@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
-import net.carmgate.morph.model.animations.MiningLaserAnim;
+import net.carmgate.morph.model.animations.ship.MiningLaserAnim;
 
 @NeedsTarget
 @ComponentKind(ComponentType.MINING_LASERS)

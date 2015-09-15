@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.WorldEvent;
 import net.carmgate.morph.events.WorldEventFactory;
 import net.carmgate.morph.events.WorldEventType;
@@ -17,6 +19,7 @@ import net.carmgate.morph.events.mgt.MEvent;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.XPHolder;
 import net.carmgate.morph.model.entities.Surroundings;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
@@ -34,6 +37,8 @@ public class Ship extends PhysicalEntity {
 	@Inject private Logger LOGGER;
 	@Inject private WorldEventFactory worldEventFactory;
 	@Inject private ScriptManager scriptManager;
+	@Inject private XPHolder xpHolder;
+	@Inject private Conf conf;
 
 	private Player owner;
 	@Deprecated private final Surroundings surroundings = new Surroundings();
@@ -50,12 +55,12 @@ public class Ship extends PhysicalEntity {
 	private float resourcesMax;
 	private float integrity = 1;
 	private float integrityDt; // integrity variation d(integrity)/dt
+	private int xp;
 
 	public Vector2f debug1 = new Vector2f();
 	public Vector2f debug2 = new Vector2f();
 	public Vector2f debug3 = new Vector2f();
 	public Vector2f debug4 = new Vector2f();
-
 	private boolean forceStop;
 	private long creationTime;
 
@@ -73,7 +78,6 @@ public class Ship extends PhysicalEntity {
 	public Map<ComponentType, Float> getComponentsComposition() {
 		return componentsComposition;
 	}
-
 	public long getCreationTime() {
 		return creationTime;
 	}
@@ -89,10 +93,6 @@ public class Ship extends PhysicalEntity {
 	public float getEnergy() {
 		return energy;
 	}
-
-	// public MoveOrder getMoveOrder() {
-	// return moveOrder;
-	// }
 
 	public float getEnergyDt() {
 		return energydt;
@@ -152,11 +152,8 @@ public class Ship extends PhysicalEntity {
 		return integrityDt;
 	}
 
-	// public void removeActionOrder() {
-	// if (actionOrder instanceof ForceSource) {
-	// getForceSources().remove(actionOrder);
-	// }
-	// actionOrder = null;
+	// public MoveOrder getMoveOrder() {
+	// return moveOrder;
 	// }
 
 	public Player getPlayer() {
@@ -175,9 +172,29 @@ public class Ship extends PhysicalEntity {
 		return resourcesMax;
 	}
 
+	// public void removeActionOrder() {
+	// if (actionOrder instanceof ForceSource) {
+	// getForceSources().remove(actionOrder);
+	// }
+	// actionOrder = null;
+	// }
+
 	@Deprecated
 	public Surroundings getSurroundings() {
 		return surroundings;
+	}
+
+	public int getXp() {
+		return xp;
+	}
+
+	public int getXpMax() {
+		return conf.getIntProperty("xp.max");
+	}
+
+	@PostConstruct
+	private void init() {
+		xpHolder.setShip(this);
 	}
 
 	public boolean isForceStop() {
@@ -258,5 +275,9 @@ public class Ship extends PhysicalEntity {
 
 	public void setResourcesMax(float resourcesMax) {
 		this.resourcesMax = resourcesMax;
+	}
+
+	public void setXp(int xp) {
+		this.xp = xp;
 	}
 }

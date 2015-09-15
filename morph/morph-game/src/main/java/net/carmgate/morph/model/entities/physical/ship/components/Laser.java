@@ -9,7 +9,7 @@ import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
-import net.carmgate.morph.model.animations.LaserAnim;
+import net.carmgate.morph.model.animations.ship.LaserAnim;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 
 

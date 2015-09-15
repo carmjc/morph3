@@ -34,7 +34,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.newdawn.slick</groupId>
-				<artifactId>slick-util</artifactId>
+				<artifactId>slick</artifactId>
 				<version>UNKNOWN</version>
 			</dependency>
 			<dependency>

@@ -22,22 +22,22 @@ public class SimpleAggressiveAI implements AI {
 		Component prop = ship.getComponents().get(ComponentType.PROPULSORS);
 		laser.setTarget(world.getPlayerShip());
 		if (laser.canBeActivated()) {
-			LOGGER.debug("laser");
+			LOGGER.debug("Activating laser");
 			laser.startBehavior();
 		} else {
 			Vector2f shipPosToTarget = new Vector2f(ship.getPos()).sub(laser.getTarget().getPos());
 			if (shipPosToTarget.lengthSquared() > laser.getRange() * laser.getRange()) {
-				LOGGER.debug("too far: ");
+				LOGGER.debug("Too far to activate lasers");
 				Vector2f targetPos = new Vector2f(world.getPlayerShip().getPos());
 				Vector2f toTarget = new Vector2f(targetPos).sub(ship.getPos());
 				if (toTarget.lengthSquared() > prop.getRange() * prop.getRange()) {
 					toTarget.scale((prop.getRange() - 10) / toTarget.length());
-					LOGGER.debug("indirect: " + toTarget.length());
+					LOGGER.debug("Too far to go to target with a single propulsor activation" + toTarget.length());
 				}
 				Vector2f propTarget = toTarget.add(ship.getPos());
 				prop.setTargetPosInWorld(propTarget);
 				if (prop.canBeActivated()) {
-					LOGGER.debug("prop");
+					LOGGER.debug("Activating propulsors");
 					prop.startBehavior();
 				}
 			}
@@ -45,7 +45,7 @@ public class SimpleAggressiveAI implements AI {
 			if (ship.getEnergy() < -laser.getEnergyDt()
 					&& ship.getEnergy() < -prop.getEnergyDt()
 					&& generator.canBeActivated()) {
-				LOGGER.debug("generator");
+				LOGGER.debug("Activating generators");
 				generator.startBehavior();
 			}
 		}

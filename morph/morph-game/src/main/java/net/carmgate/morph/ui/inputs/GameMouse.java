@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.slf4j.Logger;
 
+import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
@@ -39,6 +40,7 @@ public class GameMouse {
 	@Inject private World world;
 	@Inject private ShipSelectRenderer shipSelectRenderer;
 	@Inject private PhysicalEntitySelectRenderer physicalEntitySelectRenderer;
+	@Inject private Conf conf;
 
 	private Vector2f posInWorld = new Vector2f();
 	private long lastPickingAbsoluteTime = 0;
@@ -79,7 +81,7 @@ public class GameMouse {
 
 	public PickingResult pick(int x, int y) {
 		// if picking has already been done very recently, don't do it again
-		if (world.getAbsoluteTime() - lastPickingAbsoluteTime < 200) {
+		if (world.getAbsoluteTime() - lastPickingAbsoluteTime < conf.getIntProperty("picking.interval")) {
 			return pickingResult;
 		}
 

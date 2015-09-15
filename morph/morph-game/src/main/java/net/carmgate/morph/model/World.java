@@ -35,6 +35,7 @@ import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEvent;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.model.animations.world.WorldAnimation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
@@ -62,15 +63,15 @@ public class World {
 	private final List<PhysicalEntity> nonShipsPhysicalEntities = new ArrayList<>();
 	private final Set<PhysicalEntity> physicalEntities = new HashSet<>();
 	private final Map<String, Player> players = new HashMap<>();
+	private final List<WorldAnimation> animations = new ArrayList<>();
+
 	private long lastUpdateTime = 0;
 	private long time = 0;
 	private long absoluteTime = 0;
-
 	private float timeFactor = 1f;
-
 	private boolean timeFrozen = false;
-
 	private Ship playerShip;
+
 	public void add(PhysicalEntity entity) {
 		if (entity instanceof Ship) {
 			add((Ship) entity);
@@ -97,7 +98,6 @@ public class World {
 		shipAdded.setAddedShip(ship);
 		worldEventMgr.fire(shipAdded);
 	}
-
 	public long getAbsoluteTime() {
 		return absoluteTime;
 	}
@@ -129,6 +129,10 @@ public class World {
 		return time;
 	}
 
+	public List<WorldAnimation> getWorldAnimations() {
+		return animations;
+	}
+
 	// @PostConstruct
 	private void init(@Observes ContainerInitialized containerInitializedEvent) {
 		eventManager.scanAndRegister(this);
@@ -155,19 +159,19 @@ public class World {
 				}
 			}
 		}, "model init").start(); //$NON-NLS-1$
+
 	}
 
 	public boolean isTimeFrozen() {
 		return timeFrozen;
 	}
 
-	protected void onEntityRemovel(@MObserves PhysicalEntityToBeRemoved event) {
+	protected void onEntityRemoval(@MObserves PhysicalEntityToBeRemoved event) {
 		LOGGER.debug("Removing " + event.getEntity().getClass().getName()); //$NON-NLS-1$
 		remove(event.getEntity());
 	}
 
 	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
-		LOGGER.debug("Ship death: " + shipDeath.getShip()); //$NON-NLS-1$
 		remove(shipDeath.getShip());
 	}
 

@@ -11,8 +11,8 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.util.glu.GLU;
+import org.newdawn.slick.AngelCodeFont;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.ImageDataFactory;
 import org.newdawn.slick.opengl.InternalTextureLoader;
 import org.newdawn.slick.opengl.LoadableImageData;
@@ -363,14 +363,18 @@ public class RenderUtils {
 
 	// TODO The "line" parameter should not be necessary
 	// The method should adapt to the number of lines printed so far
-	public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color) {
+	public static void renderText(AngelCodeFont font, float x, float y, String str, int line, Color color) {
 		renderText(font, x, y, str, line, color, true);
 	}
 
-	public static void renderText(TrueTypeFont font, float x, float y, String str, int line, Color color, boolean alignLeft) {
+	public static void renderText(AngelCodeFont font, float x, float y, String str, int line, Color color, boolean alignLeft) {
 		if (!alignLeft) {
 			x -= font.getWidth(str);
 		}
-		font.drawString(x, y + font.getHeight() * (line - 1), str, color);
+		font.drawString(x, y + font.getLineHeight() * (line - 1), str, color);
+	}
+
+	public static void renderText(AngelCodeFont font, String str, int line, Color color, boolean alignLeft) {
+		renderText(font, 0, 0, str, line, color, alignLeft);
 	}
 }

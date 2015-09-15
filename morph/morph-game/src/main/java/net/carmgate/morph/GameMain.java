@@ -2,12 +2,17 @@ package net.carmgate.morph;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -20,8 +25,16 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.AngelCodeFont;
 import org.newdawn.slick.Color;
-import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.opengl.ImageData;
+import org.newdawn.slick.opengl.ImageDataFactory;
+import org.newdawn.slick.opengl.InternalTextureLoader;
+import org.newdawn.slick.opengl.LoadableImageData;
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.util.Log;
 import org.newdawn.slick.util.ResourceLoader;
 import org.slf4j.Logger;
 
@@ -33,6 +46,7 @@ import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
+import net.carmgate.morph.model.animations.world.WorldAnimation;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
@@ -66,7 +80,8 @@ import net.carmgate.morph.ui.widgets.WidgetFactory;
 @Singleton
 public class GameMain {
 
-	private static TrueTypeFont font;
+	public static AngelCodeFont font;
+
 	@Inject private MEventManager eventManager;
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
@@ -116,6 +131,33 @@ public class GameMain {
 		nextWaveId++;
 	}
 
+	private Image createMipmapImage(String ref) throws SlickException {
+		// this implementation is subject to change...
+		try {
+			InputStream in = ResourceLoader.getResourceAsStream(ref);
+			LoadableImageData imageData = ImageDataFactory.getImageDataFor(ref);
+			ByteBuffer buf = imageData.loadImage(new BufferedInputStream(in),
+					false, null);
+			ImageData.Format fmt = imageData.getFormat();
+			int minFilter = GL11.GL_LINEAR_MIPMAP_NEAREST;
+			int magFilter = GL11.GL_LINEAR;
+
+			// Texture tex = RenderUtils.getTexture(ref, in);
+			Texture tex = InternalTextureLoader.get().createTexture(
+					imageData, // the image data holding width/height/format
+					buf, // the buffer of data
+					ref, // the ref for the TextureImpl
+					GL11.GL_TEXTURE_2D, // what you will usually use
+					minFilter, magFilter, // min and mag filters
+					true, // generate mipmaps automatically
+					fmt); // the internal format for the texture or null for RGBA default
+			return new Image(tex);
+		} catch (IOException e) {
+			Log.error("error loading image", e);
+			throw new SlickException("error loading image " + e.getMessage());
+		}
+	}
+
 	/**
 	 * Initialise the GL display
 	 *
@@ -135,8 +177,6 @@ public class GameMain {
 			System.exit(0);
 		}
 
-		LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
-
 		initView();
 	}
 
@@ -145,8 +185,7 @@ public class GameMain {
 	}
 
 	/**
-	 * Inits the view, viewport, window, etc.
-	 * This should be called at init and when the view changes (window is resized for instance).
+	 * Inits the view, viewport, window, etc. This should be called at init and when the view changes (window is resized for instance).
 	 */
 	private void initView() {
 
@@ -178,8 +217,12 @@ public class GameMain {
 			try {
 				awtFont = Font.createFont(Font.TRUETYPE_FONT, ResourceLoader.getResourceAsStream(conf.getProperty("ui.font"))); //$NON-NLS-1$
 				awtFont = awtFont.deriveFont(conf.getFloatProperty("ui.font.size")); // set font size //$NON-NLS-1$
-				font = new TrueTypeFont(awtFont, true);
-			} catch (FontFormatException | IOException e) {
+				// font = new TrueTypeFont(awtFont, true);
+
+				Image image = createMipmapImage(conf.getProperty("ui.font.angel.tga"));
+				font = new AngelCodeFont(conf.getProperty("ui.font.angel"), image);
+
+			} catch (FontFormatException | IOException | SlickException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -197,7 +240,7 @@ public class GameMain {
 			renderer.init();
 		}
 
-		// addWaves();
+		addWaves();
 		updateWorld();
 
 		// Rendering loop
@@ -210,6 +253,7 @@ public class GameMain {
 			if (uiContext.getRenderMode() != RenderMode.SELECT_DEBUG) {
 				renderComponentsAnimation();
 				renderPhysical();
+				renderWorldAnimation();
 				renderGui();
 			} else {
 				gameMouse.renderForSelect();
@@ -278,7 +322,7 @@ public class GameMain {
 				}
 			}
 			loop();
-		}, "Game engine").start(); //$NON-NLS-1$
+		} , "Game engine").start(); //$NON-NLS-1$
 	}
 
 	@SuppressWarnings("unused")
@@ -349,10 +393,12 @@ public class GameMain {
 			RenderUtils.renderText(font, x, y, messages.getString("ui.game.paused"), line--, Color.white, false); //$NON-NLS-1$
 		}
 
-		String[] strArray = inputHistory.toString().split("\n");
-		line = -strArray.length + 1;
-		for (String str : strArray) {
-			RenderUtils.renderText(font, -x, y, str, line++, Color.white, true);
+		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+			String[] strArray = inputHistory.toString().split("\n");
+			line = -strArray.length + 1;
+			for (String str : strArray) {
+				RenderUtils.renderText(font, -x, y, str, line++, Color.white, true);
+			}
 		}
 	}
 
@@ -362,14 +408,15 @@ public class GameMain {
 		float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
 		int line = 1;
 		if (ship != null) {
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
-			RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
 			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, false); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, false); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, false); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, false); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, false); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoDt"), ship.getEnergyDt(), ship.getResourcesDt()), line++, Color.white, false); //$NON-NLS-1$
+				RenderUtils.renderText(font, borderLeftX, borderTopY, MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, false); //$NON-NLS-1$
+
 				for (Component c : ship.getComponents().values()) {
 					Color color = Color.white;
 					if (!c.isActive()) {
@@ -429,6 +476,32 @@ public class GameMain {
 		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
 	}
 
+	private void renderWorldAnimation() {
+		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final float zoomFactor = uiContext.getViewport().getZoomFactor();
+		GL11.glScalef(zoomFactor, zoomFactor, 1);
+		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+
+		List<WorldAnimation> toBeRemoved = new ArrayList<>();
+
+		for (WorldAnimation wAnim : world.getWorldAnimations()) {
+			Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(wAnim.getClass());
+			renderer.render(wAnim, 1f);
+
+			if (wAnim.getDuration() < world.getTime() - wAnim.getCreationTime()) {
+				toBeRemoved.add(wAnim);
+			}
+		}
+
+		// Clean animations list
+		for (WorldAnimation anim : toBeRemoved) {
+			world.getWorldAnimations().remove(anim);
+		}
+
+		GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
+		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+	}
+
 	private void updateKinematics() {
 		for (final PhysicalEntity entity : world.getPhysicalEntities()) {
 			if (entity instanceof Ship && ((Ship) entity).isForceStop()) {
@@ -451,7 +524,6 @@ public class GameMain {
 			entity.getAccel().copy(tmpEntityAccel);
 			tmp.copy(entity.getAccel()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
 			entity.getSpeed().add(tmp);
-			// entity.getSpeed().scale(1f - 0.005f * (world.getTime() - lastUpdateTime) / 1000); // drag
 			tmp.copy(entity.getSpeed()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
 			entity.getPos().add(tmp);
 

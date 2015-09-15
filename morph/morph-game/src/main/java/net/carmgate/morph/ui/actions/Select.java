@@ -103,7 +103,6 @@ public class Select implements MouseListener {
 				cmp.startBehavior();
 
 			}
-			LOGGER.debug("cmp");
 		} else {
 			// picked something not selectable
 			uiContext.setSelectedWidget(null);

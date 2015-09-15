@@ -122,6 +122,7 @@ public class ShipRenderer implements Renderer<Ship> {
 		float blurriness = 6 / zoom;
 		float offset = 0.2f; // must be inferior to 0.25
 		if (ship == uiContext.getSelectedShip()) {
+			// Energy
 			if (ship.getEnergyMax() > 0) {
 				RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
 						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
@@ -134,6 +135,8 @@ public class ShipRenderer implements Renderer<Ship> {
 						new float[] { 0, 0.5f, 1, 1 },
 						new float[] { 0, 0, 0, 0f });
 			}
+
+			// Resources
 			if (ship.getResourcesMax() > 0) {
 				GL11.glScalef(-1, 1, 1);
 				RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
@@ -148,6 +151,20 @@ public class ShipRenderer implements Renderer<Ship> {
 						new float[] { 0, 0, 0, 0f });
 				GL11.glScalef(-1, 1, 1);
 			}
+
+			// XP
+			GL11.glRotatef(90, 0, 0, 1);
+			RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
+					width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
+					new float[] { 0, 0, 0, 0f },
+					new float[] { 0.6f, 0.6f, 0.6f, 1 },
+					new float[] { 0, 0, 0, 0f });
+			RenderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getXp() / ship.getXpMax(),
+					width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
+					new float[] { 0, 0, 0, 0f },
+					new float[] { 1f, 1f, 1f, 1 },
+					new float[] { 0, 0, 0, 0f });
+			GL11.glRotatef(-90, 0, 0, 1);
 		}
 
 		GL11.glScalef(1f / massScale, 1f / massScale, 0);

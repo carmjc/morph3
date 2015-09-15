@@ -16,10 +16,9 @@ public class SimplePropulsor extends Component implements ForceSource {
 
 	@Inject private World world;
 	@Inject private Logger LOGGER;
-
 	@Inject private Conf conf;
 
-	private float desiredDistance = 100;
+	private float desiredDistance = 0;
 	private final Vector2f force = new Vector2f();
 	private final Vector2f tmpVect = new Vector2f();
 
@@ -27,9 +26,9 @@ public class SimplePropulsor extends Component implements ForceSource {
 		setActive(false);
 		setTarget(null);
 	}
-
 	@Override
 	public void evalBehavior() {
+
 		if (getTargetPosInWorld() == null) {
 			setActive(false);
 			return;
@@ -40,6 +39,7 @@ public class SimplePropulsor extends Component implements ForceSource {
 		float actualDistance = tmpVect.length() - desiredDistance;
 
 		float epsilon = conf.getFloatProperty("order.moveOrder.epsilon"); //$NON-NLS-1$
+		LOGGER.debug("actualDistance: " + actualDistance + " - epsilon: " + epsilon + " - speed: " + getShip().getSpeed().length());
 		if (actualDistance < epsilon && getShip().getSpeed().lengthSquared() < epsilon) {
 			if (!getShip().isForceStop()) {
 				getShip().setForceStop(true);
@@ -71,8 +71,15 @@ public class SimplePropulsor extends Component implements ForceSource {
 		// TODO This is a very basic orientating method
 		if (force != null && force.length() != 0) {
 			float angle = (float) (force.angleWith(Vector2f.J) / Math.PI * 180);
+			if (force.x * getShip().getSpeed().x + force.y * getShip().getSpeed().y < 0) {
+				angle += 180;
+			}
 			getShip().setRotationTarget(angle);
 		}
+	}
+
+	public float getDesiredDistance() {
+		return desiredDistance;
 	}
 
 	@Override
@@ -86,6 +93,10 @@ public class SimplePropulsor extends Component implements ForceSource {
 
 		// Apply force to ship
 		getShip().getForceSources().add(this);
+	}
+
+	public void setDesiredDistance(float desiredDistance) {
+		this.desiredDistance = desiredDistance;
 	}
 
 }

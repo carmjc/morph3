@@ -200,7 +200,7 @@ public class ComponentPonderationWidget extends Widget implements WidgetMouseLis
 			String str = ponderation.getKey().name();
 			CharSequence ss = str.subSequence(0, 1);
 			Color color = new Color(Color.white);
-			RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 1, color);
+			// RenderUtils.renderText(font, -(float) font.getWidth(ss) / 2, (float) font.getHeight(ss) / 2, ss.toString(), 1, color);
 			GL11.glTranslatef(-i * width / nbCmpType - width / nbCmpType / 2, 0, 0);
 
 			GL11.glTranslatef(aggregatedPonderation * width, 25, 0);
