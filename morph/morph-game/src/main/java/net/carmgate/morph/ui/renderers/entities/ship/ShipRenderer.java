@@ -27,14 +27,15 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
 import net.carmgate.morph.model.entities.physical.ship.components.NeedsTarget;
 import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.actions.DragContext;
 import net.carmgate.morph.ui.actions.DragContext.DragType;
-import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
+import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 
 @Singleton
 public class ShipRenderer implements Renderer<Ship> {
@@ -42,13 +43,13 @@ public class ShipRenderer implements Renderer<Ship> {
 	private static Map<ComponentType, Texture> cmpTextures = new HashMap<>();
 	// private static Texture shipBgTexture;
 	private static Texture shipTexture;
-	@Inject private UIContext uiContext;
 
+	@Inject private UIContext uiContext;
 	@Inject private World world;
 	@Inject private Conf conf;
 	@Inject private Logger LOGGER;
-	@Inject private GameMouse gameMouse;
 	@Inject private DragContext dragContext;
+	@Inject private RenderUtils renderUtils;
 
 	@Override
 	public void init() {
@@ -58,14 +59,15 @@ public class ShipRenderer implements Renderer<Ship> {
 						.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.Laser.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
 						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.MiningLaser.renderer.texture"))); //$NON-NLS-1$
-				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("component.repairer.renderer.texture"))); //$NON-NLS-1$
+				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
+						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimpleRepairer.renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor.renderer.texture")))) { //$NON-NLS-1$
-			// shipBgTexture = RenderUtils.getTexture("PNG", shipBgInputStream);
-			shipTexture = RenderUtils.getTexture("PNG", shipInputStream);
-			cmpTextures.put(ComponentType.LASERS, RenderUtils.getTexture("PNG", laserInputStream));
-			cmpTextures.put(ComponentType.MINING_LASERS, RenderUtils.getTexture("PNG", mlInputStream));
-			cmpTextures.put(ComponentType.REPAIRER, RenderUtils.getTexture("PNG", repairerInputStream));
-			cmpTextures.put(ComponentType.PROPULSORS, RenderUtils.getTexture("PNG", propInputStream));
+			// shipBgTexture = renderUtils.getTexture("PNG", shipBgInputStream);
+			shipTexture = renderUtils.getTexture("PNG", shipInputStream);
+			cmpTextures.put(ComponentType.LASERS, renderUtils.getTexture("PNG", laserInputStream));
+			cmpTextures.put(ComponentType.MINING_LASERS, renderUtils.getTexture("PNG", mlInputStream));
+			cmpTextures.put(ComponentType.REPAIRER, renderUtils.getTexture("PNG", repairerInputStream));
+			cmpTextures.put(ComponentType.PROPULSORS, renderUtils.getTexture("PNG", propInputStream));
 		} catch (IOException e) {
 			LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
 		}
@@ -91,7 +93,7 @@ public class ShipRenderer implements Renderer<Ship> {
 		if (ship == uiContext.getSelectedShip()) {
 			float colorScale = (int) (world.getTime() % 1000);
 			colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.6f;
-			RenderUtils.renderCircle(width / 2f - 0 / massScale,
+			renderUtils.renderCircle(width / 2f - 0 / massScale,
 					width / 2f - 0 / massScale,
 					2 / zoom / massScale,
 					5 / zoom / massScale,
@@ -102,7 +104,7 @@ public class ShipRenderer implements Renderer<Ship> {
 
 		float[] color = ship.getPlayer().getColor();
 		// GL11.glColor4f(color[0] / 4, color[1] / 4, color[2] / 4, color[3] * alpha);
-		// RenderUtils.renderSprite(width, shipBgTexture);
+		// renderUtils.renderSprite(width, shipBgTexture);
 		GL11.glColor4f(color[0], color[1], color[2], color[3] * alpha);
 		float skewRatio = 1f;
 		if (ship.getRotationSpeed() > 0) {
@@ -111,7 +113,7 @@ public class ShipRenderer implements Renderer<Ship> {
 			skewRatio = -0.9f;
 		}
 
-		RenderUtils.renderSprite(width, shipTexture, skewRatio);
+		renderUtils.renderSprite(width, shipTexture, skewRatio);
 		renderComponents(ship, alpha);
 
 		GL11.glRotatef(-ship.getRotation(), 0, 0, 1);
@@ -124,12 +126,12 @@ public class ShipRenderer implements Renderer<Ship> {
 		if (ship == uiContext.getSelectedShip()) {
 			// Energy
 			if (ship.getEnergyMax() > 0) {
-				RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
+				renderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
 						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
 						new float[] { 0, 0, 0, 0f },
 						new float[] { 0.6f, 0.6f, 0.6f, 1 },
 						new float[] { 0, 0, 0, 0f });
-				RenderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getEnergy() / ship.getEnergyMax(),
+				renderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getEnergy() / ship.getEnergyMax(),
 						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
 						new float[] { 0, 0, 0, 0f },
 						new float[] { 0, 0.5f, 1, 1 },
@@ -139,12 +141,12 @@ public class ShipRenderer implements Renderer<Ship> {
 			// Resources
 			if (ship.getResourcesMax() > 0) {
 				GL11.glScalef(-1, 1, 1);
-				RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
+				renderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
 						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
 						new float[] { 0, 0, 0, 0f },
 						new float[] { 0.6f, 0.6f, 0.6f, 1 },
 						new float[] { 0, 0, 0, 0f });
-				RenderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getResources() / ship.getResourcesMax(),
+				renderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getResources() / ship.getResourcesMax(),
 						width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
 						new float[] { 0, 0, 0, 0f },
 						new float[] { 139f / 255, 90f / 255, 43f / 255, 1 },
@@ -152,22 +154,30 @@ public class ShipRenderer implements Renderer<Ship> {
 				GL11.glScalef(-1, 1, 1);
 			}
 
-			// XP
+			// Integrity
 			GL11.glRotatef(90, 0, 0, 1);
-			RenderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
+			GL11.glScalef(-1, 1, 1);
+			renderUtils.renderPartialCircle(0.25f + offset, 0.75f - offset,
 					width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
 					new float[] { 0, 0, 0, 0f },
 					new float[] { 0.6f, 0.6f, 0.6f, 1 },
 					new float[] { 0, 0, 0, 0f });
-			RenderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getXp() / ship.getXpMax(),
+			renderUtils.renderPartialCircle(0.25f + offset, 0.25f + offset + (0.5f - 2 * offset) * ship.getIntegrity(),
 					width / 2f + delta - thickness, width / 2f + delta + thickness, blurriness, blurriness,
 					new float[] { 0, 0, 0, 0f },
-					new float[] { 1f, 1f, 1f, 1 },
+					new float[] { 0.8f, 0.0f, 0.0f, 1 },
 					new float[] { 0, 0, 0, 0f });
+			GL11.glScalef(-1, 1, 1);
 			GL11.glRotatef(-90, 0, 0, 1);
 		}
 
 		GL11.glScalef(1f / massScale, 1f / massScale, 0);
+
+		if (ship == uiContext.getSelectedShip()) {
+			GL11.glTranslatef(0, -width / 4f, 0);
+			renderUtils.renderText(RenderingManager.font, "XP: " + ship.getXp(), 0, Color.white, TextAlign.CENTER);
+			GL11.glTranslatef(0, width / 4f, 0);
+		}
 
 		// draw component range
 		Component selectedCmp = uiContext.getSelectedCmp();
@@ -217,15 +227,15 @@ public class ShipRenderer implements Renderer<Ship> {
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
 			// Accel
 			Vector2f accel = new Vector2f(ship.getAccel());
-			RenderUtils.renderLine(Vector2f.NULL, accel, 2, 2, new float[] { 1f, 0f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			renderUtils.renderLine(Vector2f.NULL, accel, 2, 2, new float[] { 1f, 0f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
 			// Speed
 			Vector2f speed = new Vector2f(ship.getSpeed());
-			RenderUtils.renderLine(Vector2f.NULL, speed, 2, 2, new float[] { 0f, 1f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			renderUtils.renderLine(Vector2f.NULL, speed, 2, 2, new float[] { 0f, 1f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
 
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug1, 2, 2, new float[] { 0f, 0f, 1f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug2, 2, 2, new float[] { 0.5f, 0.5f, 0.5f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug3, 2, 2, new float[] { 1f, 1f, 1f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
-			RenderUtils.renderLine(Vector2f.NULL, ship.debug4, 2, 2, new float[] { 1f, 1f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			renderUtils.renderLine(Vector2f.NULL, ship.debug1, 2, 2, new float[] { 0f, 0f, 1f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			renderUtils.renderLine(Vector2f.NULL, ship.debug2, 2, 2, new float[] { 0.5f, 0.5f, 0.5f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			renderUtils.renderLine(Vector2f.NULL, ship.debug3, 2, 2, new float[] { 1f, 1f, 1f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
+			renderUtils.renderLine(Vector2f.NULL, ship.debug4, 2, 2, new float[] { 1f, 1f, 0f, 1f * alpha }, new float[] { 0f, 0f, 0f, 0f });
 		}
 
 	}
@@ -234,7 +244,7 @@ public class ShipRenderer implements Renderer<Ship> {
 		float timeAngle;
 		timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
 		GL11.glRotatef(timeAngle, 0, 0, 1);
-		RenderUtils.renderSegmentedCircle(
+		renderUtils.renderSegmentedCircle(
 				radius,
 				radius,
 				blur,
@@ -243,7 +253,7 @@ public class ShipRenderer implements Renderer<Ship> {
 				new float[] { color[0], color[1], color[2], color[3] },
 				new float[] { color[0], color[1], color[2], 0 },
 				nbSegments);
-		RenderUtils.renderAntialiasedDisc(radius, blur, new float[] { color[0], color[1], color[2], color[3] * 0.1f });
+		renderUtils.renderAntialiasedDisc(radius, blur, new float[] { color[0], color[1], color[2], color[3] * 0.1f });
 		GL11.glRotatef(-timeAngle, 0, 0, 1);
 	}
 
@@ -290,7 +300,7 @@ public class ShipRenderer implements Renderer<Ship> {
 			if (cmp == uiContext.getSelectedCmp()) {
 				float colorScale = (int) (world.getTime() % 1000);
 				colorScale = (colorScale > 500 ? 1000 - colorScale : colorScale) / 1000 * 2 + 0.6f;
-				RenderUtils.renderCircle(width / 2f + 10,
+				renderUtils.renderCircle(width / 2f + 10,
 						width / 2f + 10,
 						40 / zoom,
 						50 / zoom,
@@ -301,13 +311,13 @@ public class ShipRenderer implements Renderer<Ship> {
 
 			GL11.glColor4f(color.r, color.g, color.b, color.a * alpha);
 			if (texture != null) {
-				RenderUtils.renderSprite(width, texture);
+				renderUtils.renderSprite(width, texture);
 			}
 
 			if (cmp.getAvailability() < 1) {
 				GL11.glColor4f(0, 0, 0, 0.8f);
 				GL11.glRotatef(-ship.getRotation() - 90, 0, 0, 1);
-				RenderUtils.renderAntialiasedPartialDisc(0 + cmp.getAvailability(), 1, width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha }, zoom);
+				renderUtils.renderAntialiasedPartialDisc(0 + cmp.getAvailability(), 1, width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha }, zoom);
 				GL11.glRotatef(ship.getRotation() + 90, 0, 0, 1);
 			}
 
@@ -332,7 +342,7 @@ public class ShipRenderer implements Renderer<Ship> {
 			Vector2f vect = new Vector2f(to).sub(from);
 			vect.scale((128 / Component.SCALE + 2 / zoom) / vect.length());
 			from.add(vect);
-			RenderUtils.renderLine(from, to, 0, blur / zoom, color, new float[] { 0, 0, 0, 0 });
+			renderUtils.renderLine(from, to, 0, blur / zoom, color, new float[] { 0, 0, 0, 0 });
 		}
 	}
 

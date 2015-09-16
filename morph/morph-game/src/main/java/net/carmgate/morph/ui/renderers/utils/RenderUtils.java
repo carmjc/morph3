@@ -7,11 +7,13 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.util.glu.GLU;
-import org.newdawn.slick.AngelCodeFont;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.ImageDataFactory;
 import org.newdawn.slick.opengl.InternalTextureLoader;
@@ -19,27 +21,28 @@ import org.newdawn.slick.opengl.LoadableImageData;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureImpl;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.ui.renderers.MorphFont;
 
+@Singleton
 public class RenderUtils {
 
-	public static enum Align {
+	public enum TextAlign {
 		LEFT,
 		CENTER,
 		RIGHT;
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RenderUtils.class);
 	private static final int nbSegments = 1000;
 	private static final double deltaAngle = (float) (2 * Math.PI / nbSegments);
 	private static final float cos = (float) Math.cos(deltaAngle);
 	private static final float sin = (float) Math.sin(deltaAngle);
+	@Inject private Logger LOGGER;
 
-	private static final Vector2f ortho = new Vector2f();
+	private final Vector2f ortho = new Vector2f();
 
-	public static TextureImpl getTexture(String resourceName, InputStream in) throws IOException {
+	public TextureImpl getTexture(String resourceName, InputStream in) throws IOException {
 		int textureID = InternalTextureLoader.createTextureID();
 		int target = GL11.GL_TEXTURE_2D;
 		TextureImpl texture = new TextureImpl(resourceName, target, textureID);
@@ -89,27 +92,28 @@ public class RenderUtils {
 
 	}
 
-	public static void renderAntialiasedDisc(float outerRadius, float blurWidthExt, float[] colorMiddle) {
-		RenderUtils.renderPartialCircle(0, 1f, 0, outerRadius, 0, blurWidthExt, new float[] { 0, 0, 0, 0 },
+	public void renderAntialiasedDisc(float outerRadius, float blurWidthExt, float[] colorMiddle) {
+		renderPartialCircle(0, 1f, 0, outerRadius, 0, blurWidthExt, new float[] { 0, 0, 0, 0 },
 				colorMiddle,
 				new float[] { 0, 0, 0, 0 });
 	}
 
-	public static void renderAntialiasedPartialDisc(float ratioStart, float ratioEnd, float outerRadius, float[] colorMiddle, float zoom) {
-		RenderUtils.renderPartialCircle(ratioStart, ratioEnd, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
+	public void renderAntialiasedPartialDisc(float ratioStart, float ratioEnd, float outerRadius, float[] colorMiddle, float zoom) {
+		renderPartialCircle(ratioStart, ratioEnd, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
 				colorMiddle,
 				new float[] { 0, 0, 0, 0 });
 	}
 
-	public static void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt) {
+	public void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle,
+			float[] colorExt) {
 		renderPartialCircle(0, 1f, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt);
 	}
 
-	public static void renderDisc(float radius) {
+	public void renderDisc(float radius) {
 		renderPartialDisc(radius, 1);
 	}
 
-	public static void renderLine(Vector2f from, Vector2f to, float widthFrom, float widthTo, float blurWidth, float[] colorInt, float[] colorExt) {
+	public void renderLine(Vector2f from, Vector2f to, float widthFrom, float widthTo, float blurWidth, float[] colorInt, float[] colorExt) {
 		TextureImpl.bindNone();
 		ortho.copy(to).sub(from);
 		float orthoLength = ortho.length();
@@ -136,18 +140,18 @@ public class RenderUtils {
 		GL11.glEnd();
 	}
 
-	public static void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
+	public void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
 		renderLine(from, to, width, width, blurWidth, colorInt, colorExt);
 	}
 
-	public static void renderPartialCircle(float ratioStart, float ratioEnd, float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt,
+	public void renderPartialCircle(float ratioStart, float ratioEnd, float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt,
 			float[] colorInt,
 			float[] colorMiddle, float[] colorExt) {
 
 		renderPartialSegmentedCircle(ratioStart, ratioEnd, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt, 0);
 	}
 
-	public static void renderPartialDisc(float radius, float ratio) {
+	public void renderPartialDisc(float radius, float ratio) {
 		ratio = Math.max(0, Math.min(1, ratio));
 
 		// render limit of effect zone
@@ -180,7 +184,7 @@ public class RenderUtils {
 		}
 	}
 
-	public static void renderPartialSegmentedCircle(float ratioStart, float ratioEnd, float innerRadius, float outerRadius, float blurWidthInt,
+	public void renderPartialSegmentedCircle(float ratioStart, float ratioEnd, float innerRadius, float outerRadius, float blurWidthInt,
 			float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt, int nbSubSegments) {
 		int currentSubSegment = 0;
 		boolean oneSegmentDrawn = false;
@@ -296,7 +300,7 @@ public class RenderUtils {
 	 * @param bottom
 	 * @param right
 	 */
-	public static void renderQuad(float left, float top, float right, float bottom) {
+	public void renderQuad(float left, float top, float right, float bottom) {
 		TextureImpl.bindNone();
 		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2f(left, top);
@@ -306,7 +310,8 @@ public class RenderUtils {
 		GL11.glEnd();
 	}
 
-	public static void renderSegmentedCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle, float[] colorExt, int nbSegments) {
+	public void renderSegmentedCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle,
+			float[] colorExt, int nbSegments) {
 		renderPartialSegmentedCircle(0, 1f, innerRadius, outerRadius, blurWidthInt, blurWidthExt, colorInt, colorMiddle, colorExt, nbSegments);
 	}
 
@@ -316,7 +321,7 @@ public class RenderUtils {
 	 * @param width
 	 * @param texture
 	 */
-	public static void renderSprite(final float width, Texture texture) {
+	public void renderSprite(final float width, Texture texture) {
 		renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1, 1);
 	}
 
@@ -326,7 +331,7 @@ public class RenderUtils {
 	 * @param width
 	 * @param texture
 	 */
-	public static void renderSprite(final float width, Texture texture, float skewRatio) {
+	public void renderSprite(final float width, Texture texture, float skewRatio) {
 		renderSpriteFromBigTexture(width, texture, 0, 0, 1, 1, skewRatio);
 	}
 
@@ -340,7 +345,7 @@ public class RenderUtils {
 	 * @param texCoordRight
 	 * @param texCoordBottom
 	 */
-	public static void renderSpriteFromBigTexture(float width, Texture texture, float texCoordLeft, float texCoordTop, float texCoordRight,
+	public void renderSpriteFromBigTexture(float width, Texture texture, float texCoordLeft, float texCoordTop, float texCoordRight,
 			float texCoordBottom, float skewRatio) {
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
 		texture.bind();
@@ -368,20 +373,24 @@ public class RenderUtils {
 
 	// TODO The "line" parameter should not be necessary
 	// The method should adapt to the number of lines printed so far
-	public static void renderText(AngelCodeFont font, float x, float y, String str, int line, Color color) {
-		renderText(font, x, y, str, line, color, Align.LEFT);
+	public void renderText(MorphFont font, float x, float y, String str, int line, Color color) {
+		renderText(font, x, y, str, line, color, TextAlign.LEFT);
 	}
 
-	public static void renderText(AngelCodeFont font, float x, float y, String str, int line, Color color, Align align) {
-		if (align == Align.RIGHT) {
-			x -= font.getWidth(str);
-		} else if (align == Align.CENTER) {
-			x -= font.getWidth(str) / 2;
+	public void renderText(MorphFont font, float x, float y, String str, int line, Color color, TextAlign align) {
+		float fontRatio = (float) font.getTargetFontSize() / font.getLineHeight();
+		GL11.glScalef(fontRatio, fontRatio, 1);
+		if (align == TextAlign.RIGHT) {
+			x -= font.getWidth(str) * fontRatio;
+		} else if (align == TextAlign.CENTER) {
+			x -= font.getWidth(str) * fontRatio / 2;
 		}
-		font.drawString(x, y + font.getLineHeight() * (line - 1), str, color);
+		font.drawString(x / fontRatio, (y + font.getLineHeight() * fontRatio * (line - 1)) / fontRatio, str, color);
+		GL11.glScalef(1 / fontRatio, 1 / fontRatio, 1);
+		;
 	}
 
-	public static void renderText(AngelCodeFont font, String str, int line, Color color, Align align) {
+	public void renderText(MorphFont font, String str, int line, Color color, TextAlign align) {
 		renderText(font, 0, 0, str, line, color, align);
 	}
 }

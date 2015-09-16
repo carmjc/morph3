@@ -16,9 +16,15 @@ import net.carmgate.morph.ui.inputs.UIEvent.HardwareType;
 @Singleton
 public class InputHistory {
 	public static class KeyDown implements Predicate<UIEvent> {
+		private int button;
+
+		public KeyDown(int button) {
+			this.button = button;
+		}
+
 		@Override
 		public boolean test(UIEvent t) {
-			return t != null && t.getEventType() == EventType.KEYBOARD_DOWN;
+			return t != null && t.getEventType() == EventType.KEYBOARD_DOWN && t.getButton() == button;
 		}
 
 	}
@@ -61,7 +67,8 @@ public class InputHistory {
 		for (UIEvent event : events) {
 			stack.remove(event);
 			if (event.getEventType() == EventType.KEYBOARD_UP) {
-				stack.remove(getLastMatchingEvent(new KeyDown()));
+				LOGGER.debug("" + event);
+				stack.remove(getLastMatchingEvent(new KeyDown(event.getButton())));
 			}
 		}
 

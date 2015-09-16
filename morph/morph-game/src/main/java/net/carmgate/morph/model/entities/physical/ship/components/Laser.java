@@ -3,7 +3,6 @@ package net.carmgate.morph.model.entities.physical.ship.components;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.World;
@@ -19,7 +18,6 @@ public class Laser extends Component {
 
 	@Inject private AnimationFactory animationFactory;
 	@Inject private World world;
-	@Inject private Conf conf;
 
 	private LaserAnim laserAnim;;
 
@@ -32,7 +30,7 @@ public class Laser extends Component {
 			// Remove health to target
 			Ship targetShip = (Ship) getTarget();
 			targetShip.setIntegrity(
-					targetShip.getIntegrity() - conf.getFloatProperty(getClass().getCanonicalName() + ".target.damage") / targetShip.getDurability());
+					targetShip.getIntegrity() - getDamage() / targetShip.getDurability());
 		}
 	}
 

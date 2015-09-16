@@ -8,6 +8,7 @@ import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.World.TimeFreezeCause;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
@@ -52,15 +53,13 @@ public class SetComponentTarget implements MouseListener {
 		if (inputHistory.getLastMouseEvent(1).getButton() == 0 && inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
 				&& inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
 				// && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
-				&& !dragContext.dragInProgress()) {
-			TargetType targetType = select.select();
-			if (targetType == TargetType.COMPONENT) {
-				dragContext.setOldFP(uiContext.getViewport().getFocalPoint());
-				dragContext.setOldMousePosInWindow(gameMouse.getX(), gameMouse.getY());
-				dragContext.setDragType(DragType.COMPONENT);
-				if (!world.isTimeFrozen()) {
-					world.toggleTimeFrozen();
-				}
+				&& !dragContext.dragInProgress()
+				&& uiContext.getSelectedCmp() != null && uiContext.getSelectedCmp().isAvailable() && uiContext.getSelectedCmp().hasEnoughResources()) {
+			dragContext.setOldFP(uiContext.getViewport().getFocalPoint());
+			dragContext.setOldMousePosInWindow(gameMouse.getX(), gameMouse.getY());
+			dragContext.setDragType(DragType.COMPONENT);
+			if (!world.isTimeFrozen()) {
+				world.toggleTimeFrozen(TimeFreezeCause.COMPONENT_DRAG);
 			}
 		}
 
@@ -89,8 +88,8 @@ public class SetComponentTarget implements MouseListener {
 		if (inputHistory.getLastMouseEvent().getButton() == 0 && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_BUTTON_UP
 				&& uiContext.getSelectedCmp() != null) {
 			Component selectedCmp = uiContext.getSelectedCmp();
-			if (world.isTimeFrozen()) {
-				world.toggleTimeFrozen();
+			if (world.isTimeFrozen() && world.getTimeFreezeCause() == TimeFreezeCause.COMPONENT_DRAG) {
+				world.toggleTimeFrozen(TimeFreezeCause.COMPONENT_DRAG);
 			}
 			if (selectedCmp.canBeActivated()) {
 				selectedCmp.startBehavior();

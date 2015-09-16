@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
@@ -20,9 +19,8 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 public class PhysicalEntitySelectRenderer implements SelectRenderer<PhysicalEntity> {
 
 	@Inject private Logger LOGGER;
-
 	@Inject	private Conf conf;
-	@Inject private UIContext uiContext;
+	@Inject private RenderUtils renderUtils;
 
 	@SuppressWarnings("unused")
 	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
@@ -38,7 +36,7 @@ public class PhysicalEntitySelectRenderer implements SelectRenderer<PhysicalEnti
 		GL11.glColor4f(1, 1, 1, 0.3f);
 		GL11.glPushName(SelectRenderer.TargetType.NON_SHIP_PHYSICAL_ENTITY.ordinal());
 		GL11.glPushName(entity.getId());
-		RenderUtils.renderDisc(width / 2f);
+		renderUtils.renderDisc(width / 2f);
 		GL11.glPopName();
 		GL11.glPopName();
 		GL11.glScalef(1f / massScale, 1f / massScale, 1);

@@ -5,6 +5,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import net.carmgate.morph.Messages;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.events.mgt.MObserves;
@@ -13,6 +14,8 @@ import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.world.XpAwardedAnimation;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.ui.MessageManager;
+import net.carmgate.morph.ui.MessageManager.Message;
 
 public class XPHolder {
 
@@ -20,6 +23,9 @@ public class XPHolder {
 	@Inject private AnimationFactory animationFactory;
 	@Inject private Logger LOGGER;
 	@Inject private MEventManager eventManager;
+	@Inject private MessageManager messageManager;
+	@Inject private Messages messages;
+
 	private Ship ship;
 
 	public Ship getShip() {
@@ -39,6 +45,8 @@ public class XPHolder {
 			xpAwardedAnim.setPos(shipDeath.getShip().getPos());
 			xpAwardedAnim.setXpAmount(1);
 			world.getWorldAnimations().add(xpAwardedAnim);
+
+			messageManager.addMessage(new Message(messages.getFormattedString("killing.xpAward", 1)));
 		}
 	}
 

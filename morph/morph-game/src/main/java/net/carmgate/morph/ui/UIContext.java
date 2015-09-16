@@ -19,6 +19,11 @@ import net.carmgate.morph.ui.widgets.WidgetContainer;
 @Singleton
 public class UIContext {
 
+	public static enum Context {
+		GAME,
+		SHIP_EDITOR;
+	}
+
 	@Inject private ViewPort viewport;
 	@Inject private Window window;
 	@Inject private MEventManager eventManager;
@@ -29,6 +34,11 @@ public class UIContext {
 	private WidgetContainer widgetRoot;
 	private Map<Integer, Widget> widgets = new WeakHashMap<>();
 	private Component selectedCmp;
+	private Context context = Context.GAME;
+
+	public Context getContext() {
+		return context;
+	}
 
 	public RenderMode getRenderMode() {
 		return renderMode;
@@ -71,6 +81,10 @@ public class UIContext {
 		if (selectedShip == shipDeath.getShip()) {
 			selectedShip = null;
 		}
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
 	}
 
 	public void setRenderMode(RenderMode renderMode) {

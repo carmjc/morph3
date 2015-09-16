@@ -2,7 +2,6 @@ package net.carmgate.morph.model.entities.physical.ship;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -10,12 +9,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.events.WorldEvent;
-import net.carmgate.morph.events.WorldEventFactory;
-import net.carmgate.morph.events.WorldEventType;
+import net.carmgate.morph.events.entities.ship.ShipComponentsUpdated;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.events.entities.ship.ShipHit;
-import net.carmgate.morph.events.mgt.MEvent;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
@@ -32,30 +27,27 @@ public class Ship extends PhysicalEntity {
 
 	public static final float MAX_PROPULSOR_FORCE = 200f;
 
-	@Inject private World world;
-	@Inject private MEvent<WorldEvent> worldEventMgr;
-	@Inject private Logger LOGGER;
-	@Inject private WorldEventFactory worldEventFactory;
 	@Inject private ScriptManager scriptManager;
 	@Inject private XPHolder xpHolder;
 	@Inject private Conf conf;
+	@Inject private World world;
+	@Inject private Logger LOGGER;
 
 	private Player owner;
 	@Deprecated private final Surroundings surroundings = new Surroundings();
 	private float durability;
 	private final Map<ComponentType, Component> components = new HashMap<>();
-	private final Map<ComponentType, Float> componentsComposition = new TreeMap<>();
 
 	// internal economics
 	private float energy;
-	private float energydt; // energy variation d(energy)/dt
 	private float energyMax;
 	private float resources;
-	private float resourcesdt; // resources variation d(resources)/dt
 	private float resourcesMax;
 	private float integrity = 1;
-	private float integrityDt; // integrity variation d(integrity)/dt
 	private int xp;
+
+	private float maxDamageDt = 0;
+	private float maxDefenseDt = 0;
 
 	public Vector2f debug1 = new Vector2f();
 	public Vector2f debug2 = new Vector2f();
@@ -64,28 +56,53 @@ public class Ship extends PhysicalEntity {
 	private boolean forceStop;
 	private long creationTime;
 
-	public void add(Component component, float compositionContribution) {
+	private Integer xpMax;
+
+	public void add(Component component) {
 		component.setShip(this);
 		ComponentKind componentKind = component.getClass().getAnnotation(ComponentKind.class);
 		components.put(componentKind.value(), component);
-		componentsComposition.put(componentKind.value(), compositionContribution);
+	}
+
+	public void computeMaxDamageDt() {
+		Component laser = getComponents().get(ComponentType.LASERS);
+		if (laser == null) {
+			maxDamageDt = 0f;
+			return;
+		}
+		maxDamageDt = laser.getDamage() / laser.getCooldown();
+	}
+
+	public void computeMaxDefenseDt() {
+		Component repairer = getComponents().get(ComponentType.REPAIRER);
+		if (repairer == null) {
+			maxDefenseDt = 0;
+			return;
+		}
+		maxDefenseDt = repairer.getDurabilityDt() / repairer.getCooldown();
+	}
+
+	/**
+	 * Call this method to materialize the ship
+	 */
+	public void create() {
+		creationTime = world.getTime();
+
+		computeMaxDamageDt();
+		computeMaxDefenseDt();
+
+		// conf
+		xpMax = conf.getIntProperty("xp.max");
 	}
 
 	public Map<ComponentType, Component> getComponents() {
 		return components;
 	}
 
-	public Map<ComponentType, Float> getComponentsComposition() {
-		return componentsComposition;
-	}
 	public long getCreationTime() {
 		return creationTime;
 	}
 
-	// public List<Order> getBgOrders() {
-	// return bgOrders;
-	// }
-	//
 	public float getDurability() {
 		return durability;
 	}
@@ -94,67 +111,21 @@ public class Ship extends PhysicalEntity {
 		return energy;
 	}
 
-	public float getEnergyDt() {
-		return energydt;
-	}
-
 	public float getEnergyMax() {
 		return energyMax;
 	}
 
-	// public void add(Order order) {
-	// order.setWorld(world);
-	//
-	// if (order instanceof MoveOrder) {
-	// if (moveOrder != null) {
-	// moveOrder.onRemoveOrder();
-	// if (moveOrder instanceof ForceSource) {
-	// getForceSources().remove(moveOrder);
-	// }
-	// }
-	// moveOrder = (MoveOrder) order;
-	// LOGGER.debug("Move order added: " + order); //$NON-NLS-1$
-	// } else if (order instanceof ActionOrder) {
-	// if (actionOrder != null) {
-	// actionOrder.onRemoveOrder();
-	// if (actionOrder instanceof ForceSource) {
-	// getForceSources().remove(actionOrder);
-	// }
-	// }
-	// actionOrder = order;
-	// LOGGER.debug("Action order added: " + order); //$NON-NLS-1$
-	// } else {
-	// if (order.getClass().isAnnotationPresent(Unique.class)) {
-	// for (Order uniqueOrder : bgOrders) {
-	// if (uniqueOrder.getClass().equals(order.getClass())) {
-	// return;
-	// }
-	// }
-	// }
-	// bgOrders.add(order);
-	// LOGGER.debug("Background order added: " + order); //$NON-NLS-1$
-	// }
-	//
-	// if (order instanceof ForceSource) {
-	// getForceSources().add((ForceSource) order);
-	// }
-	// }
-	//
-	// public Order getActionOrder() {
-	// return actionOrder;
-	// }
-	//
 	public float getIntegrity() {
 		return integrity;
 	}
 
-	public float getIntegrityDt() {
-		return integrityDt;
+	public float getMaxDamageDt() {
+		return maxDamageDt;
 	}
 
-	// public MoveOrder getMoveOrder() {
-	// return moveOrder;
-	// }
+	public float getMaxDefenseDt() {
+		return maxDefenseDt;
+	}
 
 	public Player getPlayer() {
 		return owner;
@@ -164,20 +135,9 @@ public class Ship extends PhysicalEntity {
 		return resources;
 	}
 
-	public float getResourcesDt() {
-		return resourcesdt;
-	}
-
 	public float getResourcesMax() {
 		return resourcesMax;
 	}
-
-	// public void removeActionOrder() {
-	// if (actionOrder instanceof ForceSource) {
-	// getForceSources().remove(actionOrder);
-	// }
-	// actionOrder = null;
-	// }
 
 	@Deprecated
 	public Surroundings getSurroundings() {
@@ -189,7 +149,7 @@ public class Ship extends PhysicalEntity {
 	}
 
 	public int getXpMax() {
-		return conf.getIntProperty("xp.max");
+		return xpMax;
 	}
 
 	@PostConstruct
@@ -201,7 +161,14 @@ public class Ship extends PhysicalEntity {
 		return forceStop;
 	}
 
-	public void onShipDeath(@MObserves ShipDeath shipDeath) {
+	@SuppressWarnings("unused")
+	private void onShipComponentsUpdated(@MObserves ShipComponentsUpdated shipComponentsUpdated) {
+		computeMaxDamageDt();
+		computeMaxDefenseDt();
+	}
+
+	@SuppressWarnings("unused")
+	private void onShipDeath(@MObserves ShipDeath shipDeath) {
 		if (shipDeath.getShip() != this) {
 			HashMap<String, Object> inputs = new HashMap<>();
 			inputs.put("self", this);
@@ -210,39 +177,12 @@ public class Ship extends PhysicalEntity {
 		}
 	}
 
-	// FIXME This will occur too regularly, event should be used only for non periodic events
-	public void onShipHit(@MObserves ShipHit event) {
-		if (event.getShip() == this && integrity > 0) {
-			integrity -= event.getDamage() / durability;
-			if (integrity <= 0) {
-				LOGGER.debug("Dying"); //$NON-NLS-1$
-				final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
-				shipDead.setDeadShip(this);
-				worldEventMgr.fire(shipDead);
-			} else {
-				HashMap<String, Object> inputs = new HashMap<>();
-				inputs.put("self", this);
-				inputs.put("damage", event.getDamage());
-				inputs.put("aggressor", event.getAggressor());
-				scriptManager.callScript("onSelfShipHit", getPlayer(), inputs, null);
-			}
-		}
-	}
-
-	public void setCreationTime(long creationTime) {
-		this.creationTime = creationTime;
-	}
-
 	public void setDurability(float durability) {
 		this.durability = durability;
 	}
 
 	public void setEnergy(float energy) {
 		this.energy = energy;
-	}
-
-	public void setEnergyDt(float energydt) {
-		this.energydt = energydt;
 	}
 
 	public void setEnergyMax(float energyMax) {
@@ -257,20 +197,12 @@ public class Ship extends PhysicalEntity {
 		this.integrity = integrity;
 	}
 
-	public void setIntegrityDt(float integrityDt) {
-		this.integrityDt = integrityDt;
-	}
-
 	public void setPlayer(Player owner) {
 		this.owner = owner;
 	}
 
 	public void setResources(float resources) {
 		this.resources = resources;
-	}
-
-	public void setResourcesDt(float resourcesdt) {
-		this.resourcesdt = resourcesdt;
 	}
 
 	public void setResourcesMax(float resourcesMax) {

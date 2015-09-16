@@ -19,6 +19,7 @@ public class MiningLaserRenderer implements Renderer<MiningLaserAnim> {
 	private Random rand = new Random();
 
 	@Inject private Logger LOGGER;
+	@Inject private RenderUtils renderUtils;
 
 	@SuppressWarnings("unused")
 	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
@@ -28,7 +29,7 @@ public class MiningLaserRenderer implements Renderer<MiningLaserAnim> {
 	@Override
 	public void render(MiningLaserAnim laser, float alpha) {
 		if (laser.getSource() != null && laser.getTarget() != null) {
-			RenderUtils.renderLine(laser.getSource().getPos(), laser.getTarget().getPos(), 10f, 0f, rand.nextFloat() * 5 + 3,
+			renderUtils.renderLine(laser.getSource().getPos(), laser.getTarget().getPos(), 10f, 0f, rand.nextFloat() * 5 + 3,
 					new float[] { 1f, 1f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
 		}
 	}

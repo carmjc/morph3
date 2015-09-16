@@ -98,7 +98,7 @@ public class Select implements MouseListener {
 			uiContext.setSelectedCmp(cmp);
 			if (cmp.getTarget() == null && !world.isTimeFrozen()
 					&& cmp.getClass().isAnnotationPresent(NeedsTarget.class)) {
-				world.toggleTimeFrozen();
+				// world.toggleTimeFrozen(TimeFreezeCause.COMPONENT_DRAG);
 			} else if (cmp.canBeActivated()) {
 				cmp.startBehavior();
 

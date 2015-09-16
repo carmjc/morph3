@@ -29,7 +29,7 @@ public abstract class Component implements Activable {
 	@Inject private Logger LOGGER;
 
 	public boolean canBeActivated() {
-		return hasResources()
+		return hasEnoughResources()
 				&& isAvailable()
 				&& (!getClass().isAnnotationPresent(NeedsTarget.class)
 						|| isPosWithinRange(targetPosInWorld));
@@ -40,12 +40,11 @@ public abstract class Component implements Activable {
 	}
 
 	public float getAvailability() {
-		String coolDown = conf.getProperty(getClass().getCanonicalName() + ".cooldown");
-		if (coolDown == null) {
+		if (getCooldown() == 0) {
 			return 1;
 		}
 
-		float value = ((float) world.getTime() - getLastActivation()) / conf.getIntProperty(getClass().getCanonicalName() + ".cooldown") / 1000;
+		float value = ((float) world.getTime() - getLastActivation()) / getCooldown() / 1000;
 		if (getLastActivation() == 0) {
 			value = 1;
 		}
@@ -54,6 +53,26 @@ public abstract class Component implements Activable {
 
 	public float[] getColor() {
 		return conf.getFloatArrayProperty(getClass().getCanonicalName() + ".color");
+	}
+
+	public Integer getCooldown() {
+		Integer cooldown = conf.getIntProperty(getClass().getCanonicalName() + ".cooldown");
+		if (cooldown == null) {
+			cooldown = 0;
+		}
+		return cooldown;
+	}
+
+	public Float getDamage() {
+		return conf.getFloatProperty(getClass().getCanonicalName() + ".target.damage");
+	}
+
+	public final float getDurabilityDt() {
+		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".durabilityDt");
+		if (value == null) {
+			value = 0f;
+		}
+		return value;
 	}
 
 	public final float getEnergyDt() {
@@ -68,7 +87,7 @@ public abstract class Component implements Activable {
 		return id;
 	}
 
-	public final float getIntegrityDt() {
+	public Float getIntegrity() {
 		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".integrityDt");
 		if (value == null) {
 			value = 0f;
@@ -136,7 +155,7 @@ public abstract class Component implements Activable {
 		return targetPosInWorld;
 	}
 
-	public boolean hasResources() {
+	public boolean hasEnoughResources() {
 		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0;
 	}
 
@@ -194,6 +213,7 @@ public abstract class Component implements Activable {
 	public final void startBehavior() {
 		getShip().setEnergy(getShip().getEnergy() + getEnergyDt());
 		getShip().setResources(getShip().getResources() + getResourcesDt());
+		getShip().setIntegrity(getShip().getIntegrity() + getDurabilityDt() / getShip().getDurability());
 		setLastActivation(world.getTime());
 
 		initBehavior();

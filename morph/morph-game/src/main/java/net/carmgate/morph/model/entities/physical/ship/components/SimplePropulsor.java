@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
@@ -14,7 +13,6 @@ import net.carmgate.morph.model.physics.ForceSource;
 @ComponentKind(ComponentType.PROPULSORS)
 public class SimplePropulsor extends Component implements ForceSource {
 
-	@Inject private World world;
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
 
@@ -47,7 +45,7 @@ public class SimplePropulsor extends Component implements ForceSource {
 			return;
 		}
 
-		float maxAccel = Ship.MAX_PROPULSOR_FORCE / getShip().getMass() * getShip().getComponentsComposition().get(ComponentType.PROPULSORS);
+		float maxAccel = Ship.MAX_PROPULSOR_FORCE / getShip().getMass();
 
 		if (actualDistance < 0) {
 			force.copy(getShip().getSpeed()).scale(-1);
@@ -61,8 +59,8 @@ public class SimplePropulsor extends Component implements ForceSource {
 		}
 
 		float length = force.length();
-		if (length > Ship.MAX_PROPULSOR_FORCE * getShip().getComponentsComposition().get(ComponentType.PROPULSORS)) {
-			force.scale(Ship.MAX_PROPULSOR_FORCE / length * getShip().getComponentsComposition().get(ComponentType.PROPULSORS));
+		if (length > Ship.MAX_PROPULSOR_FORCE) {
+			force.scale(Ship.MAX_PROPULSOR_FORCE / length);
 		}
 
 		// set orientation

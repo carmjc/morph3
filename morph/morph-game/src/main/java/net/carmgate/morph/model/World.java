@@ -29,7 +29,6 @@ import net.carmgate.morph.GameLoaded;
 import net.carmgate.morph.events.WorldEvent;
 import net.carmgate.morph.events.WorldEventFactory;
 import net.carmgate.morph.events.WorldEventType;
-import net.carmgate.morph.events.entities.ship.PhysicalEntityToBeRemoved;
 import net.carmgate.morph.events.entities.ship.ShipAdded;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEvent;
@@ -43,6 +42,12 @@ import net.carmgate.morph.model.entities.physical.ship.components.ComponentFacto
 
 @Singleton
 public class World {
+
+	public static enum TimeFreezeCause {
+		PAUSE_ACTION,
+		COMPONENT_DRAG,
+		SHIP_EDITOR;
+	}
 
 	public static String readFile(String path, Charset encoding)
 			throws IOException {
@@ -71,6 +76,7 @@ public class World {
 	private float timeFactor = 1f;
 	private boolean timeFrozen = false;
 	private Ship playerShip;
+	private TimeFreezeCause timeFreezeCause;
 
 	public void add(PhysicalEntity entity) {
 		if (entity instanceof Ship) {
@@ -129,11 +135,16 @@ public class World {
 		return time;
 	}
 
+	public TimeFreezeCause getTimeFreezeCause() {
+		return timeFreezeCause;
+	}
+
 	public List<WorldAnimation> getWorldAnimations() {
 		return animations;
 	}
 
 	// @PostConstruct
+	@SuppressWarnings("unused")
 	private void init(@Observes ContainerInitialized containerInitializedEvent) {
 		eventManager.scanAndRegister(this);
 
@@ -166,23 +177,9 @@ public class World {
 		return timeFrozen;
 	}
 
-	protected void onEntityRemoval(@MObserves PhysicalEntityToBeRemoved event) {
-		LOGGER.debug("Removing " + event.getEntity().getClass().getName()); //$NON-NLS-1$
-		remove(event.getEntity());
-	}
-
-	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
+	@SuppressWarnings("unused")
+	private void onShipDeath(@MObserves ShipDeath shipDeath) {
 		remove(shipDeath.getShip());
-	}
-
-	private void remove(PhysicalEntity entity) {
-		if (entity instanceof Ship) {
-			remove((Ship) entity);
-			return;
-		}
-
-		nonShipsPhysicalEntities.remove(entity);
-		physicalEntities.remove(entity);
 	}
 
 	private void remove(Ship ship) {
@@ -194,7 +191,12 @@ public class World {
 		this.timeFactor = timeFactor;
 	}
 
-	public void toggleTimeFrozen() {
+	public void toggleTimeFrozen(TimeFreezeCause timeFreezeCause) {
+		if (!timeFrozen) {
+			this.timeFreezeCause = timeFreezeCause;
+		} else {
+			this.timeFreezeCause = null;
+		}
 		timeFrozen = !timeFrozen;
 	}
 

@@ -4,6 +4,7 @@ import java.util.Random;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 
@@ -13,6 +14,8 @@ import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 public class LaserRenderer implements Renderer<LaserAnim> {
+
+	@Inject private RenderUtils renderUtils;
 
 	private Random rand = new Random();
 
@@ -24,7 +27,7 @@ public class LaserRenderer implements Renderer<LaserAnim> {
 	@Override
 	public void render(LaserAnim laserAnim, float alpha) {
 		if (laserAnim.getSource() != null && laserAnim.getTarget() != null) {
-			RenderUtils.renderLine(laserAnim.getSource().getPos(), laserAnim.getTarget().getPos(), 10f, 0f, rand.nextFloat() * 5 + 3,
+			renderUtils.renderLine(laserAnim.getSource().getPos(), laserAnim.getTarget().getPos(), 10f, 0f, rand.nextFloat() * 5 + 3,
 					new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
 		}
 	}

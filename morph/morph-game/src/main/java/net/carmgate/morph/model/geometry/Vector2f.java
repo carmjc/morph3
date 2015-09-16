@@ -16,7 +16,9 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 	}
 
 	public Vector2f(Vector2f v) {
-		super(v.x, v.y);
+		if (v != null) {
+			copy(v);
+		}
 	}
 
 	@Override
