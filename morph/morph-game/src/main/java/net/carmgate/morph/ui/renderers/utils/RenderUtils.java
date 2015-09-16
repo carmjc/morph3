@@ -299,9 +299,11 @@ public class RenderUtils {
 	 * @param left
 	 * @param bottom
 	 * @param right
+	 * @param color
 	 */
-	public void renderQuad(float left, float top, float right, float bottom) {
+	public void renderQuad(float left, float top, float right, float bottom, float[] color) {
 		TextureImpl.bindNone();
+		GL11.glColor4f(color[0], color[1], color[2], color[3]);
 		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glVertex2f(left, top);
 		GL11.glVertex2f(right, top);
@@ -373,11 +375,11 @@ public class RenderUtils {
 
 	// TODO The "line" parameter should not be necessary
 	// The method should adapt to the number of lines printed so far
-	public void renderText(MorphFont font, float x, float y, String str, int line, Color color) {
+	public void renderText(MorphFont font, float x, float y, String str, float line, Color color) {
 		renderText(font, x, y, str, line, color, TextAlign.LEFT);
 	}
 
-	public void renderText(MorphFont font, float x, float y, String str, int line, Color color, TextAlign align) {
+	public void renderText(MorphFont font, float x, float y, String str, float line, Color white, TextAlign align) {
 		float fontRatio = (float) font.getTargetFontSize() / font.getLineHeight();
 		GL11.glScalef(fontRatio, fontRatio, 1);
 		if (align == TextAlign.RIGHT) {
@@ -385,12 +387,12 @@ public class RenderUtils {
 		} else if (align == TextAlign.CENTER) {
 			x -= font.getWidth(str) * fontRatio / 2;
 		}
-		font.drawString(x / fontRatio, (y + font.getLineHeight() * fontRatio * (line - 1)) / fontRatio, str, color);
+		font.drawString(x / fontRatio, (y + font.getLineHeight() * fontRatio * (line - 1)) / fontRatio, str, white);
 		GL11.glScalef(1 / fontRatio, 1 / fontRatio, 1);
 		;
 	}
 
-	public void renderText(MorphFont font, String str, int line, Color color, TextAlign align) {
-		renderText(font, 0, 0, str, line, color, align);
+	public void renderText(MorphFont font, String str, float line, Color white, TextAlign align) {
+		renderText(font, 0, 0, str, line, white, align);
 	}
 }

@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.ui.renderers.RenderMode;
@@ -27,6 +28,7 @@ public class UIContext {
 	@Inject private ViewPort viewport;
 	@Inject private Window window;
 	@Inject private MEventManager eventManager;
+	@Inject private World world;
 
 	private RenderMode renderMode = RenderMode.NORMAL;
 	private Ship selectedShip;

@@ -56,9 +56,10 @@ import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
-import net.carmgate.morph.ui.widgets.MessagesWidget;
+import net.carmgate.morph.ui.widgets.MessagesPanel;
 import net.carmgate.morph.ui.widgets.WidgetContainer;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
+import net.carmgate.morph.ui.widgets.shipeditor.ShipEditorPanel;
 
 @Singleton
 public class RenderingManager {
@@ -130,9 +131,14 @@ public class RenderingManager {
 		}
 
 		uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
-		MessagesWidget messagesWidget = widgetFactory.newInstance(MessagesWidget.class);
+
+		MessagesPanel messagesWidget = widgetFactory.newInstance(MessagesPanel.class);
 		messagesWidget.setPosition(new float[] { 0, 0, 0 });
 		uiContext.getWidgetRoot().add(messagesWidget);
+
+		ShipEditorPanel shipEditorPanel = widgetFactory.newInstance(ShipEditorPanel.class);
+		shipEditorPanel.setPosition(new float[] { uiContext.getWindow().getWidth() / 2, 0, 0 });
+		uiContext.getWidgetRoot().add(shipEditorPanel);
 	}
 
 	/**
@@ -294,8 +300,7 @@ public class RenderingManager {
 					GL11.glTranslatef(borderLeftX - 5, borderTopY + font.getTargetFontSize() * line - 10, 0);
 					ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
 					float[] cmpColor = cmpType.getColor();
-					GL11.glColor3f(cmpColor[0], cmpColor[1], cmpColor[2]);
-					renderUtils.renderQuad(0, 0, 5, 5);
+					renderUtils.renderQuad(0, 0, 5, 5, cmpColor);
 					GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getTargetFontSize() * line - 10), 0);
 
 					renderUtils.renderText(font, borderLeftX - 10, borderTopY,

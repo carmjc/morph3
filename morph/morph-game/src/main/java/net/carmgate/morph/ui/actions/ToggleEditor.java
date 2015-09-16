@@ -33,7 +33,8 @@ public class ToggleEditor implements KeyboardListener {
 	@Override
 	public void onKeyboardEvent() {
 		if (inputHistory.getLastKeyboardEvent(1).getButton() == conf.getCharProperty("action.enterShipEditor.key")
-				&& inputHistory.getLastKeyboardEvent().getEventType() == EventType.KEYBOARD_UP) {
+				&& inputHistory.getLastKeyboardEvent().getEventType() == EventType.KEYBOARD_UP
+				&& uiContext.getSelectedShip() != null) {
 			uiContext.setContext(Context.SHIP_EDITOR);
 			if (!world.isTimeFrozen()) {
 				world.toggleTimeFrozen(TimeFreezeCause.SHIP_EDITOR);

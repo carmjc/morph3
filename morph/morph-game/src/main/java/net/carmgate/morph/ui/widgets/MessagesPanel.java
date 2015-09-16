@@ -11,7 +11,7 @@ import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 
-public class MessagesWidget extends Widget {
+public class MessagesPanel extends Widget {
 
 	@Inject private Logger LOGGER;
 	@Inject private RenderUtils renderUtils;
@@ -26,5 +26,9 @@ public class MessagesWidget extends Widget {
 			renderUtils.renderText(RenderingManager.font, 2, 2, msg.getStr(), line++, Color.white, TextAlign.LEFT);
 		}
 
+	}
+
+	@Override
+	public void renderWidgetForSelect() {
 	}
 }

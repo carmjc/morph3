@@ -19,6 +19,7 @@ import net.carmgate.morph.model.entities.physical.ship.components.Activable;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.UIContext.Context;
 import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.actions.Select.PickingResult;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
@@ -214,25 +215,27 @@ public class GameMouse {
 		renderWidgetForSelect(uiContext.getWidgetRoot());
 		GL11.glTranslatef(-x, -y, 0);
 
-		GL11.glScalef(zoomFactor, zoomFactor, 1);
-		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, -0);
+		if (uiContext.getContext() == Context.GAME) {
+			GL11.glScalef(zoomFactor, zoomFactor, 1);
+			GL11.glTranslatef(-focalPoint.x, -focalPoint.y, -0);
 
-		for (Ship ship : world.getShips()) {
-			final Vector2f pos = ship.getPos();
-			GL11.glTranslatef(pos.x, pos.y, 0);
-			shipSelectRenderer.render(ship, 1f);
-			GL11.glTranslatef(-pos.x, -pos.y, 0);
+			for (Ship ship : world.getShips()) {
+				final Vector2f pos = ship.getPos();
+				GL11.glTranslatef(pos.x, pos.y, 0);
+				shipSelectRenderer.render(ship, 1f);
+				GL11.glTranslatef(-pos.x, -pos.y, 0);
+			}
+
+			for (PhysicalEntity entity : world.getNonShipsPhysicalEntities()) {
+				final Vector2f pos = entity.getPos();
+				GL11.glTranslatef(pos.x, pos.y, 0);
+				physicalEntitySelectRenderer.render(entity, 1f);
+				GL11.glTranslatef(-pos.x, -pos.y, 0);
+			}
+
+			GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+			GL11.glScalef(1f / zoomFactor, 1f / zoomFactor, 1);
 		}
-
-		for (PhysicalEntity entity : world.getNonShipsPhysicalEntities()) {
-			final Vector2f pos = entity.getPos();
-			GL11.glTranslatef(pos.x, pos.y, 0);
-			physicalEntitySelectRenderer.render(entity, 1f);
-			GL11.glTranslatef(-pos.x, -pos.y, 0);
-		}
-
-		GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
-		GL11.glScalef(1f / zoomFactor, 1f / zoomFactor, 1);
 	}
 
 	private void renderWidgetForSelect(Widget widget) {
