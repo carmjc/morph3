@@ -1,5 +1,9 @@
 package net.carmgate.morph.model.entities.physical.ship.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -23,10 +27,36 @@ public abstract class Component implements Activable {
 	private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 	private Vector2f targetPosInWorld;
 	private long lastActivation;
+	private float[] color;
+
+	private final List<HardPart> hardParts = new ArrayList<>();
+	private final List<SoftPart> softParts = new ArrayList<>();
 
 	@Inject private World world;
 	@Inject private Conf conf;
 	@Inject private Logger LOGGER;
+
+	private Float cooldown;
+	private Float damage;
+	private Float durability;
+	private Float energyDt;
+	private Float integrity;
+	private Float maxStoredEnergy;
+	private Float maxStoredResources;
+	private Float range;
+	private Float resourceDt;
+
+	public boolean addPart(Part part) {
+		if (part instanceof HardPart) {
+			part.setComponent(this);
+			return hardParts.add((HardPart) part);
+		}
+		if (part instanceof SoftPart) {
+			part.setComponent(this);
+			return softParts.add((SoftPart) part);
+		}
+		return false;
+	}
 
 	public boolean canBeActivated() {
 		return hasEnoughResources()
@@ -52,35 +82,31 @@ public abstract class Component implements Activable {
 	}
 
 	public float[] getColor() {
-		return conf.getFloatArrayProperty(getClass().getCanonicalName() + ".color");
+		return color;
 	}
 
-	public Integer getCooldown() {
-		Integer cooldown = conf.getIntProperty(getClass().getCanonicalName() + ".cooldown");
-		if (cooldown == null) {
-			cooldown = 0;
-		}
+	public float getCooldown() {
 		return cooldown;
 	}
 
 	public Float getDamage() {
-		return conf.getFloatProperty(getClass().getCanonicalName() + ".target.damage");
+		return damage;
+	}
+
+	public Float getDurability() {
+		return durability;
 	}
 
 	public final float getDurabilityDt() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".durabilityDt");
-		if (value == null) {
-			value = 0f;
-		}
-		return value;
+		return durability;
 	}
 
 	public final float getEnergyDt() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".energyDt");
-		if (value == null) {
-			value = 0f;
-		}
-		return value;
+		return energyDt;
+	}
+
+	public List<HardPart> getHardParts() {
+		return hardParts;
 	}
 
 	public int getId() {
@@ -88,11 +114,7 @@ public abstract class Component implements Activable {
 	}
 
 	public Float getIntegrity() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".integrityDt");
-		if (value == null) {
-			value = 0f;
-		}
-		return value;
+		return integrity;
 	}
 
 	public long getLastActivation() {
@@ -100,19 +122,11 @@ public abstract class Component implements Activable {
 	}
 
 	public final float getMaxStoredEnergy() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredEnergy");
-		if (value == null) {
-			value = 0f;
-		}
-		return value;
+		return maxStoredEnergy;
 	}
 
 	public final float getMaxStoredResources() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredResources");
-		if (value == null) {
-			value = 0f;
-		}
-		return value;
+		return maxStoredResources;
 	}
 
 	public Vector2f getPosInShip() {
@@ -120,19 +134,15 @@ public abstract class Component implements Activable {
 	}
 
 	public final float getRange() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".range");
-		if (value == null) {
-			value = 0f;
-		}
-		return value;
+		return range;
+	}
+
+	public Float getResourceDt() {
+		return resourceDt;
 	}
 
 	public final float getResourcesDt() {
-		Float value = conf.getFloatProperty(getClass().getCanonicalName() + ".resourceDt");
-		if (value == null) {
-			value = 0f;
-		}
-		return value;
+		return resourceDt;
 	}
 
 	public Ship getShip() {
@@ -141,6 +151,10 @@ public abstract class Component implements Activable {
 
 	public Holder<Ship> getShipHolder() {
 		return shipHolder;
+	}
+
+	public List<SoftPart> getSoftParts() {
+		return softParts;
 	}
 
 	public PhysicalEntity getTarget() {
@@ -159,6 +173,54 @@ public abstract class Component implements Activable {
 		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0;
 	}
 
+	@PostConstruct
+	public void init() {
+		color = conf.getFloatArrayProperty(getClass().getCanonicalName() + ".color");
+		damage = conf.getFloatProperty(getClass().getCanonicalName() + ".target.damage");
+
+		cooldown = conf.getFloatProperty(getClass().getCanonicalName() + ".cooldown");
+		if (cooldown == null) {
+			cooldown = 0f;
+		}
+
+		durability = conf.getFloatProperty(getClass().getCanonicalName() + ".durabilityDt");
+		if (durability == null) {
+			durability = 0f;
+		}
+
+		energyDt = conf.getFloatProperty(getClass().getCanonicalName() + ".energyDt");
+		if (energyDt == null) {
+			energyDt = 0f;
+		}
+
+		integrity = conf.getFloatProperty(getClass().getCanonicalName() + ".integrityDt");
+		if (integrity == null) {
+			integrity = 0f;
+		}
+
+		maxStoredEnergy = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredEnergy");
+		if (maxStoredEnergy == null) {
+			maxStoredEnergy = 0f;
+		}
+
+		maxStoredResources = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredResources");
+		if (maxStoredResources == null) {
+			maxStoredResources = 0f;
+		}
+
+		range = conf.getFloatProperty(getClass().getCanonicalName() + ".range");
+		if (range == null) {
+			range = 0f;
+		}
+
+		resourceDt = conf.getFloatProperty(getClass().getCanonicalName() + ".resourceDt");
+		if (resourceDt == null) {
+			resourceDt = 0f;
+		}
+
+		updateComponentWithEffectOfParts();
+	}
+
 	public void initBehavior() {
 	}
 
@@ -175,6 +237,16 @@ public abstract class Component implements Activable {
 		return pos != null && (getRange() == 0 || pos.clone().sub(getShip().getPos()).lengthSquared() <= getRange() * getRange());
 	}
 
+	public boolean removePart(Part part) {
+		if (part instanceof HardPart) {
+			return hardParts.remove(part);
+		}
+		if (part instanceof SoftPart) {
+			return softParts.remove(part);
+		}
+		return false;
+	}
+
 	@Override
 	public void setActive(boolean active) {
 		this.active = active;
@@ -184,12 +256,48 @@ public abstract class Component implements Activable {
 		this.animation = animation;
 	}
 
+	public void setCooldown(float cooldown) {
+		this.cooldown = cooldown;
+	}
+
+	public void setDamage(Float damage) {
+		this.damage = damage;
+	}
+
+	public void setDurability(Float durability) {
+		this.durability = durability;
+	}
+
+	public void setEnergyDt(Float energyDt) {
+		this.energyDt = energyDt;
+	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
 
+	public void setIntegrity(Float integrity) {
+		this.integrity = integrity;
+	}
+
 	public void setLastActivation(long lastActivation) {
 		this.lastActivation = lastActivation;
+	}
+
+	public void setMaxStoredEnergy(Float maxStoredEnergy) {
+		this.maxStoredEnergy = maxStoredEnergy;
+	}
+
+	public void setMaxStoredResources(Float maxStoredResources) {
+		this.maxStoredResources = maxStoredResources;
+	}
+
+	public void setRange(Float range) {
+		this.range = range;
+	}
+
+	public void setResourceDt(Float resourceDt) {
+		this.resourceDt = resourceDt;
 	}
 
 	public void setShip(Ship ship) {
@@ -218,6 +326,16 @@ public abstract class Component implements Activable {
 
 		initBehavior();
 		evalBehavior();
+	}
+
+	private void updateComponentWithEffectOfParts() {
+		for (SoftPart softPart : getSoftParts()) {
+			softPart.computeEffectOnComponent(this);
+		}
+
+		for (HardPart hardPart : getHardParts()) {
+			hardPart.computeEffectOnComponent(this);
+		}
 	}
 
 }

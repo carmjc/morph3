@@ -18,6 +18,11 @@ public class MessagesPanel extends Widget {
 	@Inject private MessageManager messageManager;
 
 	@Override
+	public void renderInteractiveAreas() {
+		// not interactive widget
+	}
+
+	@Override
 	public void renderWidget() {
 		int line = 1;
 
@@ -26,9 +31,5 @@ public class MessagesPanel extends Widget {
 			renderUtils.renderText(RenderingManager.font, 2, 2, msg.getStr(), line++, Color.white, TextAlign.LEFT);
 		}
 
-	}
-
-	@Override
-	public void renderWidgetForSelect() {
 	}
 }

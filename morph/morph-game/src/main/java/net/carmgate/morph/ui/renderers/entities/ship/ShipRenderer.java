@@ -25,7 +25,11 @@ import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.Component;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
+import net.carmgate.morph.model.entities.physical.ship.components.MiningLaser;
 import net.carmgate.morph.model.entities.physical.ship.components.NeedsTarget;
+import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
+import net.carmgate.morph.model.entities.physical.ship.components.SimpleRepairer;
+import net.carmgate.morph.model.entities.physical.ship.components.laser.Laser;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
@@ -53,15 +57,18 @@ public class ShipRenderer implements Renderer<Ship> {
 
 	@Override
 	public void init() {
-		try (BufferedInputStream shipBgInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture.bg"))); //$NON-NLS-1$
-				BufferedInputStream shipInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture"))); //$NON-NLS-1$
-				BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader
-						.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.Laser.renderer.texture"))); //$NON-NLS-1$
+		try (BufferedInputStream shipBgInputStream = new BufferedInputStream(
+				ClassLoader.getSystemResourceAsStream(conf.getProperty("ship.renderer.texture.bg"))); //$NON-NLS-1$
+				BufferedInputStream shipInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
+						conf.getProperty("ship.renderer.texture"))); //$NON-NLS-1$
+				BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
+						conf.getProperty(Laser.class.getCanonicalName() + ".renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream mlInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
-						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.MiningLaser.renderer.texture"))); //$NON-NLS-1$
+						conf.getProperty(MiningLaser.class.getCanonicalName() + ".renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
-						conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimpleRepairer.renderer.texture"))); //$NON-NLS-1$
-				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(conf.getProperty("net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor.renderer.texture")))) { //$NON-NLS-1$
+						conf.getProperty(SimpleRepairer.class.getCanonicalName() + ".renderer.texture"))); //$NON-NLS-1$
+				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
+						conf.getProperty(SimplePropulsor.class.getCanonicalName() + ".renderer.texture")))) { //$NON-NLS-1$
 			// shipBgTexture = renderUtils.getTexture("PNG", shipBgInputStream);
 			shipTexture = renderUtils.getTexture("PNG", shipInputStream);
 			cmpTextures.put(ComponentType.LASERS, renderUtils.getTexture("PNG", laserInputStream));

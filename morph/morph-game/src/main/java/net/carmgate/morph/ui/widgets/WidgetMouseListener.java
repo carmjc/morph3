@@ -2,8 +2,7 @@ package net.carmgate.morph.ui.widgets;
 
 public interface WidgetMouseListener {
 
-   void renderInteractiveAreas();
-
-   void onDrag();
-
+	default void onClick() {};
+	default void onMouseDown() {};
+	default void onMouseUp() {};
 }

@@ -15,10 +15,10 @@ import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
 import net.carmgate.morph.model.entities.physical.ship.Ship;
 import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
-import net.carmgate.morph.model.entities.physical.ship.components.Laser;
 import net.carmgate.morph.model.entities.physical.ship.components.MiningLaser;
 import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
 import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
+import net.carmgate.morph.model.entities.physical.ship.components.laser.Laser;
 
 @Singleton
 public class AiManager {

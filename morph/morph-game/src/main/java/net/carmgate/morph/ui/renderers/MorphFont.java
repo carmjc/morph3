@@ -39,8 +39,18 @@ public class MorphFont extends AngelCodeFont {
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
+	public int getHeight(CharSequence text) {
+		return (int) ((float) super.getHeight(text) / getLineHeight() * fontSize);
+	}
+
 	public int getTargetFontSize() {
 		return fontSize;
+	}
+
+	@Override
+	public int getWidth(CharSequence text) {
+		return (int) ((float) super.getWidth(text) / getLineHeight() * fontSize);
 	}
 
 	public void setFontSize(int fontSize) {

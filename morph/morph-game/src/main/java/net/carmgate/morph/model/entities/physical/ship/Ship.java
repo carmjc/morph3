@@ -56,6 +56,8 @@ public class Ship extends PhysicalEntity {
 	private boolean forceStop;
 	private long creationTime;
 
+	private int softSpaceMax;
+	private int hardSpaceMax;
 	private Integer xpMax;
 
 	public void add(Component component) {
@@ -115,6 +117,10 @@ public class Ship extends PhysicalEntity {
 		return energyMax;
 	}
 
+	public int getHardSpaceMax() {
+		return hardSpaceMax;
+	}
+
 	public float getIntegrity() {
 		return integrity;
 	}
@@ -137,6 +143,10 @@ public class Ship extends PhysicalEntity {
 
 	public float getResourcesMax() {
 		return resourcesMax;
+	}
+
+	public int getSoftSpaceMax() {
+		return softSpaceMax;
 	}
 
 	@Deprecated
@@ -193,6 +203,10 @@ public class Ship extends PhysicalEntity {
 		this.forceStop = forceStop;
 	}
 
+	public void setHardSpaceMax(int hardSpaceMax) {
+		this.hardSpaceMax = hardSpaceMax;
+	}
+
 	public void setIntegrity(float integrity) {
 		this.integrity = integrity;
 	}
@@ -207,6 +221,10 @@ public class Ship extends PhysicalEntity {
 
 	public void setResourcesMax(float resourcesMax) {
 		this.resourcesMax = resourcesMax;
+	}
+
+	public void setSoftSpaceMax(int softSpaceMax) {
+		this.softSpaceMax = softSpaceMax;
 	}
 
 	public void setXp(int xp) {

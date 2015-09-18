@@ -27,8 +27,6 @@ import net.carmgate.morph.ui.renderers.SelectRenderer.TargetType;
 import net.carmgate.morph.ui.renderers.entities.PhysicalEntitySelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipSelectRenderer;
 import net.carmgate.morph.ui.widgets.Widget;
-import net.carmgate.morph.ui.widgets.WidgetContainer;
-import net.carmgate.morph.ui.widgets.WidgetMouseListener;
 
 /**
  * Allows mouse manipulation in world coordinates.
@@ -69,6 +67,10 @@ public class GameMouse {
 	 */
 	public int getY() {
 		return Mouse.getY();
+	}
+
+	public boolean isButtonDown(int button) {
+		return Mouse.isButtonDown(button);
 	}
 
 	/**
@@ -153,7 +155,6 @@ public class GameMouse {
 		if (targetTypeId == SelectRenderer.TargetType.WIDGET.ordinal()) {
 			pickingResult.setTargetType(TargetType.WIDGET);
 			pickingResult.setTarget(uiContext.getWidgets().get(selectBuf.get(selectBufIndex++)));
-			LOGGER.debug("Widget selected");
 		} else if (targetTypeId == SelectRenderer.TargetType.SHIP.ordinal()) {
 			// get the matching element in the model
 			int shipId = selectBuf.get(selectBufIndex++);
@@ -239,21 +240,11 @@ public class GameMouse {
 	}
 
 	private void renderWidgetForSelect(Widget widget) {
-		if (widget instanceof WidgetContainer) {
-			for (Widget childWidget : ((WidgetContainer) widget).getWidgets()) {
-				GL11.glTranslatef(childWidget.getPosition()[0], childWidget.getPosition()[1], 0);
-				renderWidgetForSelect(childWidget);
-				GL11.glTranslatef(-childWidget.getPosition()[0], -childWidget.getPosition()[1], 0);
-			}
-		}
-
-		if (widget instanceof WidgetMouseListener) {
-			GL11.glPushName(SelectRenderer.TargetType.WIDGET.ordinal());
-			GL11.glPushName(widget.getId());
-			((WidgetMouseListener) widget).renderInteractiveAreas();
-			GL11.glPopName();
-			GL11.glPopName();
-		}
+		GL11.glPushName(SelectRenderer.TargetType.WIDGET.ordinal());
+		GL11.glPushName(widget.getId());
+		widget.renderInteractiveAreas();
+		GL11.glPopName();
+		GL11.glPopName();
 	}
 
 	@Override

@@ -56,8 +56,8 @@ import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
+import net.carmgate.morph.ui.widgets.AbsoluteLayoutContainer;
 import net.carmgate.morph.ui.widgets.MessagesPanel;
-import net.carmgate.morph.ui.widgets.WidgetContainer;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 import net.carmgate.morph.ui.widgets.shipeditor.ShipEditorPanel;
 
@@ -130,7 +130,7 @@ public class RenderingManager {
 			renderer.init();
 		}
 
-		uiContext.setWidgetRoot(widgetFactory.newInstance(WidgetContainer.class));
+		uiContext.setWidgetRoot(widgetFactory.newInstance(AbsoluteLayoutContainer.class));
 
 		MessagesPanel messagesWidget = widgetFactory.newInstance(MessagesPanel.class);
 		messagesWidget.setPosition(new float[] { 0, 0, 0 });

@@ -1,6 +1,7 @@
 load("nashorn:mozilla_compat.js");
 importPackage(Packages.net.carmgate.morph.model)
 importPackage(Packages.net.carmgate.morph.model.entities.physical.ship.components)
+importPackage(Packages.net.carmgate.morph.model.entities.physical.ship.components.laser)
 importPackage(Packages.net.carmgate.morph.model.entities.physical.ship)
 importPackage(Packages.net.carmgate.morph.model.entities.physical)
 importPackage(Packages.net.carmgate.morph.model.geometry)
@@ -34,6 +35,8 @@ ship.add(componentFactory.newInstance(SimplePropulsor.class));
 ship.add(componentFactory.newInstance(SimpleGenerator.class));
 ship.add(componentFactory.newInstance(SimpleRepairer.class));
 ship.add(componentFactory.newInstance(Laser.class));
+ship.setSoftSpaceMax(5);
+ship.setHardSpaceMax(5);
 ship.create();
 //order = orderFactory.newInstance(OrderType.MINE_ASTEROID, ship);
 //order.setAsteroid(asteroid);

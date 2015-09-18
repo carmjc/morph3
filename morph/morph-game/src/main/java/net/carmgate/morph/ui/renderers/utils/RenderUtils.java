@@ -387,7 +387,7 @@ public class RenderUtils {
 		} else if (align == TextAlign.CENTER) {
 			x -= font.getWidth(str) * fontRatio / 2;
 		}
-		font.drawString(x / fontRatio, (y + font.getLineHeight() * fontRatio * (line - 1)) / fontRatio, str, white);
+		font.drawString(x / fontRatio, (y + font.getTargetFontSize() * (line - 1)) / fontRatio, str, white);
 		GL11.glScalef(1 / fontRatio, 1 / fontRatio, 1);
 		;
 	}

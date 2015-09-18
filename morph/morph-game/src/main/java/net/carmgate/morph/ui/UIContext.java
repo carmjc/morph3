@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.events.entities.ship.ShipDeath;
+import net.carmgate.morph.events.entities.ship.ShipSelected;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.World;
@@ -98,7 +99,12 @@ public class UIContext {
 	}
 
 	public void setSelectedShip(Ship selectedShip) {
-		this.selectedShip = selectedShip;
+		if (selectedShip != null) {
+			this.selectedShip = selectedShip;
+			ShipSelected event = new ShipSelected();
+			event.setShip(selectedShip);
+			eventManager.addEvent(event);
+		}
 	}
 
 	public void setSelectedWidget(Widget selectedWidget) {

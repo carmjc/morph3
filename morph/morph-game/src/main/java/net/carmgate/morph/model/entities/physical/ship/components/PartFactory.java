@@ -7,15 +7,15 @@ import javax.inject.Singleton;
 import net.carmgate.morph.events.mgt.MEventManager;
 
 @Singleton
-public class ComponentFactory {
+public class PartFactory {
 
-	@Inject private Instance<Component> components;
+	@Inject private Instance<Part> parts;
 	@Inject private MEventManager eventManager;
 
 	private int idGen = 0;
 
-	public <U extends Component> Component newInstance(Class<U> clazz) {
-		final U u = components.select(clazz).get();
+	public <U extends Part> U newInstance(Class<U> clazz) {
+		final U u = parts.select(clazz).get();
 		eventManager.scanAndRegister(u);
 		u.setId(idGen++);
 		return u;

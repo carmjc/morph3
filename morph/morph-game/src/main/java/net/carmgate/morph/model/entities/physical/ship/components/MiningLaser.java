@@ -25,16 +25,16 @@ public class MiningLaser extends Component {
 		}
 	}
 
+	@Override
+	public void initBehavior() {
+		setActive(true);
+	}
+
 	@PostConstruct
-	public void init() {
+	private void initSpec() {
 		laserAnim = animationFactory.newInstance(AnimationType.MINING_LASER);
 		laserAnim.setSourceHolder(getShipHolder());
 		laserAnim.setTarget(getTargetHolder());
 		setAnimation(laserAnim);
-	}
-
-	@Override
-	public void initBehavior() {
-		setActive(true);
 	}
 }
