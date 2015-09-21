@@ -1,4 +1,6 @@
-package net.carmgate.morph.model.entities.physical.ship.components;
+package net.carmgate.morph.model.entities.parts;
+
+import net.carmgate.morph.model.entities.components.Component;
 
 public abstract class Part<C extends Component> {
 

@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship.components;
+package net.carmgate.morph.model.entities.components;
 
 public enum ComponentType {
    GENERATORS(new float[] { 1, 1, 1, 1 }),

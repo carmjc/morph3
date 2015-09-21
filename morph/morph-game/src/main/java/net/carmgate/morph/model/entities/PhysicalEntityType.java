@@ -1,6 +1,6 @@
-package net.carmgate.morph.model.entities.physical;
+package net.carmgate.morph.model.entities;
 
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 public enum PhysicalEntityType {
    SHIP(Ship.class),

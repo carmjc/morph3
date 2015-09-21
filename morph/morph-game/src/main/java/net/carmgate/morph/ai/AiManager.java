@@ -11,14 +11,14 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.calculator.Calculator;
 import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
-import net.carmgate.morph.model.entities.physical.PhysicalEntityType;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
-import net.carmgate.morph.model.entities.physical.ship.components.MiningLaser;
-import net.carmgate.morph.model.entities.physical.ship.components.SimpleGenerator;
-import net.carmgate.morph.model.entities.physical.ship.components.SimplePropulsor;
-import net.carmgate.morph.model.entities.physical.ship.components.laser.Laser;
+import net.carmgate.morph.model.entities.PhysicalEntityFactory;
+import net.carmgate.morph.model.entities.PhysicalEntityType;
+import net.carmgate.morph.model.entities.components.ComponentFactory;
+import net.carmgate.morph.model.entities.components.generator.SimpleGenerator;
+import net.carmgate.morph.model.entities.components.mining.MiningLaser;
+import net.carmgate.morph.model.entities.components.offensive.Laser;
+import net.carmgate.morph.model.entities.components.prop.SimplePropulsor;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 @Singleton
 public class AiManager {

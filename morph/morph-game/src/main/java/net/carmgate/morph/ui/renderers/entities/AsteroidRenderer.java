@@ -13,7 +13,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.entities.physical.Asteroid;
+import net.carmgate.morph.model.entities.Asteroid;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;

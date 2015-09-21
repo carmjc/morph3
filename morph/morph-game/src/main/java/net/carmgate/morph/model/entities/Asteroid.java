@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical;
+package net.carmgate.morph.model.entities;
 
 
 public class Asteroid extends PhysicalEntity {

@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 @Singleton
 public class MEventManager {

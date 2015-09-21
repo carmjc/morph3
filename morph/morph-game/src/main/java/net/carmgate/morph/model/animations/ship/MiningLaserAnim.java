@@ -7,9 +7,9 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
-import net.carmgate.morph.model.entities.physical.Asteroid;
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.Asteroid;
+import net.carmgate.morph.model.entities.PhysicalEntity;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 public class MiningLaserAnim extends Animation {
 

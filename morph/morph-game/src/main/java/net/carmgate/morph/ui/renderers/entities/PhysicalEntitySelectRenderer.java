@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
+import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;

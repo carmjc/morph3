@@ -1,10 +1,10 @@
-package net.carmgate.morph.model.entities.physical.ship.components.hardParts;
+package net.carmgate.morph.model.entities.parts.hardParts;
 
 import javax.inject.Inject;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.entities.physical.ship.components.HardPart;
-import net.carmgate.morph.model.entities.physical.ship.components.laser.Laser;
+import net.carmgate.morph.model.entities.components.offensive.Laser;
+import net.carmgate.morph.model.entities.parts.HardPart;
 
 public class OverClocking extends HardPart<Laser> {
 
@@ -12,11 +12,6 @@ public class OverClocking extends HardPart<Laser> {
 
 	@Override
 	public void computeEffectOnComponent(Laser cmp) {
-		// Float cooldown = conf.getFloatProperty(getComponent().getClass().getCanonicalName() + ".cooldown");
-		// if (cooldown == null) {
-		// cooldown = 0f;
-		// }
-		//
 		cmp.setCooldown((float) (cmp.getCooldown() * Math.pow(getCooldownFactor(), getLevel())));
 	}
 

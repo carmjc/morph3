@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship.components;
+package net.carmgate.morph.model.entities.components;
 
 public interface Activable {
 

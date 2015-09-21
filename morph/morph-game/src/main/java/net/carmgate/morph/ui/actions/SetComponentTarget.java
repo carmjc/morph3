@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.World.TimeFreezeCause;
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.components.Component;
+import net.carmgate.morph.model.entities.PhysicalEntity;
+import net.carmgate.morph.model.entities.components.Component;
+import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.actions.DragContext.DragType;

@@ -1,6 +1,6 @@
-package net.carmgate.morph.model.entities.physical.ship;
+package net.carmgate.morph.model.entities.ship;
 
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
+import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.geometry.Vector2f;
 
 /**

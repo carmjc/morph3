@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.events.mgt.MEventManager;
-import net.carmgate.morph.model.entities.physical.ship.ReadOnlyShip;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.ship.ReadOnlyShip;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 import org.slf4j.Logger;
 

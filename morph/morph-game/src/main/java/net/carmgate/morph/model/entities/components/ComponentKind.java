@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship.components;
+package net.carmgate.morph.model.entities.components;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

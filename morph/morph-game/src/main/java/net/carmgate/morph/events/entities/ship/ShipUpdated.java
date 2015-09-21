@@ -1,7 +1,7 @@
 package net.carmgate.morph.events.entities.ship;
 
 import net.carmgate.morph.events.WorldEvent;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 public abstract class ShipUpdated implements WorldEvent {
 

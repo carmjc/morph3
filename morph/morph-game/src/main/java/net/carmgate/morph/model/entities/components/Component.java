@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship.components;
+package net.carmgate.morph.model.entities.components;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,11 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.PhysicalEntity;
+import net.carmgate.morph.model.entities.parts.HardPart;
+import net.carmgate.morph.model.entities.parts.Part;
+import net.carmgate.morph.model.entities.parts.SoftPart;
+import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 
 public abstract class Component implements Activable {

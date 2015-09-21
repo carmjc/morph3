@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship.components;
+package net.carmgate.morph.model.entities.components;
 
 @ComponentKind(ComponentType.GENERATORS)
 public class SolarPanelGenerator extends Component {

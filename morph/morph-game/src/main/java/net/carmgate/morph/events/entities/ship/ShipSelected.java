@@ -1,7 +1,7 @@
 package net.carmgate.morph.events.entities.ship;
 
 import net.carmgate.morph.events.mgt.MEvent;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 public class ShipSelected extends MEvent {
 	private Ship ship;

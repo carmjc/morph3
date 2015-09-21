@@ -8,8 +8,8 @@ import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.PhysicalEntity;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 
 public class LaserAnim extends Animation {

@@ -13,7 +13,7 @@ import net.carmgate.morph.model.Player.PlayerType;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.world.XpAwardedAnimation;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
+import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.ui.MessageManager;
 import net.carmgate.morph.ui.MessageManager.Message;
 

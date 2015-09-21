@@ -35,10 +35,10 @@ import net.carmgate.morph.events.mgt.MEvent;
 import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.animations.world.WorldAnimation;
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.PhysicalEntityFactory;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.components.ComponentFactory;
+import net.carmgate.morph.model.entities.PhysicalEntity;
+import net.carmgate.morph.model.entities.PhysicalEntityFactory;
+import net.carmgate.morph.model.entities.components.ComponentFactory;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 @Singleton
 public class World {

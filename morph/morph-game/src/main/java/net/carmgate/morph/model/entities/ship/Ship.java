@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship;
+package net.carmgate.morph.model.entities.ship;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +15,10 @@ import net.carmgate.morph.events.mgt.MObserves;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.XPHolder;
-import net.carmgate.morph.model.entities.Surroundings;
-import net.carmgate.morph.model.entities.physical.PhysicalEntity;
-import net.carmgate.morph.model.entities.physical.ship.components.Component;
-import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
-import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
+import net.carmgate.morph.model.entities.PhysicalEntity;
+import net.carmgate.morph.model.entities.components.Component;
+import net.carmgate.morph.model.entities.components.ComponentKind;
+import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.script.util.ScriptManager;
 
@@ -34,7 +33,6 @@ public class Ship extends PhysicalEntity {
 	@Inject private Logger LOGGER;
 
 	private Player owner;
-	@Deprecated private final Surroundings surroundings = new Surroundings();
 	private float durability;
 	private final Map<ComponentType, Component> components = new HashMap<>();
 
@@ -147,11 +145,6 @@ public class Ship extends PhysicalEntity {
 
 	public int getSoftSpaceMax() {
 		return softSpaceMax;
-	}
-
-	@Deprecated
-	public Surroundings getSurroundings() {
-		return surroundings;
 	}
 
 	public int getXp() {

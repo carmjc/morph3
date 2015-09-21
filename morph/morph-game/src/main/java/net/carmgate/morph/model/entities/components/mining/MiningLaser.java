@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship.components;
+package net.carmgate.morph.model.entities.components.mining;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -7,6 +7,10 @@ import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.ship.MiningLaserAnim;
+import net.carmgate.morph.model.entities.components.Component;
+import net.carmgate.morph.model.entities.components.ComponentKind;
+import net.carmgate.morph.model.entities.components.ComponentType;
+import net.carmgate.morph.model.entities.components.NeedsTarget;
 
 @NeedsTarget
 @ComponentKind(ComponentType.MINING_LASERS)

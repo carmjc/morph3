@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical.ship.components.laser;
+package net.carmgate.morph.model.entities.components.offensive;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -9,13 +9,13 @@ import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.AnimationType;
 import net.carmgate.morph.model.animations.ship.LaserAnim;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.components.Component;
-import net.carmgate.morph.model.entities.physical.ship.components.ComponentKind;
-import net.carmgate.morph.model.entities.physical.ship.components.ComponentType;
-import net.carmgate.morph.model.entities.physical.ship.components.NeedsTarget;
-import net.carmgate.morph.model.entities.physical.ship.components.PartFactory;
-import net.carmgate.morph.model.entities.physical.ship.components.hardParts.OverClocking;
+import net.carmgate.morph.model.entities.components.Component;
+import net.carmgate.morph.model.entities.components.ComponentKind;
+import net.carmgate.morph.model.entities.components.ComponentType;
+import net.carmgate.morph.model.entities.components.NeedsTarget;
+import net.carmgate.morph.model.entities.parts.PartFactory;
+import net.carmgate.morph.model.entities.parts.hardParts.OverClocking;
+import net.carmgate.morph.model.entities.ship.Ship;
 
 
 @NeedsTarget

@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.events.entities.ship.ShipSelected;
 import net.carmgate.morph.events.mgt.MObserves;
-import net.carmgate.morph.model.entities.physical.ship.Ship;
-import net.carmgate.morph.model.entities.physical.ship.components.Component;
-import net.carmgate.morph.model.entities.physical.ship.components.HardPart;
-import net.carmgate.morph.model.entities.physical.ship.components.Part;
+import net.carmgate.morph.model.entities.components.Component;
+import net.carmgate.morph.model.entities.parts.HardPart;
+import net.carmgate.morph.model.entities.parts.Part;
+import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.UIContext.Context;

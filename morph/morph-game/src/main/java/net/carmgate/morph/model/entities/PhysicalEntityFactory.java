@@ -1,4 +1,4 @@
-package net.carmgate.morph.model.entities.physical;
+package net.carmgate.morph.model.entities;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;

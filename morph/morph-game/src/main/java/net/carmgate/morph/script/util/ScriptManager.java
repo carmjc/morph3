@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.entities.physical.Asteroid;
+import net.carmgate.morph.model.entities.Asteroid;
 
 @Singleton
 public class ScriptManager {
