@@ -3,19 +3,27 @@ package net.carmgate.morph.model.entities;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Transient;
+
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.renderers.Renderable;
 
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class PhysicalEntity implements Renderable {
 
-	private int id;
-	private final Vector2f pos = new Vector2f();
-	private final Vector2f speed = new Vector2f();
-	private final Vector2f accel = new Vector2f();
+	@Id private int id;
+	private Vector2f pos = new Vector2f();
+	private Vector2f speed = new Vector2f();
+	private Vector2f accel = new Vector2f();
 	private float rotate = 0f;
 	private float rotateSpeed = 0f;
-	private final Set<ForceSource> forceSources = new HashSet<>();
+	@Transient private final Set<ForceSource> forceSources = new HashSet<>();
 	protected float mass;
 	private Float rotationTarget;
 

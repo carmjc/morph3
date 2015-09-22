@@ -28,21 +28,22 @@ public class KeyboardManager {
 			EventType type;
 			if (Keyboard.getEventKeyState()) {
 				type = EventType.KEYBOARD_DOWN;
-				UIEvent uiEvent = new UIEvent(type, Keyboard.getEventCharacter());
+				UIEvent uiEvent = new UIEvent(type, Keyboard.getEventCharacter(), Keyboard.getEventKey());
 				inputHistory.addEvent(uiEvent);
-				LOGGER.debug("" + uiEvent.getButton());
 			} else {
 				type = EventType.KEYBOARD_UP;
 				int button = -1;
+				int key = -1;
 				for (UIEvent event : inputHistory.getStack()) {
 					if (event.getEventType() == EventType.KEYBOARD_DOWN) {
-						if (!Keyboard.isKeyDown(event.getButton())) {
+						if (!Keyboard.isKeyDown(event.getKey())) {
 							button = event.getButton();
+							key = event.getKey();
 							break;
 						}
 					}
 				}
-				UIEvent uiEvent = new UIEvent(type, button);
+				UIEvent uiEvent = new UIEvent(type, button, key);
 				inputHistory.addEvent(uiEvent);
 			}
 

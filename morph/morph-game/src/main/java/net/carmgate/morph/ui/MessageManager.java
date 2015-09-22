@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
 
 @Singleton
 public class MessageManager {
@@ -34,7 +33,6 @@ public class MessageManager {
 	}
 
 
-	@Inject private World world;
 	@Inject private Conf conf;
 
 	private final List<Message> messages = new ArrayList<>();
@@ -42,15 +40,15 @@ public class MessageManager {
 
 	private Integer expirationPeriod;
 
-	public void addMessage(Message msg) {
-		msg.setCreationTime(world.getTime());
+	public void addMessage(Message msg, long creationTime) {
+		msg.setCreationTime(creationTime);
 		messages.add(msg);
 	}
 
-	public void execute() {
+	public void execute(long time) {
 		// render message
 		for (Message msg : messages) {
-			if (msg.getCreationTime() + getExpirationPeriod() < world.getTime()) {
+			if (msg.getCreationTime() + getExpirationPeriod() < time) {
 				messagesToBeDeleted.add(msg);
 			}
 		}

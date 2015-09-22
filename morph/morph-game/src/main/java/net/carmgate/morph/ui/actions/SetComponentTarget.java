@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;
 
+import net.carmgate.morph.managers.ComponentManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.World.TimeFreezeCause;
 import net.carmgate.morph.model.entities.PhysicalEntity;
@@ -34,6 +35,7 @@ public class SetComponentTarget implements MouseListener {
 	@Inject private GameMouse gameMouse;
 	@Inject private World world;
 	@Inject private DragContext dragContext;
+	@Inject private ComponentManager componentManager;
 
 	@SuppressWarnings("unused")
 	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
@@ -54,7 +56,8 @@ public class SetComponentTarget implements MouseListener {
 				&& inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
 				// && inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
 				&& !dragContext.dragInProgress()
-				&& uiContext.getSelectedCmp() != null && uiContext.getSelectedCmp().isAvailable() && uiContext.getSelectedCmp().hasEnoughResources()) {
+				&& uiContext.getSelectedCmp() != null && componentManager.isAvailable(uiContext.getSelectedCmp())
+				&& uiContext.getSelectedCmp().hasEnoughResources()) {
 			dragContext.setOldFP(uiContext.getViewport().getFocalPoint());
 			dragContext.setOldMousePosInWindow(gameMouse.getX(), gameMouse.getY());
 			dragContext.setDragType(DragType.COMPONENT);
@@ -91,8 +94,8 @@ public class SetComponentTarget implements MouseListener {
 			if (world.isTimeFrozen() && world.getTimeFreezeCause() == TimeFreezeCause.COMPONENT_DRAG) {
 				world.toggleTimeFrozen(TimeFreezeCause.COMPONENT_DRAG);
 			}
-			if (selectedCmp.canBeActivated()) {
-				selectedCmp.startBehavior();
+			if (componentManager.canBeActivated(selectedCmp)) {
+				componentManager.startBehavior(selectedCmp);
 			}
 			dragContext.reset();
 		}

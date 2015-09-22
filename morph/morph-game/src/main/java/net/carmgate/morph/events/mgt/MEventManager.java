@@ -21,8 +21,13 @@ import net.carmgate.morph.model.entities.ship.Ship;
 
 @Singleton
 public class MEventManager {
-	@Inject private Logger LOGGER;
+	private static MEventManager instance;
 
+	public static MEventManager getInstance() {
+		return instance;
+	}
+
+	@Inject private Logger LOGGER;
 	private final Map<Type, Set<Method>> observingMethodsMapByOwnerClass = new HashMap<>();
 	private final Map<Type, Set<Method>> observingMethodsMapByEvent = new HashMap<>();
 	private final Map<Type, Set<Object>> instances = new HashMap<>();
@@ -30,6 +35,7 @@ public class MEventManager {
 	private boolean firingEvent;
 	private boolean scanning;
 	private Map<Type, List<Object>> deferredEvents = new HashMap<>();
+
 	private Map<Type, List<Object>> deferredEventsBeingHandled = new HashMap<>();
 
 	public void addEvent(Object o) {
@@ -121,6 +127,7 @@ public class MEventManager {
 
 	@PostConstruct
 	protected void registerWithMEventManager() {
+		instance = this;
 		scanAndRegister(this);
 	}
 

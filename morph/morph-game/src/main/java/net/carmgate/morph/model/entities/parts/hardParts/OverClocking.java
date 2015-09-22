@@ -1,5 +1,6 @@
 package net.carmgate.morph.model.entities.parts.hardParts;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import net.carmgate.morph.conf.Conf;
@@ -8,7 +9,10 @@ import net.carmgate.morph.model.entities.parts.HardPart;
 
 public class OverClocking extends HardPart<Laser> {
 
+	// not available if loaded from database
 	@Inject private Conf conf;
+
+	private Float cooldownFactor;
 
 	@Override
 	public void computeEffectOnComponent(Laser cmp) {
@@ -16,12 +20,17 @@ public class OverClocking extends HardPart<Laser> {
 	}
 
 	public float getCooldownFactor() {
-		return 0.95f;
+		return cooldownFactor;
 	}
 
 	@Override
-	public int getXpNeededForNextLevel() {
-		return 0;
+	@PostConstruct
+	protected void postConstruct() {
+		super.postConstruct();
+		cooldownFactor = conf.getFloatProperty(getClass().getCanonicalName() + ".cooldownFactor");
+		if (cooldownFactor == null) {
+			cooldownFactor = 0f;
+		}
 	}
 
 }

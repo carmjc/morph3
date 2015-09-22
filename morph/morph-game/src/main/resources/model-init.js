@@ -4,6 +4,12 @@ importPackage(Packages.net.carmgate.morph.model.entities.physical.ship.component
 importPackage(Packages.net.carmgate.morph.model.entities.physical.ship.components.laser)
 importPackage(Packages.net.carmgate.morph.model.entities.physical.ship)
 importPackage(Packages.net.carmgate.morph.model.entities.physical)
+importPackage(Packages.net.carmgate.morph.model.entities)
+importPackage(Packages.net.carmgate.morph.model.entities.components.mining)
+importPackage(Packages.net.carmgate.morph.model.entities.components.generator)
+importPackage(Packages.net.carmgate.morph.model.entities.components.offensive)
+importPackage(Packages.net.carmgate.morph.model.entities.components.prop)
+importPackage(Packages.net.carmgate.morph.model.entities.components.repair)
 importPackage(Packages.net.carmgate.morph.model.geometry)
 //importPackage(Packages.net.carmgate.morph.orders)
 importPackage(Packages.org.lwjgl.util.vector)
@@ -20,7 +26,7 @@ asteroid = entityFactory.newInstance(PhysicalEntityType.valueOf("ASTEROID"));
 asteroid.getPos().copy(-500, -80);
 asteroid.mass = 2000;
 asteroid.rotateSpeed = 5;
-world.add(asteroid);
+worldManager.add(asteroid);
 
 ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
 ship.getPos().copy(-200, 200);
@@ -30,16 +36,24 @@ ship.player = me;
 ship.energy = 1;
 ship.resources = 10;
 //ship.getSpeed().copy(-100, -100)
-ship.add(componentFactory.newInstance(MiningLaser.class));
-ship.add(componentFactory.newInstance(SimplePropulsor.class));
-ship.add(componentFactory.newInstance(SimpleGenerator.class));
-ship.add(componentFactory.newInstance(SimpleRepairer.class));
-ship.add(componentFactory.newInstance(Laser.class));
+cmp = componentFactory.newInstance(MiningLaser.class);
+componentManager.init(cmp);
+ship.add(cmp);
+cmp = componentFactory.newInstance(SimplePropulsor.class);
+componentManager.init(cmp);
+ship.add(cmp);
+cmp = componentFactory.newInstance(SimpleGenerator.class);
+componentManager.init(cmp);
+ship.add(cmp);
+cmp = componentFactory.newInstance(SimpleRepairer.class);
+componentManager.init(cmp);
+ship.add(cmp);
+cmp = componentFactory.newInstance(Laser.class);
+componentManager.init(cmp);
+ship.add(cmp);
 ship.setSoftSpaceMax(5);
 ship.setHardSpaceMax(5);
-ship.create();
-//order = orderFactory.newInstance(OrderType.MINE_ASTEROID, ship);
-//order.setAsteroid(asteroid);
-//ship.add(order);
-world.add(ship);
+ship.setXp(5);
+shipManager.create(ship);
+worldManager.add(ship);
 

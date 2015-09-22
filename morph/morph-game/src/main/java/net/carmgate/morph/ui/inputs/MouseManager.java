@@ -37,7 +37,7 @@ public class MouseManager {
 
 			final int dWheel = Mouse.getDWheel();
 			if (dWheel != 0) {
-				final UIEvent event = new UIEvent(EventType.MOUSE_WHEEL, dWheel, new int[] { Mouse.getEventX(), Mouse.getEventY() });
+				final UIEvent event = new UIEvent(EventType.MOUSE_WHEEL, dWheel, -1, new int[] { Mouse.getEventX(), Mouse.getEventY() });
 				inputHistory.addEvent(event);
 				dispatchEvent();
 			}
@@ -50,7 +50,7 @@ public class MouseManager {
 				} else {
 					evtType = EventType.MOUSE_BUTTON_UP;
 				}
-				final UIEvent event = new UIEvent(evtType, Mouse.getEventButton(), new int[] { Mouse.getEventX(), Mouse.getEventY() });
+				final UIEvent event = new UIEvent(evtType, Mouse.getEventButton(), -1, new int[] { Mouse.getEventX(), Mouse.getEventY() });
 				inputHistory.addEvent(event);
 				// dispatchEvent();
 			}
@@ -59,7 +59,7 @@ public class MouseManager {
 			final int dy = Mouse.getDY();
 			if (dx != 0 || dy != 0) {
 				if (inputHistory.getLastMouseEvent().getEventType() != EventType.MOUSE_MOVE) {
-					final UIEvent event = new UIEvent(EventType.MOUSE_MOVE, Mouse.getEventButton(), new int[] { gameMouse.getX(), gameMouse.getY() });
+					final UIEvent event = new UIEvent(EventType.MOUSE_MOVE, Mouse.getEventButton(), -1, new int[] { gameMouse.getX(), gameMouse.getY() });
 					inputHistory.addEvent(event);
 				}
 			}

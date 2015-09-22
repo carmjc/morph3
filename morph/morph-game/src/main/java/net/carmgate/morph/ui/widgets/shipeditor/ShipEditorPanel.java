@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.events.entities.ship.ShipSelected;
 import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.managers.ComponentManager;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.parts.HardPart;
 import net.carmgate.morph.model.entities.parts.Part;
@@ -33,6 +34,7 @@ public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 	@Inject private UIContext uiContext;
 	@Inject private RenderUtils renderUtils;
 	@Inject private WidgetFactory widgetFactory;
+	@Inject private ComponentManager componentManager;
 
 	private ColumnLayoutWidgetContainer rootContainer;
 	private RowLayoutWidgetContainer cmpListPanel;
@@ -161,7 +163,7 @@ public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 			LOGGER.debug("Upgraded");
 			part.setLevel(part.getLevel() + 1);
 			ship.setXp(ship.getXp() - part.getXpNeededForNextLevel());
-			part.getComponent().init();
+			componentManager.init(part.getComponent());
 
 			partLabels.get(part).setText(part.getClass().getSimpleName() + ": level " + part.getLevel());
 			partButtons.get(part).setText("^ " + part.getXpNeededForNextLevel() + " XP");

@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;
 
+import net.carmgate.morph.managers.ComponentManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.NeedsTarget;
@@ -45,6 +46,8 @@ public class Select implements MouseListener {
 			this.targetType = targetType;
 		}
 	}
+
+	@Inject private ComponentManager componentManager;
 
 	@Inject private Logger LOGGER;
 	@Inject private MouseManager mouseManager;
@@ -98,8 +101,8 @@ public class Select implements MouseListener {
 				if (cmp.getTarget() == null && !world.isTimeFrozen()
 						&& cmp.getClass().isAnnotationPresent(NeedsTarget.class)) {
 					// world.toggleTimeFrozen(TimeFreezeCause.COMPONENT_DRAG);
-				} else if (cmp.canBeActivated()) {
-					cmp.startBehavior();
+				} else if (componentManager.canBeActivated(cmp)) {
+					componentManager.startBehavior(cmp);
 
 				}
 			} else {

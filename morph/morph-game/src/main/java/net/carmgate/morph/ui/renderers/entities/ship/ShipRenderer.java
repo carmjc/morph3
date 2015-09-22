@@ -19,6 +19,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.managers.ComponentManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
@@ -54,6 +55,7 @@ public class ShipRenderer implements Renderer<Ship> {
 	@Inject private Logger LOGGER;
 	@Inject private DragContext dragContext;
 	@Inject private RenderUtils renderUtils;
+	@Inject private ComponentManager componentManager;
 
 	@Override
 	public void init() {
@@ -321,10 +323,11 @@ public class ShipRenderer implements Renderer<Ship> {
 				renderUtils.renderSprite(width, texture);
 			}
 
-			if (cmp.getAvailability() < 1) {
+			if (componentManager.getAvailability(cmp) < 1) {
 				GL11.glColor4f(0, 0, 0, 0.8f);
 				GL11.glRotatef(-ship.getRotation() - 90, 0, 0, 1);
-				renderUtils.renderAntialiasedPartialDisc(0 + cmp.getAvailability(), 1, width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha }, zoom);
+				renderUtils.renderAntialiasedPartialDisc(0 + componentManager.getAvailability(cmp), 1, width / 2 - 20, new float[] { 0, 0, 0, 0.8f * alpha },
+						zoom);
 				GL11.glRotatef(ship.getRotation() + 90, 0, 0, 1);
 			}
 

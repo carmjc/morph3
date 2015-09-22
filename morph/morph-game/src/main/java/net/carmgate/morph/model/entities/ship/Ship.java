@@ -3,38 +3,34 @@ package net.carmgate.morph.model.entities.ship;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 
-import org.slf4j.Logger;
-
-import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.events.entities.ship.ShipComponentsUpdated;
-import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.model.Player;
-import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.XPHolder;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentKind;
 import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.script.util.ScriptManager;
 
+@Entity
+@NamedQueries({
+	@NamedQuery(name = "findAll", query = "from Ship")
+})
 public class Ship extends PhysicalEntity {
 
 	public static final float MAX_PROPULSOR_FORCE = 200f;
 
-	@Inject private ScriptManager scriptManager;
-	@Inject private XPHolder xpHolder;
-	@Inject private Conf conf;
-	@Inject private World world;
-	@Inject private Logger LOGGER;
-
-	private Player owner;
+	@ManyToOne(cascade = CascadeType.ALL) private Player owner;
 	private float durability;
-	private final Map<ComponentType, Component> components = new HashMap<>();
+	@OneToMany(cascade = CascadeType.ALL) private final Map<ComponentType, Component> components = new HashMap<>();
 
 	// internal economics
 	private float energy;
@@ -43,56 +39,26 @@ public class Ship extends PhysicalEntity {
 	private float resourcesMax;
 	private float integrity = 1;
 	private int xp;
-
 	private float maxDamageDt = 0;
 	private float maxDefenseDt = 0;
 
-	public Vector2f debug1 = new Vector2f();
-	public Vector2f debug2 = new Vector2f();
-	public Vector2f debug3 = new Vector2f();
-	public Vector2f debug4 = new Vector2f();
-	private boolean forceStop;
+	@Transient public Vector2f debug1 = new Vector2f();
+	@Transient public Vector2f debug2 = new Vector2f();
+	@Transient public Vector2f debug3 = new Vector2f();
+	@Transient public Vector2f debug4 = new Vector2f();
+	@Transient private boolean forceStop;
 	private long creationTime;
 
 	private int softSpaceMax;
 	private int hardSpaceMax;
 	private Integer xpMax;
 
+	@Transient private MEventManager eventManager;
+
 	public void add(Component component) {
 		component.setShip(this);
 		ComponentKind componentKind = component.getClass().getAnnotation(ComponentKind.class);
 		components.put(componentKind.value(), component);
-	}
-
-	public void computeMaxDamageDt() {
-		Component laser = getComponents().get(ComponentType.LASERS);
-		if (laser == null) {
-			maxDamageDt = 0f;
-			return;
-		}
-		maxDamageDt = laser.getDamage() / laser.getCooldown();
-	}
-
-	public void computeMaxDefenseDt() {
-		Component repairer = getComponents().get(ComponentType.REPAIRER);
-		if (repairer == null) {
-			maxDefenseDt = 0;
-			return;
-		}
-		maxDefenseDt = repairer.getDurabilityDt() / repairer.getCooldown();
-	}
-
-	/**
-	 * Call this method to materialize the ship
-	 */
-	public void create() {
-		creationTime = world.getTime();
-
-		computeMaxDamageDt();
-		computeMaxDefenseDt();
-
-		// conf
-		xpMax = conf.getIntProperty("xp.max");
 	}
 
 	public Map<ComponentType, Component> getComponents() {
@@ -155,29 +121,18 @@ public class Ship extends PhysicalEntity {
 		return xpMax;
 	}
 
-	@PostConstruct
-	private void init() {
-		xpHolder.setShip(this);
-	}
-
 	public boolean isForceStop() {
 		return forceStop;
 	}
 
-	@SuppressWarnings("unused")
-	private void onShipComponentsUpdated(@MObserves ShipComponentsUpdated shipComponentsUpdated) {
-		computeMaxDamageDt();
-		computeMaxDefenseDt();
+	@PostLoad
+	private void postLoad() {
+		eventManager = MEventManager.getInstance();
+		eventManager.scanAndRegister(this);
 	}
 
-	@SuppressWarnings("unused")
-	private void onShipDeath(@MObserves ShipDeath shipDeath) {
-		if (shipDeath.getShip() != this) {
-			HashMap<String, Object> inputs = new HashMap<>();
-			inputs.put("self", this);
-			inputs.put("ship", new ReadOnlyShip(shipDeath.getShip()));
-			scriptManager.callScript("onOtherShipDeath", getPlayer(), inputs, null);
-		}
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
 	}
 
 	public void setDurability(float durability) {
@@ -204,6 +159,14 @@ public class Ship extends PhysicalEntity {
 		this.integrity = integrity;
 	}
 
+	public void setMaxDamageDt(float maxDamageDt) {
+		this.maxDamageDt = maxDamageDt;
+	}
+
+	public void setMaxDefenseDt(float maxDefenseDt) {
+		this.maxDefenseDt = maxDefenseDt;
+	}
+
 	public void setPlayer(Player owner) {
 		this.owner = owner;
 	}
@@ -222,5 +185,9 @@ public class Ship extends PhysicalEntity {
 
 	public void setXp(int xp) {
 		this.xp = xp;
+	}
+
+	public void setXpMax(Integer xpMax) {
+		this.xpMax = xpMax;
 	}
 }

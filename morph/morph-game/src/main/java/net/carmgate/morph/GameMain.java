@@ -3,6 +3,7 @@ package net.carmgate.morph;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.Display;
@@ -15,6 +16,7 @@ import net.carmgate.morph.events.WorldEventFactory;
 import net.carmgate.morph.events.WorldEventType;
 import net.carmgate.morph.events.entities.ship.ShipDeath;
 import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.managers.ComponentManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
@@ -46,12 +48,18 @@ public class GameMain {
 	@Inject private AiManager aiManager;
 	@Inject private RenderingManager renderingManager;
 	@Inject private MessageManager messageManager;
+	@Inject private EntityManager em;
+	@Inject private ComponentManager componentManager;
 
 	// Computation attributes
 	private long lastUpdateTime = 0;
 
 	// misc attributes
 	private boolean gameLoaded;
+
+	private void initDb() {
+		LOGGER.debug("em: " + em);
+	}
 
 	public void loop() {
 		// init OpenGL context
@@ -60,10 +68,14 @@ public class GameMain {
 		// init GUI
 		renderingManager.initGui();
 
-		aiManager.addWave();
-		updateWorld();
+		// init db
+		initDb();
 
-		messageManager.addMessage(new Message("Game Loaded"));
+		// aiManager.addWave();
+		updateWorld();
+		eventManager.scanAndRegister(world);
+
+		messageManager.addMessage(new Message("Game Loaded"), world.getTime());
 
 		// Rendering loop
 		while (true) {
@@ -125,21 +137,27 @@ public class GameMain {
 			aiManager.execute();
 
 			// misc
-			messageManager.execute();
+			messageManager.execute(world.getTime());
 		}
 	}
 
 	@SuppressWarnings("unused")
 	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
 		new Thread((Runnable) () -> {
-			while (!GameMain.this.gameLoaded) {
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
-					LOGGER.error("Thread.sleep interrupted", e); //$NON-NLS-1$
+			try {
+				while (!GameMain.this.gameLoaded) {
+					try {
+						Thread.sleep(100);
+					} catch (Exception e) {
+						LOGGER.error("Thread.sleep interrupted", e); //$NON-NLS-1$
+					}
 				}
+				loop();
+			} catch (Throwable t) {
+				LOGGER.error("Error in main game loop", t);
+			} finally {
+				System.exit(2);
 			}
-			loop();
 		} , "Game engine").start(); //$NON-NLS-1$
 	}
 
@@ -235,7 +253,7 @@ public class GameMain {
 			// Take into account component updates
 			for (Component cmp : ship.getComponents().values()) {
 				if (cmp.isActive()) {
-					cmp.evalBehavior();
+					componentManager.evalBehavior(cmp);
 				}
 			}
 

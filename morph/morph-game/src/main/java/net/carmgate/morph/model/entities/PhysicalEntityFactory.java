@@ -9,17 +9,17 @@ import net.carmgate.morph.events.mgt.MEventManager;
 @Singleton
 public class PhysicalEntityFactory {
 
-   @Inject private Instance<PhysicalEntity> physicalEntities;
-   @Inject private MEventManager eventManager;
+	@Inject private Instance<PhysicalEntity> physicalEntities;
+	@Inject private MEventManager eventManager;
 
-   private int idGen = 0;
+	private int idGen = 0;
 
-   @SuppressWarnings("unchecked")
-   public <U extends PhysicalEntity> U newInstance(PhysicalEntityType type) {
-      final U u = (U) physicalEntities.select(type.getClazz()).get();
-      u.setId(idGen++);
-      eventManager.scanAndRegister(u);
-      return u;
-   }
+	@SuppressWarnings("unchecked")
+	public <U extends PhysicalEntity> U newInstance(PhysicalEntityType type) {
+		final U u = (U) physicalEntities.select(type.getClazz()).get();
+		u.setId(idGen++);
+		eventManager.scanAndRegister(u);
+		return u;
+	}
 
 }

@@ -4,13 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
+import javax.persistence.Transient;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.events.mgt.MEventManager;
 import net.carmgate.morph.model.Holder;
-import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.parts.HardPart;
@@ -19,25 +26,27 @@ import net.carmgate.morph.model.entities.parts.SoftPart;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Component implements Activable {
 	public static final float SCALE = 3.292f * 2;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Component.class);
 
-	private int id;
+	@Transient protected MEventManager eventManager;
+
+	@Id private int id;
 	private Vector2f posInShip = new Vector2f();
-	private boolean active;
-	private Animation animation;
-	private final Holder<Ship> shipHolder = new Holder<>();
-	private final Holder<PhysicalEntity> targetHolder = new Holder<>();
+	@Transient private boolean active;
+	@Transient private Animation animation;
+	@Transient private final Holder<Ship> shipHolder = new Holder<>();
+	@Transient private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 	private Vector2f targetPosInWorld;
 	private long lastActivation;
 	private float[] color;
+	@ManyToOne private Ship ship;
 
-	private final List<HardPart> hardParts = new ArrayList<>();
-	private final List<SoftPart> softParts = new ArrayList<>();
-
-	@Inject private World world;
-	@Inject private Conf conf;
-	@Inject private Logger LOGGER;
+	@Transient private final List<HardPart> hardParts = new ArrayList<>();
+	@Transient private final List<SoftPart> softParts = new ArrayList<>();
 
 	private Float cooldown;
 	private Float damage;
@@ -61,27 +70,8 @@ public abstract class Component implements Activable {
 		return false;
 	}
 
-	public boolean canBeActivated() {
-		return hasEnoughResources()
-				&& isAvailable()
-				&& (!getClass().isAnnotationPresent(NeedsTarget.class)
-						|| isPosWithinRange(targetPosInWorld));
-	}
-
 	public Animation getAnimation() {
 		return animation;
-	}
-
-	public float getAvailability() {
-		if (getCooldown() == 0) {
-			return 1;
-		}
-
-		float value = ((float) world.getTime() - getLastActivation()) / getCooldown() / 1000;
-		if (getLastActivation() == 0) {
-			value = 1;
-		}
-		return value;
 	}
 
 	public float[] getColor() {
@@ -176,68 +166,26 @@ public abstract class Component implements Activable {
 		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0;
 	}
 
-	@PostConstruct
-	public void init() {
-		color = conf.getFloatArrayProperty(getClass().getCanonicalName() + ".color");
-		damage = conf.getFloatProperty(getClass().getCanonicalName() + ".target.damage");
-
-		cooldown = conf.getFloatProperty(getClass().getCanonicalName() + ".cooldown");
-		if (cooldown == null) {
-			cooldown = 0f;
-		}
-
-		durability = conf.getFloatProperty(getClass().getCanonicalName() + ".durabilityDt");
-		if (durability == null) {
-			durability = 0f;
-		}
-
-		energyDt = conf.getFloatProperty(getClass().getCanonicalName() + ".energyDt");
-		if (energyDt == null) {
-			energyDt = 0f;
-		}
-
-		integrity = conf.getFloatProperty(getClass().getCanonicalName() + ".integrityDt");
-		if (integrity == null) {
-			integrity = 0f;
-		}
-
-		maxStoredEnergy = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredEnergy");
-		if (maxStoredEnergy == null) {
-			maxStoredEnergy = 0f;
-		}
-
-		maxStoredResources = conf.getFloatProperty(getClass().getCanonicalName() + ".maxStoredResources");
-		if (maxStoredResources == null) {
-			maxStoredResources = 0f;
-		}
-
-		range = conf.getFloatProperty(getClass().getCanonicalName() + ".range");
-		if (range == null) {
-			range = 0f;
-		}
-
-		resourceDt = conf.getFloatProperty(getClass().getCanonicalName() + ".resourceDt");
-		if (resourceDt == null) {
-			resourceDt = 0f;
-		}
-
-		updateComponentWithEffectOfParts();
-	}
-
-	public void initBehavior() {
-	}
-
 	@Override
 	public boolean isActive() {
 		return active;
 	}
 
-	public boolean isAvailable() {
-		return (getLastActivation() == 0 || getAvailability() >= 1) && !isActive();
+	public boolean isPosWithinRange(Vector2f pos) {
+		return pos != null && (getRange() == 0 || pos.distanceToSquared(getShip().getPos()) <= getRange() * getRange());
 	}
 
-	public boolean isPosWithinRange(Vector2f pos) {
-		return pos != null && (getRange() == 0 || pos.clone().sub(getShip().getPos()).lengthSquared() <= getRange() * getRange());
+	@PostLoad
+	@PostConstruct
+	protected void postLoad() {
+		shipHolder.set(ship);
+		eventManager = MEventManager.getInstance();
+		eventManager.scanAndRegister(this);
+	}
+
+	@PrePersist
+	private void prePersist() {
+		ship = shipHolder.get();
 	}
 
 	public boolean removePart(Part part) {
@@ -257,6 +205,10 @@ public abstract class Component implements Activable {
 
 	public void setAnimation(Animation animation) {
 		this.animation = animation;
+	}
+
+	public void setColor(float[] color) {
+		this.color = color;
 	}
 
 	public void setCooldown(float cooldown) {
@@ -318,27 +270,6 @@ public abstract class Component implements Activable {
 
 	public void setTargetPosInWorld(Vector2f targetPosInWorld) {
 		this.targetPosInWorld = targetPosInWorld;
-	}
-
-	@Override
-	public final void startBehavior() {
-		getShip().setEnergy(getShip().getEnergy() + getEnergyDt());
-		getShip().setResources(getShip().getResources() + getResourcesDt());
-		getShip().setIntegrity(getShip().getIntegrity() + getDurabilityDt() / getShip().getDurability());
-		setLastActivation(world.getTime());
-
-		initBehavior();
-		evalBehavior();
-	}
-
-	private void updateComponentWithEffectOfParts() {
-		for (SoftPart softPart : getSoftParts()) {
-			softPart.computeEffectOnComponent(this);
-		}
-
-		for (HardPart hardPart : getHardParts()) {
-			hardPart.computeEffectOnComponent(this);
-		}
 	}
 
 }

@@ -10,9 +10,13 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.calculator.Calculator;
+import net.carmgate.morph.managers.ComponentManager;
+import net.carmgate.morph.managers.ShipManager;
+import net.carmgate.morph.managers.WorldManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.PhysicalEntityType;
+import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentFactory;
 import net.carmgate.morph.model.entities.components.generator.SimpleGenerator;
 import net.carmgate.morph.model.entities.components.mining.MiningLaser;
@@ -29,13 +33,16 @@ public class AiManager {
 	@Inject private PhysicalEntityFactory physicalEntityFactory;
 	@Inject private ComponentFactory componentFactory;
 	@Inject private Calculator calculator;
+	@Inject private ShipManager shipManager;
+	@Inject private ComponentManager componentManager;
+	@Inject private WorldManager worldManager;
 
 	private long aiLastUpdateTime = 0;
 
 	public void addWave() {
 		float danger = Float.MAX_VALUE;
 		List<Ship> ennemies = new ArrayList<>();
-		while (danger > 1.5) {
+		while (danger > 2) {
 			Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
 			ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
 			ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
@@ -45,28 +52,38 @@ public class AiManager {
 			ship.setIntegrity(1);
 			ship.setDurability(1);
 			ship.setRotation(new Random().nextFloat() * 360);
-			ship.add(componentFactory.newInstance(Laser.class));
-			ship.add(componentFactory.newInstance(SimplePropulsor.class));
-			ship.add(componentFactory.newInstance(SimpleGenerator.class));
-			ship.add(componentFactory.newInstance(MiningLaser.class));
-			ship.create();
+			Component cmp = componentFactory.newInstance(Laser.class);
+			componentManager.init(cmp);
+			ship.add(cmp);
+			cmp = componentFactory.newInstance(SimplePropulsor.class);
+			componentManager.init(cmp);
+			ship.add(cmp);
+			cmp = componentFactory.newInstance(SimpleGenerator.class);
+			componentManager.init(cmp);
+			ship.add(cmp);
+			cmp = componentFactory.newInstance(MiningLaser.class);
+			componentManager.init(cmp);
+			ship.add(cmp);
+			shipManager.create(ship);
 			ennemies.add(ship);
 			danger = calculator.computeDanger(world.getPlayerShip(), ennemies);
 			LOGGER.debug("Danger (" + ennemies.size() + "): " + danger); //$NON-NLS-1$ //$NON-NLS-2$
-			if (danger > 1.5) {
-				world.add(ship);
+			if (danger > 2) {
+				worldManager.add(ship);
 			}
 		}
 	}
 
 	public void execute() {
-		if (world.getTime() - aiLastUpdateTime > 500) {
+
+		if (world.getTime() - world.getAiLastUpdate() > 500) {
 			for (Ship ship : world.getShips()) {
 				if ("Other".equals(ship.getPlayer().getName())) {
+					LOGGER.debug("running for ship: " + ship.getPlayer().getName());
 					ai.run(ship);
 				}
 			}
-			aiLastUpdateTime = world.getTime();
+			world.setAiLastUpdate(world.getTime());
 		}
 	}
 }
