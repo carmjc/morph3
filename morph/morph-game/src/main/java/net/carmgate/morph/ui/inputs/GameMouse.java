@@ -14,14 +14,13 @@ import org.slf4j.Logger;
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntity;
-import net.carmgate.morph.model.entities.components.Activable;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.UIContext.Context;
+import net.carmgate.morph.ui.actions.selection.Select.PickingResult;
 import net.carmgate.morph.ui.Window;
-import net.carmgate.morph.ui.actions.Select.PickingResult;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer.TargetType;
 import net.carmgate.morph.ui.renderers.entities.PhysicalEntitySelectRenderer;
@@ -184,7 +183,7 @@ public class GameMouse {
 				}
 			}
 			int cmpId = selectBuf.get(selectBufIndex++);
-			Activable pickedCmp = null;
+			Component pickedCmp = null;
 			for (Component cmp : pickedShip.getComponents().values()) {
 				if (cmp.getId() == cmpId) {
 					pickedCmp = cmp;

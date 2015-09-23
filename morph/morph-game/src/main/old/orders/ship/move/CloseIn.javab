@@ -3,8 +3,8 @@ package net.carmgate.morph.orders.ship.move;
 import javax.inject.Inject;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.events.world.entities.ship.ShipDeath;
+import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.entities.components.ComponentType;

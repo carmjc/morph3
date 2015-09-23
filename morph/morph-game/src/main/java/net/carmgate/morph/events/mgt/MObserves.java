@@ -1,9 +1,0 @@
-package net.carmgate.morph.events.mgt;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MObserves {
-
-}

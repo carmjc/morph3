@@ -15,7 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.event.Observes;
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -53,7 +54,6 @@ import net.carmgate.morph.ui.renderers.Renderable;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
-import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 import net.carmgate.morph.ui.widgets.AbsoluteLayoutContainer;
@@ -74,6 +74,7 @@ public class RenderingManager {
 	@Inject private InputHistory inputHistory;
 	@Inject private RenderUtils renderUtils;
 	@Inject private World world;
+	@Inject private Instance<Renderer<? extends Renderable>> rendererInstances;
 
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
@@ -187,28 +188,29 @@ public class RenderingManager {
 		}
 	}
 
-	@SuppressWarnings({ "unused" })
-	private void registerRenderer(@Observes NewRendererFound event) {
-		try {
-			final Renderer<? extends Renderable> renderer = event.getRenderer();
-			final Type[] interfaces = renderer.getClass().getGenericInterfaces();
-			for (final Type interf : interfaces) {
-				if (interf instanceof ParameterizedType) {
-					final ParameterizedType paramType = (ParameterizedType) interf;
-					if (paramType.getRawType().equals(Renderer.class)) {
-						final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
-						renderers.put(type, renderer);
-						LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					if (paramType.getRawType().equals(SelectRenderer.class)) {
-						final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
-						selectRenderers.put(type, renderer);
-						LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-					}
+	@PostConstruct
+	private void postContruct() {
+		rendererInstances.forEach((renderer) -> {
+			registerRenderer(renderer);
+		});
+	}
+
+	public void registerRenderer(final Renderer<? extends Renderable> renderer) {
+		final Type[] interfaces = renderer.getClass().getGenericInterfaces();
+		for (final Type interf : interfaces) {
+			if (interf instanceof ParameterizedType) {
+				final ParameterizedType paramType = (ParameterizedType) interf;
+				if (paramType.getRawType().equals(Renderer.class)) {
+					final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
+					renderers.put(type, renderer);
+					LOGGER.debug("Added new renderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				if (paramType.getRawType().equals(SelectRenderer.class)) {
+					final Class<? extends Renderable> type = (Class<? extends Renderable>) paramType.getActualTypeArguments()[0];
+					selectRenderers.put(type, renderer);
+					LOGGER.debug("Added new selectRenderer: " + renderer.getClass().getName() + " for " + type.getName()); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
-		} catch (final Exception e) {
-			LOGGER.error("Error", e); //$NON-NLS-1$
 		}
 	}
 
@@ -221,15 +223,15 @@ public class RenderingManager {
 
 			Collection<Component> components = ship.getComponents().values();
 			components.forEach(cmp -> {
-				if (cmp.isActive()) {// && !cmp.isFamished() && !cmp.isUseless()) {
+				if (cmp.isActive()) {
 					Animation anim = cmp.getAnimation();
 					if (anim != null) {
 						Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
-						if (anim.getAnimationEnd() > world.getTime()) {
+						if (anim.getEnd() > world.getTime()) {
 							renderer.render(anim, 1f);
 						}
-						if (anim.getAnimationEnd() + anim.getAnimationCoolDown() < world.getTime()) {
-							anim.setAnimationEnd(anim.getAnimationEnd() + anim.getAnimationCoolDown() + anim.getAnimationDuration());
+						if (anim.getEnd() + anim.getCoolDown() < world.getTime()) {
+							anim.setEnd(anim.getEnd() + anim.getCoolDown() + anim.getDuration());
 						}
 					}
 				}
@@ -271,7 +273,7 @@ public class RenderingManager {
 
 	private void renderGuiForSelectedShip() {
 		Ship ship = uiContext.getSelectedShip();
-		float borderLeftX = uiContext.getWindow().getWidth() / 2 - 2;
+		float borderLeftX = uiContext.getWindow().getWidth() / 2 - 4;
 		float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
 		int line = 1;
 		if (ship != null) {

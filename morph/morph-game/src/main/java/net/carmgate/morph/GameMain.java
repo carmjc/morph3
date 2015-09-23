@@ -12,17 +12,16 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.ai.AiManager;
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.events.WorldEventFactory;
-import net.carmgate.morph.events.WorldEventType;
-import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.events.mgt.MEventManager;
-import net.carmgate.morph.managers.ComponentManager;
+import net.carmgate.morph.events.MEventManager;
+import net.carmgate.morph.events.world.WorldEventFactory;
+import net.carmgate.morph.events.world.entities.ship.ShipDeath;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
+import net.carmgate.morph.services.ComponentManager;
 import net.carmgate.morph.ui.MessageManager;
 import net.carmgate.morph.ui.MessageManager.Message;
 import net.carmgate.morph.ui.RenderingManager;
@@ -71,7 +70,10 @@ public class GameMain {
 		// init db
 		initDb();
 
-		// aiManager.addWave();
+		// FIXME implement real wave management
+		if (world.getShips().size() <= 1) {
+			aiManager.addWave();
+		}
 		updateWorld();
 		eventManager.scanAndRegister(world);
 
@@ -245,7 +247,7 @@ public class GameMain {
 		for (final Ship ship : world.getShips()) {
 			// Check if the ship is still alive
 			if (ship.getIntegrity() <= 0) {
-				final ShipDeath shipDead = worldEventFactory.newInstance(WorldEventType.SHIP_DEATH);
+				final ShipDeath shipDead = worldEventFactory.newInstance(ShipDeath.class);
 				shipDead.setDeadShip(ship);
 				eventManager.addEvent(shipDead);
 			}

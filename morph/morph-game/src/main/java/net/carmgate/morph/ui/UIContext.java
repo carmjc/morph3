@@ -7,10 +7,10 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.events.entities.ship.ShipSelected;
-import net.carmgate.morph.events.mgt.MEventManager;
-import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.events.MEventManager;
+import net.carmgate.morph.events.MObserves;
+import net.carmgate.morph.events.world.entities.ship.ShipDeath;
+import net.carmgate.morph.events.world.entities.ship.ShipSelected;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;

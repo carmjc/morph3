@@ -1,8 +1,6 @@
 load("nashorn:mozilla_compat.js");
 importPackage(Packages.net.carmgate.morph.model)
-importPackage(Packages.net.carmgate.morph.model.entities.physical.ship.components)
-importPackage(Packages.net.carmgate.morph.model.entities.physical.ship.components.laser)
-importPackage(Packages.net.carmgate.morph.model.entities.physical.ship)
+importPackage(Packages.net.carmgate.morph.model.entities.ship)
 importPackage(Packages.net.carmgate.morph.model.entities.physical)
 importPackage(Packages.net.carmgate.morph.model.entities)
 importPackage(Packages.net.carmgate.morph.model.entities.components.mining)
@@ -22,13 +20,13 @@ other = new Player("Other", Player.PlayerType.AI);
 other.color = [0.2, 1, 0.5, 1];
 world.add(other);
 
-asteroid = entityFactory.newInstance(PhysicalEntityType.valueOf("ASTEROID"));
+asteroid = entityFactory.newInstance(Asteroid.class);
 asteroid.getPos().copy(-500, -80);
 asteroid.mass = 2000;
 asteroid.rotateSpeed = 5;
 worldManager.add(asteroid);
 
-ship = entityFactory.newInstance(PhysicalEntityType.valueOf("SHIP"));
+ship = entityFactory.newInstance(Ship.class);
 ship.getPos().copy(-200, 200);
 ship.mass = 0.5;
 ship.durability = 30;

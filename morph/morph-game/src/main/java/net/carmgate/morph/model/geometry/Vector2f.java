@@ -2,7 +2,7 @@ package net.carmgate.morph.model.geometry;
 
 
 @SuppressWarnings("serial")
-public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<Vector2f> {
+public class Vector2f extends org.lwjgl.util.vector.Vector2f {
 
 	public static final Vector2f NULL = new Vector2f();
 	public static final Vector2f J = new Vector2f(0, -1);
@@ -21,7 +21,6 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 		}
 	}
 
-	@Override
 	public Vector2f add(Vector2f v) {
 		x += v.x;
 		y += v.y;
@@ -48,7 +47,6 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 		return this;
 	}
 
-	@Override
 	public Vector2f copy(Vector2f v) {
 		x = v.x;
 		y = v.y;
@@ -87,7 +85,6 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f implements Vector<V
 		return this;
 	}
 
-	@Override
 	public Vector2f sub(Vector2f v) {
 		x -= v.x;
 		y -= v.y;

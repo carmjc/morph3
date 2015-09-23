@@ -17,8 +17,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
-import net.carmgate.morph.events.entities.ship.ShipDeath;
-import net.carmgate.morph.events.mgt.MObserves;
+import net.carmgate.morph.events.MObserves;
+import net.carmgate.morph.events.world.entities.ship.ShipDeath;
 import net.carmgate.morph.model.animations.world.WorldAnimation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.ship.Ship;
@@ -134,6 +134,10 @@ public class World {
 	private void remove(Ship ship) {
 		ships.remove(ship);
 		physicalEntities.remove(ship);
+	}
+
+	public void resetLastUpdateTime() {
+		lastUpdateTime = new Date().getTime();
 	}
 
 	public void setAiLastUpdate(long aiLastUpdate) {

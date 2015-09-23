@@ -2,12 +2,9 @@ package net.carmgate.morph.ui.renderers.entities.ship;
 
 import java.util.Collection;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 
@@ -20,7 +17,6 @@ import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
-import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 @Singleton
@@ -32,11 +28,6 @@ public class ShipSelectRenderer implements SelectRenderer<Ship> {
 	@Inject private UIContext uiContext;
 	@Inject private World world;
 	@Inject private RenderUtils renderUtils;
-
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-		newRendererEventMgr.fire(new NewRendererFound(this));
-	}
 
 	@Override
 	public void render(Ship ship, float alpha) {

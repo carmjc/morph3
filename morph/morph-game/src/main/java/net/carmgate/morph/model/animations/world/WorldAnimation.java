@@ -15,14 +15,9 @@ public abstract class WorldAnimation extends Animation {
 
 	private Vector2f pos;
 	private long creationTime;
-	private int duration;
 
 	public long getCreationTime() {
 		return creationTime;
-	}
-
-	public int getDuration() {
-		return duration;
 	}
 
 	public Vector2f getPos() {
@@ -32,7 +27,7 @@ public abstract class WorldAnimation extends Animation {
 	@PostConstruct
 	private void init() {
 		creationTime = world.getTime();
-		duration = conf.getIntProperty(getClass().getCanonicalName() + ".duration");
+		setDuration(conf.getIntProperty(getClass().getCanonicalName() + ".duration"));
 	}
 
 	public void setPos(Vector2f pos) {

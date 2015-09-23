@@ -16,7 +16,7 @@ import javax.persistence.Transient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
@@ -25,10 +25,11 @@ import net.carmgate.morph.model.entities.parts.Part;
 import net.carmgate.morph.model.entities.parts.SoftPart;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.physics.ForceSource;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Component implements Activable {
+public abstract class Component {
 	public static final float SCALE = 3.292f * 2;
 	private static final Logger LOGGER = LoggerFactory.getLogger(Component.class);
 
@@ -36,14 +37,17 @@ public abstract class Component implements Activable {
 
 	@Id private int id;
 	private Vector2f posInShip = new Vector2f();
-	@Transient private boolean active;
+	private boolean active;
 	@Transient private Animation animation;
+
 	@Transient private final Holder<Ship> shipHolder = new Holder<>();
 	@Transient private final Holder<PhysicalEntity> targetHolder = new Holder<>();
+	@ManyToOne private Ship ship;
+	@ManyToOne private PhysicalEntity target;
+
 	private Vector2f targetPosInWorld;
 	private long lastActivation;
 	private float[] color;
-	@ManyToOne private Ship ship;
 
 	@Transient private final List<HardPart> hardParts = new ArrayList<>();
 	@Transient private final List<SoftPart> softParts = new ArrayList<>();
@@ -166,7 +170,6 @@ public abstract class Component implements Activable {
 		return getShip().getEnergy() + getEnergyDt() >= 0 && getShip().getResources() + getResourcesDt() >= 0;
 	}
 
-	@Override
 	public boolean isActive() {
 		return active;
 	}
@@ -179,13 +182,23 @@ public abstract class Component implements Activable {
 	@PostConstruct
 	protected void postLoad() {
 		shipHolder.set(ship);
+		targetHolder.set(target);
 		eventManager = MEventManager.getInstance();
 		eventManager.scanAndRegister(this);
+
+		// when loading the component for the first time, getShip() will return null.
+		// This is not problematic since the force source will be added to the ship when the force producer behavior will be initiated
+		// This code is in fact used for when the component is loaded from database
+		if (this instanceof ForceSource && getShip() != null) {
+			// Apply force to ship
+			getShip().getForceSources().add((ForceSource) this);
+		}
 	}
 
 	@PrePersist
 	private void prePersist() {
 		ship = shipHolder.get();
+		target = targetHolder.get();
 	}
 
 	public boolean removePart(Part part) {
@@ -198,7 +211,6 @@ public abstract class Component implements Activable {
 		return false;
 	}
 
-	@Override
 	public void setActive(boolean active) {
 		this.active = active;
 	}

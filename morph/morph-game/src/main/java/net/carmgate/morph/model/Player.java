@@ -3,6 +3,7 @@ package net.carmgate.morph.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -19,7 +20,7 @@ public class Player {
 
 	@Id private int id = newId++;
 	private String name;
-	@OneToMany(mappedBy = "owner")
+	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
 	private List<Ship> ships = new ArrayList<>();
 	private float[] color;
 	private PlayerType playerType;

@@ -11,7 +11,7 @@ import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.model.entities.components.Component;
 
 @Entity

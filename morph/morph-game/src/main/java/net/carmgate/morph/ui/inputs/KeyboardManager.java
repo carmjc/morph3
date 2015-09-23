@@ -3,6 +3,8 @@ package net.carmgate.morph.ui.inputs;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -16,6 +18,7 @@ public class KeyboardManager {
 
 	@Inject private Logger LOGGER;
 	@Inject private InputHistory inputHistory;
+	@Inject private Instance<KeyboardListener> keyboardListenerInstances;
 
 	private List<KeyboardListener> keyboardListeners = new ArrayList<>();
 
@@ -51,6 +54,13 @@ public class KeyboardManager {
 				kl.onKeyboardEvent();
 			});
 		}
+	}
+
+	@PostConstruct
+	private void postConstruct() {
+		keyboardListenerInstances.forEach((clazz) -> {
+			addKeyboardListener(clazz);
+		});
 	}
 
 	public void removeKeyboardListener(KeyboardListener listener) {

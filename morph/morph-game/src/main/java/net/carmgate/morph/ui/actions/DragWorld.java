@@ -1,36 +1,27 @@
 package net.carmgate.morph.ui.actions;
 
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import org.jboss.weld.environment.se.events.ContainerInitialized;
 
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.ViewPort;
-import net.carmgate.morph.ui.actions.DragContext.DragType;
-import net.carmgate.morph.ui.actions.Select.PickingResult;
+import net.carmgate.morph.ui.actions.selection.Select.PickingResult;
+import net.carmgate.morph.ui.inputs.DragContext;
+import net.carmgate.morph.ui.inputs.DragContext.DragType;
 import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.MouseListener;
-import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.inputs.UIEvent.EventType;
 
 @Singleton
 public class DragWorld implements MouseListener {
 
 	@Inject private org.slf4j.Logger LOGGER;
-	@Inject private MouseManager mouseManager;
 	@Inject private InputHistory inputHistory;
 	@Inject private UIContext uiContext;
 	@Inject private GameMouse gameMouse;
 	@Inject private DragContext dragContext;
-
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent) {
-		mouseManager.addMouseListener(this);
-	}
 
 	@Override
 	public void onMouseEvent() {

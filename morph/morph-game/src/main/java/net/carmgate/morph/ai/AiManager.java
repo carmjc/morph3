@@ -10,12 +10,8 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.calculator.Calculator;
-import net.carmgate.morph.managers.ComponentManager;
-import net.carmgate.morph.managers.ShipManager;
-import net.carmgate.morph.managers.WorldManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntityFactory;
-import net.carmgate.morph.model.entities.PhysicalEntityType;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentFactory;
 import net.carmgate.morph.model.entities.components.generator.SimpleGenerator;
@@ -23,6 +19,9 @@ import net.carmgate.morph.model.entities.components.mining.MiningLaser;
 import net.carmgate.morph.model.entities.components.offensive.Laser;
 import net.carmgate.morph.model.entities.components.prop.SimplePropulsor;
 import net.carmgate.morph.model.entities.ship.Ship;
+import net.carmgate.morph.services.ComponentManager;
+import net.carmgate.morph.services.ShipManager;
+import net.carmgate.morph.services.WorldManager;
 
 @Singleton
 public class AiManager {
@@ -37,13 +36,11 @@ public class AiManager {
 	@Inject private ComponentManager componentManager;
 	@Inject private WorldManager worldManager;
 
-	private long aiLastUpdateTime = 0;
-
 	public void addWave() {
 		float danger = Float.MAX_VALUE;
 		List<Ship> ennemies = new ArrayList<>();
 		while (danger > 2) {
-			Ship ship = physicalEntityFactory.newInstance(PhysicalEntityType.SHIP);
+			Ship ship = physicalEntityFactory.newInstance(Ship.class);
 			ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
 			ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
 			ship.setMass(0.5f);
@@ -67,7 +64,7 @@ public class AiManager {
 			shipManager.create(ship);
 			ennemies.add(ship);
 			danger = calculator.computeDanger(world.getPlayerShip(), ennemies);
-			LOGGER.debug("Danger (" + ennemies.size() + "): " + danger); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.debug("Wave global danger (with " + ennemies.size() + " ships): " + danger); //$NON-NLS-1$ //$NON-NLS-2$
 			if (danger > 2) {
 				worldManager.add(ship);
 			}
@@ -79,7 +76,6 @@ public class AiManager {
 		if (world.getTime() - world.getAiLastUpdate() > 500) {
 			for (Ship ship : world.getShips()) {
 				if ("Other".equals(ship.getPlayer().getName())) {
-					LOGGER.debug("running for ship: " + ship.getPlayer().getName());
 					ai.run(ship);
 				}
 			}

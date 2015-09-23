@@ -2,16 +2,12 @@ package net.carmgate.morph.ui.renderers.animations.ship;
 
 import java.util.Random;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.model.animations.ship.MiningLaserAnim;
 import net.carmgate.morph.ui.renderers.Renderer;
-import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 public class MiningLaserRenderer implements Renderer<MiningLaserAnim> {
@@ -20,11 +16,6 @@ public class MiningLaserRenderer implements Renderer<MiningLaserAnim> {
 
 	@Inject private Logger LOGGER;
 	@Inject private RenderUtils renderUtils;
-
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-		newRendererEventMgr.fire(new NewRendererFound(this));
-	}
 
 	@Override
 	public void render(MiningLaserAnim laser, float alpha) {

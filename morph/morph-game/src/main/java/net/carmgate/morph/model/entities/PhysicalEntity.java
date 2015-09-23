@@ -1,7 +1,8 @@
 package net.carmgate.morph.model.entities;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -23,7 +24,7 @@ public abstract class PhysicalEntity implements Renderable {
 	private Vector2f accel = new Vector2f();
 	private float rotate = 0f;
 	private float rotateSpeed = 0f;
-	@Transient private final Set<ForceSource> forceSources = new HashSet<>();
+	@Transient private final Set<ForceSource> forceSources = Collections.newSetFromMap(new WeakHashMap<>());
 	protected float mass;
 	private Float rotationTarget;
 

@@ -383,9 +383,9 @@ public class RenderUtils {
 		float fontRatio = (float) font.getTargetFontSize() / font.getLineHeight();
 		GL11.glScalef(fontRatio, fontRatio, 1);
 		if (align == TextAlign.RIGHT) {
-			x -= font.getWidth(str) * fontRatio;
+			x -= font.getWidth(str);
 		} else if (align == TextAlign.CENTER) {
-			x -= font.getWidth(str) * fontRatio / 2;
+			x -= font.getWidth(str) / 2;
 		}
 		font.drawString(x / fontRatio, (y + font.getTargetFontSize() * (line - 1)) / fontRatio, str, white);
 		GL11.glScalef(1 / fontRatio, 1 / fontRatio, 1);

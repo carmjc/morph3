@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
-import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;

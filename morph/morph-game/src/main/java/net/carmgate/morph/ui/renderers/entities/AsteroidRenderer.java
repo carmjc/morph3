@@ -3,11 +3,8 @@ package net.carmgate.morph.ui.renderers.entities;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
@@ -15,7 +12,6 @@ import org.slf4j.Logger;
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.entities.Asteroid;
 import net.carmgate.morph.ui.renderers.Renderer;
-import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 
 public class AsteroidRenderer implements Renderer<Asteroid> {
@@ -39,11 +35,6 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
 		}
 
 		massToSizeFactor = conf.getFloatProperty("asteroid.renderer.massToSizeFactor"); //$NON-NLS-1$
-	}
-
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-		newRendererEventMgr.fire(new NewRendererFound(this));
 	}
 
 	@Override

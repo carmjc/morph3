@@ -1,10 +1,7 @@
 package net.carmgate.morph.ui.renderers.animations;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 
@@ -13,7 +10,6 @@ import net.carmgate.morph.model.animations.world.XpAwardedAnimation;
 import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.Renderer;
-import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 
@@ -22,11 +18,6 @@ public class XpAwardedAnimationRenderer implements Renderer<XpAwardedAnimation> 
 	@Inject private World world;
 	@Inject private UIContext uiContext;
 	@Inject private RenderUtils renderUtils;
-
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-		newRendererEventMgr.fire(new NewRendererFound(this));
-	}
 
 	@Override
 	public void render(XpAwardedAnimation anim, float alpha) {

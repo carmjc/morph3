@@ -8,7 +8,7 @@ import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.ui.UIContext;
-import net.carmgate.morph.ui.actions.DragContext.DragType;
+import net.carmgate.morph.ui.inputs.DragContext.DragType;
 import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.inputs.MouseListener;

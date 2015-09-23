@@ -4,7 +4,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.events.MEventManager;
 
 @Singleton
 public class PhysicalEntityFactory {
@@ -15,8 +15,8 @@ public class PhysicalEntityFactory {
 	private int idGen = 0;
 
 	@SuppressWarnings("unchecked")
-	public <U extends PhysicalEntity> U newInstance(PhysicalEntityType type) {
-		final U u = (U) physicalEntities.select(type.getClazz()).get();
+	public <U extends PhysicalEntity> U newInstance(Class<U> clazz) {
+		final U u = physicalEntities.select(clazz).get();
 		u.setId(idGen++);
 		eventManager.scanAndRegister(u);
 		return u;

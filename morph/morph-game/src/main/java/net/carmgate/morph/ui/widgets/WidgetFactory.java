@@ -4,7 +4,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import net.carmgate.morph.events.mgt.MEventManager;
+import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.ui.UIContext;
 
 @Singleton

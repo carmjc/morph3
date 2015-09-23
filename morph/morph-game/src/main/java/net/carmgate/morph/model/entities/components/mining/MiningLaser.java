@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
-import net.carmgate.morph.events.entities.component.ComponentLoaded;
+import net.carmgate.morph.events.world.entities.component.ComponentLoaded;
 import net.carmgate.morph.model.animations.ship.MiningLaserAnim;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentKind;

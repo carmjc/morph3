@@ -7,19 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.managers.ComponentManager;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
@@ -32,13 +28,13 @@ import net.carmgate.morph.model.entities.components.prop.SimplePropulsor;
 import net.carmgate.morph.model.entities.components.repair.SimpleRepairer;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.services.ComponentManager;
 import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
-import net.carmgate.morph.ui.actions.DragContext;
-import net.carmgate.morph.ui.actions.DragContext.DragType;
+import net.carmgate.morph.ui.inputs.DragContext;
+import net.carmgate.morph.ui.inputs.DragContext.DragType;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.Renderer;
-import net.carmgate.morph.ui.renderers.events.NewRendererFound;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 
@@ -80,11 +76,6 @@ public class ShipRenderer implements Renderer<Ship> {
 		} catch (IOException e) {
 			LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
 		}
-	}
-
-	@SuppressWarnings("unused")
-	private void onContainerInitialized(@Observes ContainerInitialized containerInitializedEvent, Event<NewRendererFound> newRendererEventMgr) {
-		newRendererEventMgr.fire(new NewRendererFound(this));
 	}
 
 	@Override

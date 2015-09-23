@@ -19,13 +19,6 @@ public class MiningLaserAnim extends Animation {
    private Holder<PhysicalEntity> targetHolder;
    private Holder<Ship> sourceHolder;
 
-   @PostConstruct
-   public void init() {
-      setAnimationDuration(conf.getIntProperty("miningLaser.anim.duration")); //$NON-NLS-1$
-      setAnimationEnd(world.getTime() + getAnimationDuration());
-      setAnimationCoolDown(conf.getIntProperty("miningLaser.anim.cooldown")); //$NON-NLS-1$
-   }
-
    public PhysicalEntity getSource() {
       return sourceHolder.get();
    }
@@ -34,11 +27,19 @@ public class MiningLaserAnim extends Animation {
       return (Asteroid) targetHolder.get();
    }
 
-   public void setTarget(Holder<PhysicalEntity> holder) {
-      targetHolder = holder;
+   @PostConstruct
+   public void init() {
+	   // TODO this should be fixed by using a single duration field
+      setDuration(conf.getIntProperty("miningLaser.anim.duration")); //$NON-NLS-1$
+      setEnd(world.getTime() + getDuration());
+      setCoolDown(conf.getIntProperty("miningLaser.anim.cooldown")); //$NON-NLS-1$
    }
 
    public void setSourceHolder(Holder<Ship> holder) {
       sourceHolder = holder;
+   }
+
+   public void setTarget(Holder<PhysicalEntity> holder) {
+      targetHolder = holder;
    }
 }

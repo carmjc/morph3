@@ -4,34 +4,34 @@ import net.carmgate.morph.ui.renderers.Renderable;
 
 public abstract class Animation implements Renderable {
 
-   private long animationDuration;
-   private long animationEnd;
-   private long animationCoolDown;
+   private long duration;
+   private long end;
+   private long coolDown;
 
    public Animation() {
    }
 
-   public long getAnimationDuration() {
-      return animationDuration;
+   public long getDuration() {
+      return duration;
    }
 
-   protected void setAnimationDuration(long animationDuration) {
-      this.animationDuration = animationDuration;
+   protected void setDuration(long duration) {
+      this.duration = duration;
    }
 
-   public long getAnimationEnd() {
-      return animationEnd;
+   public long getEnd() {
+      return end;
    }
 
-   public void setAnimationEnd(long animationEnd) {
-      this.animationEnd = animationEnd;
+   public void setEnd(long animationEnd) {
+      this.end = animationEnd;
    }
 
-   public long getAnimationCoolDown() {
-      return animationCoolDown;
+   public long getCoolDown() {
+      return coolDown;
    }
 
-   protected void setAnimationCoolDown(long animationCoolDown) {
-      this.animationCoolDown = animationCoolDown;
+   protected void setCoolDown(long coolDown) {
+      this.coolDown = coolDown;
    }
 }

@@ -3,6 +3,8 @@ package net.carmgate.morph.ui.inputs;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -18,6 +20,7 @@ public class MouseManager {
 	@Inject private Logger LOGGER;
 	@Inject private InputHistory inputHistory;
 	@Inject private GameMouse gameMouse;
+	@Inject private Instance<MouseListener> mouseListenerInstances;
 
 	private final List<MouseListener> mouseListeners = new ArrayList<>();
 
@@ -76,6 +79,13 @@ public class MouseManager {
 				inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
 			}
 		}
+	}
+
+	@PostConstruct
+	private void postConstruct() {
+		mouseListenerInstances.forEach((clazz) -> {
+			addMouseListener(clazz);
+		});
 	}
 
 	public void removeMouseListener(MouseListener mouseListener) {

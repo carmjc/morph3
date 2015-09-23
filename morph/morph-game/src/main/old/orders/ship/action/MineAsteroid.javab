@@ -3,8 +3,8 @@ package net.carmgate.morph.orders.ship.action;
 import javax.inject.Inject;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.events.entities.ship.PhysicalEntityToBeRemoved;
-import net.carmgate.morph.events.mgt.MEvent;
+import net.carmgate.morph.events.world.entities.ship.PhysicalEntityToBeRemoved;
+import net.carmgate.morph.events.MEvent;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.Asteroid;
 import net.carmgate.morph.model.entities.components.Component;
