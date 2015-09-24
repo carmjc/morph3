@@ -1,21 +1,40 @@
 package net.carmgate.morph.services.behaviors;
 
+import java.util.Random;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.components.prop.SimplePropulsor;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.particles.Particle;
+import net.carmgate.morph.ui.particles.ParticleEngine;
+import net.carmgate.morph.ui.particles.ParticleSource;
+import net.carmgate.morph.ui.renderers.RenderMode;
 
 public class SimplePropulsorBehavior extends ComponentBehavior<SimplePropulsor> {
 
+	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
+	@Inject private ParticleEngine particleEngine;
+	@Inject private World world;
+	@Inject private UIContext uiContext;
+
+	private ParticleSource particleSource;
 
 	private Vector2f tmpVect = new Vector2f();
 
 	private void endBehavior(SimplePropulsor cmp) {
 		cmp.setActive(false);
 		cmp.setTarget(null);
+
+		particleEngine.removeParticleSource(particleSource);
+		particleSource = null;
 	}
 
 	@Override
@@ -73,8 +92,40 @@ public class SimplePropulsorBehavior extends ComponentBehavior<SimplePropulsor> 
 	public final void init(SimplePropulsor cmp) {
 		cmp.setActive(true);
 
-		// // Apply force to ship
+		// Apply force to ship
 		cmp.getShip().getForceSources().add(cmp);
+
+		// Create particle source
+		final Random random = new Random();
+		particleSource = new ParticleSource() {
+			@Override
+			public Particle createParticle() {
+				Ship playerShip = world.getPlayerShip();
+				float appearanceDistanceSq = playerShip.getPerceptionRadius() * playerShip.getPerceptionRadius();
+				float distanceToShipSq = cmp.getShip().getPos().distanceToSquared(playerShip.getPos());
+
+				if (uiContext.getRenderMode() == RenderMode.DEBUG || distanceToShipSq < appearanceDistanceSq) {
+					Vector2f shipSpeed = cmp.getShip().getSpeed().clone();
+					Particle particle = new Particle();
+					particle.setBg(true);
+					float sameRandom = random.nextFloat();
+					float repX = shipSpeed.x * sameRandom / 8;
+					float repY = shipSpeed.y * sameRandom / 8;
+					particle.getPos().x = cmp.getShip().getPos().x + random.nextFloat() * 10 - 5 - repX;
+					particle.getPos().y = cmp.getShip().getPos().y + random.nextFloat() * 10 - 5 - repY;
+					particle.getSpeed().x = -shipSpeed.x;// + random.nextFloat() * 2;
+					particle.getSpeed().y = -shipSpeed.y;// + random.nextFloat() * 2;
+					particle.setRotation(cmp.getShip().getRotationTarget());
+					particle.setBirthTime(world.getTime());
+					particle.setDeathTime(world.getTime() + 100);
+					return particle;
+				}
+				return null;
+			}
+		};
+		particleSource.setBirthRate(1000);
+
+		particleEngine.addParticleSource(particleSource);
 	}
 
 }

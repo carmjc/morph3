@@ -30,6 +30,7 @@ import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
+import net.carmgate.morph.ui.particles.ParticleEngine;
 import net.carmgate.morph.ui.renderers.RenderMode;
 
 @Singleton
@@ -49,6 +50,7 @@ public class GameMain {
 	@Inject private MessageManager messageManager;
 	@Inject private EntityManager em;
 	@Inject private ComponentManager componentManager;
+	@Inject private ParticleEngine particleEngine;
 
 	// Computation attributes
 	private long lastUpdateTime = 0;
@@ -87,14 +89,18 @@ public class GameMain {
 
 			// Renders everything
 			if (uiContext.getRenderMode() != RenderMode.SELECT_DEBUG) {
+				renderingManager.renderBackground();
+				renderingManager.renderBgParticles();
 				renderingManager.renderComponentsAnimation();
 				renderingManager.renderPhysical();
 				renderingManager.renderWorldAnimation();
+				renderingManager.renderFgParticles();
 				renderingManager.renderGui();
 			} else {
 				gameMouse.renderForSelect();
 			}
 			updateWorld();
+			particleEngine.update();
 
 			// Fire deferred events
 			eventManager.deferredFire();

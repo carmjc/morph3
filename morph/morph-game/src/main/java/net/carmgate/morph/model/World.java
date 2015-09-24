@@ -48,6 +48,7 @@ public class World {
 	@OneToOne(cascade = CascadeType.ALL) private Ship playerShip;
 	private TimeFreezeCause timeFreezeCause;
 	private long aiLastUpdate;
+	@Transient private long millisSinceLastUpdate;
 
 	public void add(Player player) {
 		players.put(player.getName(), player);
@@ -58,6 +59,10 @@ public class World {
 	}
 	public long getAiLastUpdate() {
 		return aiLastUpdate;
+	}
+
+	public long getMillisSinceLastUpdate() {
+		return millisSinceLastUpdate;
 	}
 
 	public List<PhysicalEntity> getNonShipsPhysicalEntities() {
@@ -165,9 +170,11 @@ public class World {
 		long newUpdateTime = new Date().getTime();
 		if (lastUpdateTime != 0) {
 			float timeFactor = timeFrozen ? 0 : this.timeFactor;
-			time += (newUpdateTime - lastUpdateTime) * timeFactor;
-			absoluteTime += newUpdateTime - lastUpdateTime;
+			millisSinceLastUpdate = newUpdateTime - lastUpdateTime;
+			time += millisSinceLastUpdate * timeFactor;
+			absoluteTime += millisSinceLastUpdate;
 		}
+
 		lastUpdateTime = newUpdateTime;
 	}
 

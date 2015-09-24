@@ -52,6 +52,7 @@ public class Ship extends PhysicalEntity {
 	private int softSpaceMax;
 	private int hardSpaceMax;
 	private Integer xpMax;
+	@Transient private Float perceptionRadius;
 
 	@Transient private MEventManager eventManager;
 
@@ -95,6 +96,10 @@ public class Ship extends PhysicalEntity {
 
 	public float getMaxDefenseDt() {
 		return maxDefenseDt;
+	}
+
+	public Float getPerceptionRadius() {
+		return perceptionRadius;
 	}
 
 	public Player getPlayer() {
@@ -165,6 +170,10 @@ public class Ship extends PhysicalEntity {
 
 	public void setMaxDefenseDt(float maxDefenseDt) {
 		this.maxDefenseDt = maxDefenseDt;
+	}
+
+	public void setPerceptionRadius(Float perceptionRadius) {
+		this.perceptionRadius = perceptionRadius;
 	}
 
 	public void setPlayer(Player owner) {

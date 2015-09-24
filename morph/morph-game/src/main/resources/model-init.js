@@ -35,23 +35,18 @@ ship.energy = 1;
 ship.resources = 10;
 //ship.getSpeed().copy(-100, -100)
 cmp = componentFactory.newInstance(MiningLaser.class);
-componentManager.init(cmp);
 ship.add(cmp);
 cmp = componentFactory.newInstance(SimplePropulsor.class);
-componentManager.init(cmp);
 ship.add(cmp);
 cmp = componentFactory.newInstance(SimpleGenerator.class);
-componentManager.init(cmp);
 ship.add(cmp);
 cmp = componentFactory.newInstance(SimpleRepairer.class);
-componentManager.init(cmp);
 ship.add(cmp);
 cmp = componentFactory.newInstance(Laser.class);
-componentManager.init(cmp);
 ship.add(cmp);
 ship.setSoftSpaceMax(5);
 ship.setHardSpaceMax(5);
 ship.setXp(5);
-shipManager.create(ship);
+shipManager.init(ship);
 worldManager.add(ship);
 

@@ -1,7 +1,9 @@
-package net.carmgate.morph.ui.widgets;
+package net.carmgate.morph.ui.widgets.containers;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import net.carmgate.morph.ui.widgets.Widget;
 
 public abstract class WidgetContainer extends Widget {
 

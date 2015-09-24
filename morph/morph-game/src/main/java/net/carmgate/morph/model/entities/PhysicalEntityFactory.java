@@ -5,12 +5,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import net.carmgate.morph.events.MEventManager;
+import net.carmgate.morph.services.ShipManager;
 
 @Singleton
 public class PhysicalEntityFactory {
 
 	@Inject private Instance<PhysicalEntity> physicalEntities;
 	@Inject private MEventManager eventManager;
+	@Inject private ShipManager shipManager;
 
 	private int idGen = 0;
 

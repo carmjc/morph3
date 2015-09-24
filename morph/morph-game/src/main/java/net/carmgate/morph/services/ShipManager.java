@@ -52,7 +52,7 @@ public class ShipManager {
 	}
 
 
-	public void create(Ship ship) {
+	public void init(Ship ship) {
 		ship.setCreationTime(world.getTime());
 
 		computeMaxDamageDt(ship);
@@ -60,6 +60,7 @@ public class ShipManager {
 
 		// conf
 		ship.setXpMax(conf.getIntProperty("xp.max"));
+		ship.setPerceptionRadius(conf.getFloatProperty("ship.perceptionRadius"));
 	}
 
 	@PostConstruct

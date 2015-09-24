@@ -1,4 +1,4 @@
-package net.carmgate.morph.ui.widgets;
+package net.carmgate.morph.ui.widgets.generalpurpose;
 
 import javax.inject.Inject;
 
@@ -10,6 +10,7 @@ import net.carmgate.morph.ui.MessageManager.Message;
 import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
+import net.carmgate.morph.ui.widgets.Widget;
 
 public class MessagesPanel extends Widget {
 

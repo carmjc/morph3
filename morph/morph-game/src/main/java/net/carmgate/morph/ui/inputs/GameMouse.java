@@ -19,8 +19,9 @@ import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.UIContext.Context;
-import net.carmgate.morph.ui.actions.selection.Select.PickingResult;
 import net.carmgate.morph.ui.Window;
+import net.carmgate.morph.ui.actions.selection.Select.PickingResult;
+import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.SelectRenderer.TargetType;
 import net.carmgate.morph.ui.renderers.entities.PhysicalEntitySelectRenderer;
@@ -162,8 +163,12 @@ public class GameMouse {
 					pickedShip = ship;
 				}
 			}
-			pickingResult.setTargetType(TargetType.SHIP);
-			pickingResult.setTarget(pickedShip);
+			Ship playerShip = world.getPlayerShip();
+			if (uiContext.getRenderMode() == RenderMode.DEBUG
+					|| pickedShip.getPos().distanceToSquared(playerShip.getPos()) <= playerShip.getPerceptionRadius() * playerShip.getPerceptionRadius()) {
+				pickingResult.setTargetType(TargetType.SHIP);
+				pickingResult.setTarget(pickedShip);
+			}
 		} else if (targetTypeId == SelectRenderer.TargetType.NON_SHIP_PHYSICAL_ENTITY.ordinal()) {
 			// get the matching element in the model
 			int entityId = selectBuf.get(selectBufIndex++);
@@ -172,8 +177,12 @@ public class GameMouse {
 					pickedEntity = entity;
 				}
 			}
-			pickingResult.setTargetType(TargetType.NON_SHIP_PHYSICAL_ENTITY);
-			pickingResult.setTarget(pickedEntity);
+			Ship playerShip = world.getPlayerShip();
+			if (uiContext.getRenderMode() == RenderMode.DEBUG
+					|| pickedEntity.getPos().distanceToSquared(playerShip.getPos()) <= playerShip.getPerceptionRadius() * playerShip.getPerceptionRadius()) {
+				pickingResult.setTargetType(TargetType.NON_SHIP_PHYSICAL_ENTITY);
+				pickingResult.setTarget(pickedEntity);
+			}
 		} else if (targetTypeId == SelectRenderer.TargetType.COMPONENT.ordinal()) {
 			// get the matching element in the model
 			int shipId = selectBuf.get(selectBufIndex++);

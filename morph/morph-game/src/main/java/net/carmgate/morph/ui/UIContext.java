@@ -16,7 +16,7 @@ import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.widgets.Widget;
-import net.carmgate.morph.ui.widgets.WidgetContainer;
+import net.carmgate.morph.ui.widgets.containers.WidgetContainer;
 
 @Singleton
 public class UIContext {

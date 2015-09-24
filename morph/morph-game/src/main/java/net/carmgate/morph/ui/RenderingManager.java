@@ -48,6 +48,8 @@ import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.inputs.InputHistory;
+import net.carmgate.morph.ui.particles.Particle;
+import net.carmgate.morph.ui.particles.ParticleEngine;
 import net.carmgate.morph.ui.renderers.MorphFont;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.Renderable;
@@ -56,9 +58,10 @@ import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
-import net.carmgate.morph.ui.widgets.AbsoluteLayoutContainer;
-import net.carmgate.morph.ui.widgets.MessagesPanel;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
+import net.carmgate.morph.ui.widgets.containers.AbsoluteLayoutContainer;
+import net.carmgate.morph.ui.widgets.generalpurpose.MessagesPanel;
+import net.carmgate.morph.ui.widgets.radar.RadarWidget;
 import net.carmgate.morph.ui.widgets.shipeditor.ShipEditorPanel;
 
 @Singleton
@@ -74,10 +77,13 @@ public class RenderingManager {
 	@Inject private InputHistory inputHistory;
 	@Inject private RenderUtils renderUtils;
 	@Inject private World world;
+	@Inject private ParticleEngine particleEngine;
 	@Inject private Instance<Renderer<? extends Renderable>> rendererInstances;
 
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
+
+	private Texture particleTexture;
 
 	private Image createMipmapImage(String ref) throws SlickException {
 		// this implementation is subject to change...
@@ -140,6 +146,14 @@ public class RenderingManager {
 		ShipEditorPanel shipEditorPanel = widgetFactory.newInstance(ShipEditorPanel.class);
 		shipEditorPanel.setPosition(new float[] { uiContext.getWindow().getWidth() / 2, 0, 0 });
 		uiContext.getWidgetRoot().add(shipEditorPanel);
+
+		RadarWidget radarWidget = widgetFactory.newInstance(RadarWidget.class);
+		radarWidget.setWidth(150);
+		radarWidget.setHeight(150);
+		radarWidget.setPosition(
+				new float[] { uiContext.getWindow().getWidth() - radarWidget.getWidth() - 10,
+						uiContext.getWindow().getHeight() - radarWidget.getHeight() - 10 });
+		uiContext.getWidgetRoot().add(radarWidget);
 	}
 
 	/**
@@ -152,7 +166,7 @@ public class RenderingManager {
 		LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// set clear color - Wont be needed once we have a background
-		GL11.glClearColor(0.2f, 0.2f, 0.2f, 0f);
+		GL11.glClearColor(0, 0, 0, 0f);
 		GL11.glShadeModel(GL11.GL_SMOOTH);
 
 		// enable alpha blending
@@ -214,6 +228,30 @@ public class RenderingManager {
 		}
 	}
 
+	public void renderBackground() {
+		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final float zoomFactor = uiContext.getViewport().getZoomFactor();
+		GL11.glScalef(zoomFactor, zoomFactor, 1);
+		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+
+		Ship playerShip = world.getPlayerShip();
+		float perceptionRadius = playerShip.getPerceptionRadius();
+		float outerRadius = perceptionRadius / 8;
+
+		Vector2f pos = playerShip.getPos();
+		GL11.glTranslatef(pos.x, pos.y, 0);
+		renderUtils.renderCircle(0, perceptionRadius, 0, outerRadius, new float[] { 0, 0, 0, 0 }, new float[] { 0.2f, 0.2f, 0.2f, 1 },
+				new float[] { 0, 0, 0, 0 });
+		GL11.glTranslatef(-pos.x, -pos.y, 0);
+
+		GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
+		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+	}
+
+	public void renderBgParticles() {
+		renderParticles(particleEngine.getBgParticles());
+	}
+
 	public void renderComponentsAnimation() {
 		for (final Ship ship : world.getShips()) {
 			final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
@@ -228,7 +266,7 @@ public class RenderingManager {
 					if (anim != null) {
 						Renderer<Animation> renderer = (Renderer<Animation>) renderers.get(anim.getClass());
 						if (anim.getEnd() > world.getTime()) {
-							renderer.render(anim, 1f);
+							renderer.render(anim, 0.5f);
 						}
 						if (anim.getEnd() + anim.getCoolDown() < world.getTime()) {
 							anim.setEnd(anim.getEnd() + anim.getCoolDown() + anim.getDuration());
@@ -240,6 +278,10 @@ public class RenderingManager {
 			GL11.glTranslatef(focalPoint.x, focalPoint.y, 0);
 			GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
 		}
+	}
+
+	public void renderFgParticles() {
+		renderParticles(particleEngine.getFgParticles());
 	}
 
 	public void renderGui() {
@@ -316,30 +358,76 @@ public class RenderingManager {
 
 	}
 
+	private void renderParticles(List<Particle> particles) {
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+
+		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final float zoomFactor = uiContext.getViewport().getZoomFactor();
+		GL11.glScalef(zoomFactor, zoomFactor, 1);
+		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
+		int nb = 0;
+
+		for (Particle p : particles) {
+			Renderer<Particle> pRenderer = (Renderer<Particle>) renderers.get(p.getClass());
+			GL11.glTranslatef(p.getPos().x, p.getPos().y, 0);
+			GL11.glRotatef(p.getRotation(), 0, 0, 1);
+			pRenderer.render(p, 1f);
+			GL11.glRotatef(-p.getRotation(), 0, 0, 1);
+			GL11.glTranslatef(-p.getPos().x, -p.getPos().y, 0);
+			nb++;
+		}
+
+		LOGGER.debug("Rendered " + nb + " particles");
+		GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
+		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
+
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+	}
+
 	public void renderPhysical() {
 		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
 		final float zoomFactor = uiContext.getViewport().getZoomFactor();
 		GL11.glScalef(zoomFactor, zoomFactor, 1);
 		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
 
+		Ship playerShip = world.getPlayerShip();
+		float appearanceDistanceSq = playerShip.getPerceptionRadius() * playerShip.getPerceptionRadius() * 81 / 64;
+		float interactionDistanceSq = playerShip.getPerceptionRadius() * playerShip.getPerceptionRadius();
+
 		for (PhysicalEntity entity : world.getPhysicalEntities()) {
-			if (!(entity instanceof Ship)) {
-				final Vector2f pos = entity.getPos();
-				GL11.glTranslatef(pos.x, pos.y, 0);
-				Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
-				renderer.render(entity, 1f);
-				GL11.glTranslatef(-pos.x, -pos.y, 0);
+			float distanceToEntitySq = entity.getPos().distanceToSquared(playerShip.getPos());
+			if (uiContext.getRenderMode() == RenderMode.DEBUG || distanceToEntitySq < appearanceDistanceSq) {
+				float ratio = 1;
+				if (uiContext.getRenderMode() != RenderMode.DEBUG && distanceToEntitySq > interactionDistanceSq) {
+					ratio = (appearanceDistanceSq - distanceToEntitySq) / (appearanceDistanceSq - interactionDistanceSq);
+				}
+
+				if (!(entity instanceof Ship)) {
+					final Vector2f pos = entity.getPos();
+					GL11.glTranslatef(pos.x, pos.y, 0);
+					Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(entity.getClass());
+					renderer.render(entity, ratio);
+					GL11.glTranslatef(-pos.x, -pos.y, 0);
+				}
 			}
 		}
 
 		final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
 		if (shipRenderer != null) {
 			for (final Ship ship : world.getShips()) {
-				final Vector2f pos = ship.getPos();
-				GL11.glTranslatef(pos.x, pos.y, 0);
-				float alpha = Math.min(((float) world.getTime() - ship.getCreationTime()) / 500, 1f);
-				shipRenderer.render(ship, alpha);
-				GL11.glTranslatef(-pos.x, -pos.y, 0);
+				float distanceToShipSq = ship.getPos().distanceToSquared(playerShip.getPos());
+				if (uiContext.getRenderMode() == RenderMode.DEBUG || distanceToShipSq < appearanceDistanceSq) {
+					float ratio = 1;
+					if (uiContext.getRenderMode() != RenderMode.DEBUG && distanceToShipSq > interactionDistanceSq) {
+						ratio = (appearanceDistanceSq - distanceToShipSq) / (appearanceDistanceSq - interactionDistanceSq);
+					}
+
+					final Vector2f pos = ship.getPos();
+					GL11.glTranslatef(pos.x, pos.y, 0);
+					float alpha = Math.min(((float) world.getTime() - ship.getCreationTime()) / 500, 1f);
+					shipRenderer.render(ship, alpha * ratio);
+					GL11.glTranslatef(-pos.x, -pos.y, 0);
+				}
 			}
 		}
 

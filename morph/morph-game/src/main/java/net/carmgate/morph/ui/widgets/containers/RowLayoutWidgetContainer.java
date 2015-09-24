@@ -1,4 +1,4 @@
-package net.carmgate.morph.ui.widgets;
+package net.carmgate.morph.ui.widgets.containers;
 
 import javax.inject.Inject;
 
@@ -6,6 +6,8 @@ import org.lwjgl.opengl.GL11;
 
 import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
+import net.carmgate.morph.ui.widgets.LayoutHint;
+import net.carmgate.morph.ui.widgets.Widget;
 
 public final class RowLayoutWidgetContainer extends WidgetContainer {
 

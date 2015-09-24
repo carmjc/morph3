@@ -19,14 +19,14 @@ import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.UIContext.Context;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
-import net.carmgate.morph.ui.widgets.Button;
-import net.carmgate.morph.ui.widgets.ColumnLayoutWidgetContainer;
-import net.carmgate.morph.ui.widgets.Label;
 import net.carmgate.morph.ui.widgets.LayoutHint;
-import net.carmgate.morph.ui.widgets.RowLayoutWidgetContainer;
 import net.carmgate.morph.ui.widgets.Widget;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 import net.carmgate.morph.ui.widgets.WidgetMouseListener;
+import net.carmgate.morph.ui.widgets.basics.Button;
+import net.carmgate.morph.ui.widgets.basics.Label;
+import net.carmgate.morph.ui.widgets.containers.ColumnLayoutWidgetContainer;
+import net.carmgate.morph.ui.widgets.containers.RowLayoutWidgetContainer;
 
 public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 
