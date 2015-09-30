@@ -42,7 +42,7 @@ public class AiManager {
 			Ship ship = physicalEntityFactory.newInstance(Ship.class);
 			ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
 			ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
-			ship.setMass(0.5f);
+			ship.setMass(1f);
 			ship.setEnergy(20);
 			ship.setResources(20);
 			ship.setIntegrity(1);

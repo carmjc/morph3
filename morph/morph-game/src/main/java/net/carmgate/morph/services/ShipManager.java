@@ -17,6 +17,7 @@ import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.world.XpAwardedAnimation;
 import net.carmgate.morph.model.entities.components.Component;
+import net.carmgate.morph.model.entities.components.ComponentKind;
 import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.ui.MessageManager;
@@ -52,6 +53,11 @@ public class ShipManager {
 	}
 
 
+	@PostConstruct
+	private void init() {
+		eventManager.scanAndRegister(this);
+	}
+
 	public void init(Ship ship) {
 		ship.setCreationTime(world.getTime());
 
@@ -61,11 +67,35 @@ public class ShipManager {
 		// conf
 		ship.setXpMax(conf.getIntProperty("xp.max"));
 		ship.setPerceptionRadius(conf.getFloatProperty("ship.perceptionRadius"));
-	}
 
-	@PostConstruct
-	private void init() {
-		eventManager.scanAndRegister(this);
+		int shipType = 0;
+		int propIndex = 0;
+		int turretIndex = 0;
+		int coreIndex = 0;
+		for (Component cmp : ship.getComponents().values()) {
+			if (cmp.getPosInShip().isNull()) {
+				Float compX;
+				Float compY;
+				if (cmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS) {
+					compX = conf.getFloatProperty("ship." + shipType + ".comps.prop." + propIndex + ".x");
+					compY = conf.getFloatProperty("ship." + shipType + ".comps.prop." + propIndex + ".y");
+					propIndex++;
+				} else if (cmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.LASERS) {
+					compX = conf.getFloatProperty("ship." + shipType + ".comps.turret." + turretIndex + ".x");
+					compY = conf.getFloatProperty("ship." + shipType + ".comps.turret." + turretIndex + ".y");
+					turretIndex++;
+				} else {
+					compX = conf.getFloatProperty("ship." + shipType + ".comps.core." + coreIndex + ".x");
+					compY = conf.getFloatProperty("ship." + shipType + ".comps.core." + coreIndex + ".y");
+					coreIndex++;
+				}
+				if (compX != null && compY != null) {
+					cmp.getPosInShip().copy(compX, compY);
+				} else {
+					cmp.setPosInShip(null);
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings("unused")

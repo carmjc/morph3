@@ -66,7 +66,6 @@ public class ParticleEngine {
 		// generate new particles
 		for (ParticleSource ps : sources) {
 			float nbParticles = ps.getBirthRate() * world.getMillisSinceLastUpdate() / 1000;
-			LOGGER.debug("new particles: " + nbParticles + "(" + ps.getBirthRate() + "/s)");
 			for (int i = 0; i < nbParticles; i++) {
 				Particle p = ps.createParticle();
 				if (p != null) {
@@ -74,7 +73,6 @@ public class ParticleEngine {
 				}
 			}
 		}
-		LOGGER.debug("Current nb of particles: " + particles.size());
 
 		// remove dead particles and compute kinematics
 		for (Particle p : particles) {
@@ -88,7 +86,6 @@ public class ParticleEngine {
 			p.getPos().y += p.getSpeed().y * world.getMillisSinceLastUpdate() / 1000;
 		}
 
-		LOGGER.debug("removing " + particlesToRemove.size() + " particles");
 		if (particlesToRemove.size() > 0) {
 			for (Particle p : particlesToRemove) {
 				removeParticle(p);

@@ -14,10 +14,10 @@ importPackage(Packages.org.lwjgl.util.vector)
 var ArrayList = Java.type('java.util.ArrayList');
 
 me = new Player("Me", Player.PlayerType.PLAYER);
-me.color = [1, 0.5, 0.5, 1];
+me.color = [0, 1, 0, 1];
 world.add(me);
 other = new Player("Other", Player.PlayerType.AI);
-other.color = [0.2, 1, 0.5, 1];
+other.color = [1, 0.2, 0.2, 1];
 world.add(other);
 
 asteroid = entityFactory.newInstance(Asteroid.class);
@@ -28,7 +28,7 @@ worldManager.add(asteroid);
 
 ship = entityFactory.newInstance(Ship.class);
 ship.getPos().copy(-200, 200);
-ship.mass = 0.5;
+ship.mass = 1;
 ship.durability = 30;
 ship.player = me;
 ship.energy = 1;

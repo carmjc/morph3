@@ -40,7 +40,7 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
 	@Override
 	public void render(Asteroid asteroid, float alpha) {
 		float massScale = asteroid.getMass() * massToSizeFactor;
-		float width = 128f;
+		float width = 128;
 
 		int i = 2; // TODO variabilize this
 		int j = 4;

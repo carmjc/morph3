@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.PhysicalEntity;
-import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
@@ -27,6 +26,7 @@ import net.carmgate.morph.ui.renderers.SelectRenderer.TargetType;
 import net.carmgate.morph.ui.renderers.entities.PhysicalEntitySelectRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipSelectRenderer;
 import net.carmgate.morph.ui.widgets.Widget;
+import net.carmgate.morph.ui.widgets.components.ComponentWidget;
 
 /**
  * Allows mouse manipulation in world coordinates.
@@ -153,8 +153,15 @@ public class GameMouse {
 		Ship pickedShip = null;
 		PhysicalEntity pickedEntity = null;
 		if (targetTypeId == SelectRenderer.TargetType.WIDGET.ordinal()) {
-			pickingResult.setTargetType(TargetType.WIDGET);
-			pickingResult.setTarget(uiContext.getWidgets().get(selectBuf.get(selectBufIndex++)));
+			Widget widget = uiContext.getWidgets().get(selectBuf.get(selectBufIndex++));
+
+			if (widget instanceof ComponentWidget) {
+				pickingResult.setTargetType(TargetType.COMPONENT);
+				pickingResult.setTarget(((ComponentWidget) widget).getCmp());
+			} else {
+				pickingResult.setTargetType(TargetType.WIDGET);
+				pickingResult.setTarget(widget);
+			}
 		} else if (targetTypeId == SelectRenderer.TargetType.SHIP.ordinal()) {
 			// get the matching element in the model
 			int shipId = selectBuf.get(selectBufIndex++);
@@ -183,23 +190,23 @@ public class GameMouse {
 				pickingResult.setTargetType(TargetType.NON_SHIP_PHYSICAL_ENTITY);
 				pickingResult.setTarget(pickedEntity);
 			}
-		} else if (targetTypeId == SelectRenderer.TargetType.COMPONENT.ordinal()) {
-			// get the matching element in the model
-			int shipId = selectBuf.get(selectBufIndex++);
-			for (Ship ship : world.getShips()) { // FIXME We should implement the same logic as for widgets with a big map
-				if (ship.getId() == shipId) {
-					pickedShip = ship;
-				}
-			}
-			int cmpId = selectBuf.get(selectBufIndex++);
-			Component pickedCmp = null;
-			for (Component cmp : pickedShip.getComponents().values()) {
-				if (cmp.getId() == cmpId) {
-					pickedCmp = cmp;
-				}
-			}
-			pickingResult.setTargetType(TargetType.COMPONENT);
-			pickingResult.setTarget(pickedCmp);
+			// } else if (targetTypeId == SelectRenderer.TargetType.COMPONENT.ordinal()) {
+			// // get the matching element in the model
+			// int shipId = selectBuf.get(selectBufIndex++);
+			// for (Ship ship : world.getShips()) { // FIXME We should implement the same logic as for widgets with a big map
+			// if (ship.getId() == shipId) {
+			// pickedShip = ship;
+			// }
+			// }
+			// int cmpId = selectBuf.get(selectBufIndex++);
+			// Component pickedCmp = null;
+			// for (Component cmp : pickedShip.getComponents().values()) {
+			// if (cmp.getId() == cmpId) {
+			// pickedCmp = cmp;
+			// }
+			// }
+			// pickingResult.setTargetType(TargetType.COMPONENT);
+			// pickingResult.setTarget(pickedCmp);
 		}
 		// }
 		// LOGGER.debug("Select " + pickingResult.getTargetType());

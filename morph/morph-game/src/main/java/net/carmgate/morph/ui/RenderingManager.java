@@ -38,6 +38,10 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.Messages;
 import net.carmgate.morph.conf.Conf;
+import net.carmgate.morph.events.MEventManager;
+import net.carmgate.morph.events.MObserves;
+import net.carmgate.morph.events.world.entities.ship.ShipAdded;
+import net.carmgate.morph.events.world.entities.ship.ShipUpdated;
 import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.animations.world.WorldAnimation;
@@ -59,7 +63,9 @@ import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
+import net.carmgate.morph.ui.widgets.components.ComponentWidget;
 import net.carmgate.morph.ui.widgets.containers.AbsoluteLayoutContainer;
+import net.carmgate.morph.ui.widgets.containers.ColumnLayoutWidgetContainer;
 import net.carmgate.morph.ui.widgets.generalpurpose.MessagesPanel;
 import net.carmgate.morph.ui.widgets.radar.RadarWidget;
 import net.carmgate.morph.ui.widgets.shipeditor.ShipEditorPanel;
@@ -68,6 +74,7 @@ import net.carmgate.morph.ui.widgets.shipeditor.ShipEditorPanel;
 public class RenderingManager {
 
 	public static MorphFont font;
+	private Map<ComponentType, Texture> cmpTextures = new HashMap<>();
 
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
@@ -79,11 +86,13 @@ public class RenderingManager {
 	@Inject private World world;
 	@Inject private ParticleEngine particleEngine;
 	@Inject private Instance<Renderer<? extends Renderable>> rendererInstances;
+	@Inject private MEventManager eventManager;
 
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
 
 	private Texture particleTexture;
+	private ColumnLayoutWidgetContainer componentBarWidget;
 
 	private Image createMipmapImage(String ref) throws SlickException {
 		// this implementation is subject to change...
@@ -150,10 +159,18 @@ public class RenderingManager {
 		RadarWidget radarWidget = widgetFactory.newInstance(RadarWidget.class);
 		radarWidget.setWidth(150);
 		radarWidget.setHeight(150);
-		radarWidget.setPosition(
-				new float[] { uiContext.getWindow().getWidth() - radarWidget.getWidth() - 10,
-						uiContext.getWindow().getHeight() - radarWidget.getHeight() - 10 });
+		radarWidget.setPosition(new float[] { uiContext.getWindow().getWidth() - radarWidget.getWidth() - 10,
+				uiContext.getWindow().getHeight() - radarWidget.getHeight() - 10 });
 		uiContext.getWidgetRoot().add(radarWidget);
+
+		// cmpBar = widgetFactory.newInstance(ComponentBar.class);
+		componentBarWidget = widgetFactory.newInstance(ColumnLayoutWidgetContainer.class);
+		componentBarWidget.setWidth(500);
+		componentBarWidget.setHeight(32);
+		componentBarWidget.setPosition(new float[] { 0 + 10,
+				uiContext.getWindow().getHeight() - componentBarWidget.getHeight() - 10 });
+		uiContext.getWidgetRoot().add(componentBarWidget);
+
 	}
 
 	/**
@@ -173,7 +190,10 @@ public class RenderingManager {
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
+		GL11.glClearDepth(1.0f);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glDepthFunc(GL11.GL_LEQUAL);
+		GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
 
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
@@ -202,11 +222,35 @@ public class RenderingManager {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private void onShipAdded(@MObserves ShipAdded shipAdded) {
+		if (shipAdded.getShip() == world.getPlayerShip()) {
+			for (Component cmp : world.getPlayerShip().getComponents().values()) {
+				ComponentWidget cmpWidget = widgetFactory.newInstance(ComponentWidget.class);
+				cmpWidget.setCmp(cmp);
+				componentBarWidget.add(cmpWidget);
+			}
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void onShipAdded(@MObserves ShipUpdated shipUpdated) {
+		if (shipUpdated.getShip() == world.getPlayerShip()) {
+			componentBarWidget.getWidgets().clear();
+			for (Component cmp : world.getPlayerShip().getComponents().values()) {
+				ComponentWidget cmpWidget = widgetFactory.newInstance(ComponentWidget.class);
+				cmpWidget.setCmp(cmp);
+				componentBarWidget.add(cmpWidget);
+			}
+		}
+	}
+
 	@PostConstruct
 	private void postContruct() {
 		rendererInstances.forEach((renderer) -> {
 			registerRenderer(renderer);
 		});
+		eventManager.scanAndRegister(this);
 	}
 
 	public void registerRenderer(final Renderer<? extends Renderable> renderer) {
@@ -377,7 +421,6 @@ public class RenderingManager {
 			nb++;
 		}
 
-		LOGGER.debug("Rendered " + nb + " particles");
 		GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
 		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
 

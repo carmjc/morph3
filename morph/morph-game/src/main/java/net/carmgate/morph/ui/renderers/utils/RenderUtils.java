@@ -99,9 +99,9 @@ public class RenderUtils {
 	}
 
 	public void renderAntialiasedPartialDisc(float ratioStart, float ratioEnd, float outerRadius, float[] colorMiddle, float zoom) {
-		renderPartialCircle(ratioStart, ratioEnd, 0, outerRadius, 0, 20 / zoom, new float[] { 0, 0, 0, 0 },
+		renderPartialCircle(ratioStart, ratioEnd, 0, outerRadius, 0, 20 / zoom, new float[] { colorMiddle[0], colorMiddle[1], colorMiddle[2], 0 },
 				colorMiddle,
-				new float[] { 0, 0, 0, 0 });
+				new float[] { colorMiddle[0], colorMiddle[1], colorMiddle[2], 0 });
 	}
 
 	public void renderCircle(float innerRadius, float outerRadius, float blurWidthInt, float blurWidthExt, float[] colorInt, float[] colorMiddle,

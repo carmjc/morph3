@@ -17,7 +17,7 @@ public class LaserRenderer implements Renderer<LaserAnim> {
 	@Override
 	public void render(LaserAnim laserAnim, float alpha) {
 		if (laserAnim.getSource() != null && laserAnim.getTarget() != null) {
-			renderUtils.renderLine(laserAnim.getSource().getPos(), laserAnim.getTarget().getPos(), 10f, 0f, rand.nextFloat() * 5 + 3,
+			renderUtils.renderLine(laserAnim.getSource().getPos(), laserAnim.getTarget().getPos(), 2f, 1f, rand.nextFloat() * 1 + 3,
 					new float[] { 1f, 0f, 0f, 1f }, new float[] { 0f, 0f, 0f, 0f });
 		}
 	}

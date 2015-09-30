@@ -26,10 +26,11 @@ import net.carmgate.morph.model.entities.parts.SoftPart;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.physics.ForceSource;
+import net.carmgate.morph.ui.renderers.Renderable;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Component {
+public abstract class Component implements Renderable {
 	public static final float SCALE = 3.292f * 2;
 	private static final Logger LOGGER = LoggerFactory.getLogger(Component.class);
 
@@ -38,21 +39,22 @@ public abstract class Component {
 	@Id private int id;
 	private Vector2f posInShip = new Vector2f();
 	private boolean active;
-	@Transient private Animation animation;
 
+	@Transient private Animation animation;
 	@Transient private final Holder<Ship> shipHolder = new Holder<>();
+
 	@Transient private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 	@ManyToOne private Ship ship;
 	@ManyToOne private PhysicalEntity target;
-
 	private Vector2f targetPosInWorld;
+
 	private long lastActivation;
 	private float[] color;
-
 	@Transient private final List<HardPart> hardParts = new ArrayList<>();
-	@Transient private final List<SoftPart> softParts = new ArrayList<>();
 
+	@Transient private final List<SoftPart> softParts = new ArrayList<>();
 	private Float cooldown;
+
 	private Float damage;
 	private Float durability;
 	private Float energyDt;
@@ -61,7 +63,6 @@ public abstract class Component {
 	private Float maxStoredResources;
 	private Float range;
 	private Float resourceDt;
-
 	public boolean addPart(Part part) {
 		if (part instanceof HardPart) {
 			part.setComponent(this);
@@ -257,6 +258,10 @@ public abstract class Component {
 
 	public void setMaxStoredResources(Float maxStoredResources) {
 		this.maxStoredResources = maxStoredResources;
+	}
+
+	public void setPosInShip(Vector2f posInShip) {
+		this.posInShip = posInShip;
 	}
 
 	public void setRange(Float range) {

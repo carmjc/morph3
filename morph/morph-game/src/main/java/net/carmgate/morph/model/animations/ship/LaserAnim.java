@@ -14,36 +14,36 @@ import net.carmgate.morph.model.entities.ship.Ship;
 
 public class LaserAnim extends Animation {
 
-   @Inject private World world;
+	@Inject private World world;
 
-   private Holder<PhysicalEntity> targetHolder;
-   private Holder<Ship> sourceHolder;
+	private Holder<PhysicalEntity> targetHolder;
+	private Holder<Ship> sourceHolder;
 
-   @PostConstruct
-   public void init() {
-      setDuration(300);
-      setEnd(world.getTime() + getDuration());
-   }
+	public PhysicalEntity getSource() {
+		return sourceHolder.get();
+	}
 
-   // FIXME
-   protected void onShipDeath(@MObserves ShipDeath shipDeath) {
-      setEnd(0);
-   }
+	public PhysicalEntity getTarget() {
+		return targetHolder.get();
+	}
 
-   public PhysicalEntity getSource() {
-      return sourceHolder.get();
-   }
+	@PostConstruct
+	public void init() {
+		setDuration(Integer.MAX_VALUE);
+		setEnd(world.getTime() + getDuration());
+	}
 
-   public PhysicalEntity getTarget() {
-      return (PhysicalEntity) targetHolder.get();
-   }
+	// FIXME
+	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
+		setEnd(0);
+	}
 
-   public void setTargetHolder(Holder<PhysicalEntity> targetHolder) {
-      this.targetHolder = targetHolder;
-   }
+	public void setSourceHolder(Holder<Ship> sourceHolder) {
+		this.sourceHolder = sourceHolder;
+	}
 
-   public void setSourceHolder(Holder<Ship> sourceHolder) {
-      this.sourceHolder = sourceHolder;
-   }
+	public void setTargetHolder(Holder<PhysicalEntity> targetHolder) {
+		this.targetHolder = targetHolder;
+	}
 
 }

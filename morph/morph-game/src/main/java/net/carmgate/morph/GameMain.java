@@ -55,6 +55,12 @@ public class GameMain {
 	// Computation attributes
 	private long lastUpdateTime = 0;
 
+	// frame counter
+	private float[] frameDurations = new float[100];
+	private int frameDurationIndex = 0;
+	private float frameRate;
+	private float instantFrameRate;
+
 	// misc attributes
 	private boolean gameLoaded;
 
@@ -112,7 +118,7 @@ public class GameMain {
 
 			// updates display and sets frame rate
 			Display.update();
-			Display.sync(100);
+			Display.sync(160);
 
 			// handle window resize
 			Window window = uiContext.getWindow();
@@ -146,6 +152,21 @@ public class GameMain {
 
 			// misc
 			messageManager.execute(world.getTime());
+
+			// framerate
+			frameDurations[frameDurationIndex++] = world.getMillisSinceLastUpdate();
+			if (frameDurationIndex == 100) {
+				frameDurationIndex = 0;
+			}
+			float totalFramesDuration = 0;
+			for (int i = 0; i < 100; i++) {
+				totalFramesDuration += frameDurations[i];
+			}
+			frameRate = 100 / totalFramesDuration * 1000;
+			instantFrameRate = 1000 / world.getMillisSinceLastUpdate();
+			if (instantFrameRate < 30) {
+				LOGGER.debug("frame rate: " + frameRate + " - instant: " + instantFrameRate);
+			}
 		}
 	}
 
@@ -219,7 +240,7 @@ public class GameMain {
 					entity.setRotationSpeed(0);
 					entity.setRotation(rotationTarget);
 				}
-				entity.setRotation(entity.getRotation() + entity.getRotationSpeed() * (world.getTime() - lastUpdateTime) / 1000);
+				entity.setRotation(entity.getRotation() + entity.getRotationSpeed() * world.getMillisSinceLastUpdate() / 1000);
 			}
 		}
 	}
