@@ -6,7 +6,6 @@ import javax.inject.Singleton;
 import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.ViewPort;
-import net.carmgate.morph.ui.actions.selection.Select.PickingResult;
 import net.carmgate.morph.ui.inputs.DragContext;
 import net.carmgate.morph.ui.inputs.DragContext.DragType;
 import net.carmgate.morph.ui.inputs.GameMouse;
@@ -25,19 +24,19 @@ public class DragWorld implements MouseListener {
 
 	@Override
 	public void onMouseEvent() {
-		if (uiContext.getSelectedWidget() != null) {
-			return;
-		}
+		// if (uiContext.getSelectedWidget() != null) {
+		// return;
+		// }
 
 		if (inputHistory.getLastMouseEvent(1).getEventType() == EventType.MOUSE_BUTTON_DOWN
 				&& inputHistory.getLastMouseEvent(1).getButton() == 0
 				&& inputHistory.getLastMouseEvent().getEventType() == EventType.MOUSE_MOVE
-				&& !dragContext.dragInProgress()) {
+				/* && !dragContext.dragInProgress() */) {
 
-			PickingResult pickingResult = gameMouse.pick();
-			if (pickingResult != null && pickingResult.getTargetType() != null) {
-				return;
-			}
+			// PickingResult pickingResult = gameMouse.pick();
+			// if (pickingResult != null && pickingResult.getTargetType() != null) {
+			// return;
+			// }
 
 			dragContext.setOldFP(uiContext.getViewport().getFocalPoint());
 			dragContext.setOldMousePosInWindow(gameMouse.getX(), gameMouse.getY());

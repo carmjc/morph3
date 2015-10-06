@@ -53,6 +53,10 @@ public class Vector2f extends org.lwjgl.util.vector.Vector2f {
 		return this;
 	}
 
+	public float distanceTo(Vector2f to) {
+		return (float) Math.hypot(to.x - x, to.y - y);
+	}
+
 	public float distanceToSquared(Vector2f to) {
 		return (to.x - x) * (to.x - x) + (to.y - y) * (to.y - y);
 	}

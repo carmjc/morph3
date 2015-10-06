@@ -23,7 +23,7 @@ world.add(other);
 asteroid = entityFactory.newInstance(Asteroid.class);
 asteroid.getPos().copy(-500, -80);
 asteroid.mass = 2000;
-asteroid.rotateSpeed = 5;
+asteroid.rotationSpeed = -5;
 worldManager.add(asteroid);
 
 ship = entityFactory.newInstance(Ship.class);

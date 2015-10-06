@@ -1,5 +1,7 @@
 package net.carmgate.morph.ui.renderers.animations;
 
+import java.nio.FloatBuffer;
+
 import javax.inject.Inject;
 
 import org.lwjgl.opengl.GL11;
@@ -20,7 +22,19 @@ public class XpAwardedAnimationRenderer implements Renderer<XpAwardedAnimation> 
 	@Inject private RenderUtils renderUtils;
 
 	@Override
-	public void render(XpAwardedAnimation anim, float alpha) {
+	public void clean() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void prepare() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void render(XpAwardedAnimation anim, float alpha, FloatBuffer vpFb) {
 		float percent = ((float) world.getTime() - anim.getCreationTime()) / anim.getDuration();
 		float zoomFactor = uiContext.getViewport().getZoomFactor();
 

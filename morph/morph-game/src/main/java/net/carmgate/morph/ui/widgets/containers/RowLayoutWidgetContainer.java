@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.lwjgl.opengl.GL11;
 
-import net.carmgate.morph.ui.renderers.SelectRenderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.widgets.LayoutHint;
 import net.carmgate.morph.ui.widgets.Widget;
@@ -15,33 +14,33 @@ public final class RowLayoutWidgetContainer extends WidgetContainer {
 
 	@Override
 	public void renderInteractiveAreas() {
-		Float vertSpacing = getLayoutHints().get(LayoutHint.VERTICAL_SPACING);
-		vertSpacing = vertSpacing != null ? vertSpacing : 0;
-
-		GL11.glPopName();
-		GL11.glPopName();
-
-		GL11.glTranslatef(getInsets()[3], getInsets()[0], 0);
-		float revertPosition = getInsets()[0];
-		for (Widget widget : getWidgets()) {
-			if (widget.isVisible()) {
-				GL11.glTranslatef(widget.getPosition()[0], widget.getPosition()[1], 0);
-				GL11.glPushName(SelectRenderer.TargetType.WIDGET.ordinal());
-				GL11.glPushName(widget.getId());
-
-				widget.renderInteractiveAreas();
-				GL11.glTranslatef(0, widget.getHeight() + vertSpacing, 0);
-				revertPosition += widget.getHeight() + vertSpacing;
-
-				GL11.glPopName();
-				GL11.glPopName();
-			}
-		}
-
-		GL11.glTranslatef(-getInsets()[3], -revertPosition, 0);
-
-		GL11.glPushName(SelectRenderer.TargetType.WIDGET.ordinal());
-		GL11.glPushName(getId());
+		// Float vertSpacing = getLayoutHints().get(LayoutHint.VERTICAL_SPACING);
+		// vertSpacing = vertSpacing != null ? vertSpacing : 0;
+		//
+		// GL11.glPopName();
+		// GL11.glPopName();
+		//
+		// GL11.glTranslatef(getInsets()[3], getInsets()[0], 0);
+		// float revertPosition = getInsets()[0];
+		// for (Widget widget : getWidgets()) {
+		// if (widget.isVisible()) {
+		// GL11.glTranslatef(widget.getPosition()[0], widget.getPosition()[1], 0);
+		// GL11.glPushName(SelectRenderer.TargetType.WIDGET.ordinal());
+		// GL11.glPushName(widget.getId());
+		//
+		// widget.renderInteractiveAreas();
+		// GL11.glTranslatef(0, widget.getHeight() + vertSpacing, 0);
+		// revertPosition += widget.getHeight() + vertSpacing;
+		//
+		// GL11.glPopName();
+		// GL11.glPopName();
+		// }
+		// }
+		//
+		// GL11.glTranslatef(-getInsets()[3], -revertPosition, 0);
+		//
+		// GL11.glPushName(SelectRenderer.TargetType.WIDGET.ordinal());
+		// GL11.glPushName(getId());
 	}
 
 	@Override

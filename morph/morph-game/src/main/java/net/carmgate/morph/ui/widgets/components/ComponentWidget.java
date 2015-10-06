@@ -45,7 +45,7 @@ public class ComponentWidget extends Widget {
 	public void renderWidget() {
 		GL11.glTranslatef(getWidth() / 2, getHeight() / 2, 0);
 		GL11.glScalef(0.5f, 0.5f, 1);
-		componentRenderer.render(cmp, 1);
+		componentRenderer.render(cmp, 1, null); // FIXME
 		GL11.glScalef(2, 2, 1);
 		GL11.glTranslatef(-getWidth() / 2, -getHeight() / 2, 0);
 	}

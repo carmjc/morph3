@@ -112,7 +112,7 @@ public class ShipManager {
 			XpAwardedAnimation xpAwardedAnim = animationFactory.newInstance(XpAwardedAnimation.class);
 			xpAwardedAnim.setPos(shipDeath.getShip().getPos());
 			xpAwardedAnim.setXpAmount(1);
-			world.getWorldAnimations().add(xpAwardedAnim);
+			world.addAnimation(xpAwardedAnim);
 
 			messageManager.addMessage(new Message(messages.getFormattedString("killing.xpAward", 1)), world.getTime());
 		}

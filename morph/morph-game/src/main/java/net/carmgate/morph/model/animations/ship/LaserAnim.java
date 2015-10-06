@@ -7,22 +7,15 @@ import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.entities.ship.ShipDeath;
 import net.carmgate.morph.model.Holder;
 import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.animations.Animation;
+import net.carmgate.morph.model.animations.ComponentAnimation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
-import net.carmgate.morph.model.entities.ship.Ship;
 
 
-public class LaserAnim extends Animation {
+public class LaserAnim extends ComponentAnimation {
 
 	@Inject private World world;
 
 	private Holder<PhysicalEntity> targetHolder;
-	private Holder<Ship> sourceHolder;
-
-	public PhysicalEntity getSource() {
-		return sourceHolder.get();
-	}
-
 	public PhysicalEntity getTarget() {
 		return targetHolder.get();
 	}
@@ -36,10 +29,6 @@ public class LaserAnim extends Animation {
 	// FIXME
 	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
 		setEnd(0);
-	}
-
-	public void setSourceHolder(Holder<Ship> sourceHolder) {
-		this.sourceHolder = sourceHolder;
 	}
 
 	public void setTargetHolder(Holder<PhysicalEntity> targetHolder) {

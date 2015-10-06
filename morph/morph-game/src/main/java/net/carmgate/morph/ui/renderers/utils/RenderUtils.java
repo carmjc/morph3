@@ -34,13 +34,49 @@ public class RenderUtils {
 		RIGHT;
 	}
 
-	private static final int nbSegments = 1000;
+	private static final int nbSegments = 200;
+
 	private static final double deltaAngle = (float) (2 * Math.PI / nbSegments);
 	private static final float cos = (float) Math.cos(deltaAngle);
 	private static final float sin = (float) Math.sin(deltaAngle);
 	@Inject private Logger LOGGER;
 
 	private final Vector2f ortho = new Vector2f();
+
+	public float[] getPartialDiscVertices(float radius, float ratio, float deltaX, float deltaY, int dimension) {
+		ratio = Math.max(0, Math.min(1, ratio));
+		float[] result = new float[(int) (3 * dimension * nbSegments * ratio)];
+
+		float tExt = 0; // temporary data holder
+
+		final float xInt = 0;
+		final float yInt = 0;
+
+		float xExt = radius; // radius
+		float xExtBackup = xExt; // radius
+		float yExt = 0;
+		float yExtBackup = 0;
+
+		for (int i = 0; i < nbSegments * ratio; i++) {
+			tExt = xExt;
+			xExt = cos * xExt - sin * yExt;
+			yExt = sin * tExt + cos * yExt;
+
+			result[3 * dimension * i] = xInt + deltaX;
+			result[3 * dimension * i + 1] = yInt + deltaY;
+
+			result[3 * dimension * i + dimension] = xExtBackup + deltaX;
+			result[3 * dimension * i + dimension + 1] = yExtBackup + deltaY;
+
+			result[3 * dimension * i + 2 * dimension] = xExt + deltaX;
+			result[3 * dimension * i + 2 * dimension + 1] = yExt + deltaY;
+
+			xExtBackup = xExt;
+			yExtBackup = yExt;
+		}
+
+		return result;
+	}
 
 	public TextureImpl getTexture(String resourceName, InputStream in) throws IOException {
 		int textureID = InternalTextureLoader.createTextureID();
@@ -154,21 +190,17 @@ public class RenderUtils {
 	public void renderPartialDisc(float radius, float ratio) {
 		ratio = Math.max(0, Math.min(1, ratio));
 
-		// render limit of effect zone
-		TextureImpl.bindNone();
 		float tExt = 0; // temporary data holder
-		float xInt;
-		float xExt;
 
-		xInt = 0; // radius
-		xExt = radius; // radius
-
-		float xExtBackup = xExt; // radius
+		final float xInt = 0;
 		final float yInt = 0;
+
+		float xExt = radius; // radius
+		float xExtBackup = xExt; // radius
 		float yExt = 0;
 		float yExtBackup = 0;
-		for (int i = 0; i < nbSegments * ratio; i++) {
 
+		for (int i = 0; i < nbSegments * ratio; i++) {
 			tExt = xExt;
 			xExt = cos * xExt - sin * yExt;
 			yExt = sin * tExt + cos * yExt;
@@ -395,4 +427,5 @@ public class RenderUtils {
 	public void renderText(MorphFont font, String str, float line, Color white, TextAlign align) {
 		renderText(font, 0, 0, str, line, white, align);
 	}
+
 }

@@ -1,13 +1,16 @@
 package net.carmgate.morph;
 
+import java.nio.FloatBuffer;
+
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.EntityManager;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.util.vector.Matrix4f;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.ai.AiManager;
@@ -20,6 +23,7 @@ import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vector3f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.services.ComponentManager;
 import net.carmgate.morph.ui.MessageManager;
@@ -27,11 +31,11 @@ import net.carmgate.morph.ui.MessageManager.Message;
 import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.Window;
-import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.particles.ParticleEngine;
 import net.carmgate.morph.ui.renderers.RenderMode;
+import net.carmgate.morph.ui.shaders.ShaderManager;
 
 @Singleton
 public class GameMain {
@@ -44,13 +48,12 @@ public class GameMain {
 	@Inject private MouseManager mouseManager;
 	@Inject private KeyboardManager keyboardManager;
 	@Inject private WorldEventFactory worldEventFactory;
-	@Inject private GameMouse gameMouse;
 	@Inject private AiManager aiManager;
 	@Inject private RenderingManager renderingManager;
 	@Inject private MessageManager messageManager;
-	@Inject private EntityManager em;
 	@Inject private ComponentManager componentManager;
 	@Inject private ParticleEngine particleEngine;
+	@Inject private ShaderManager shaderManager;
 
 	// Computation attributes
 	private long lastUpdateTime = 0;
@@ -63,10 +66,7 @@ public class GameMain {
 
 	// misc attributes
 	private boolean gameLoaded;
-
-	private void initDb() {
-		LOGGER.debug("em: " + em);
-	}
+	private int vpID;
 
 	public void loop() {
 		// init OpenGL context
@@ -74,9 +74,6 @@ public class GameMain {
 
 		// init GUI
 		renderingManager.initGui();
-
-		// init db
-		initDb();
 
 		// FIXME implement real wave management
 		if (world.getShips().size() <= 1) {
@@ -87,23 +84,26 @@ public class GameMain {
 
 		messageManager.addMessage(new Message("Game Loaded"), world.getTime());
 
+		// GL20.glUseProgram(shaderManager.getProgram("basic"));
+		vpID = GL20.glGetUniformLocation(shaderManager.getProgram("basic"), "VP");
+
 		// Rendering loop
 		while (true) {
 
 			// Reset screen
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
 			// Renders everything
 			if (uiContext.getRenderMode() != RenderMode.SELECT_DEBUG) {
 				renderingManager.renderBackground();
-				renderingManager.renderBgParticles();
-				renderingManager.renderComponentsAnimation();
+				// renderingManager.renderBgParticles();
+				renderingManager.renderAnimations();
 				renderingManager.renderPhysical();
-				renderingManager.renderWorldAnimation();
-				renderingManager.renderFgParticles();
+				// renderingManager.renderWorldAnimation();
+				// renderingManager.renderFgParticles();
 				renderingManager.renderGui();
 			} else {
-				gameMouse.renderForSelect();
+				// gameMouse.renderForSelect();
 			}
 			updateWorld();
 			particleEngine.update();
@@ -117,26 +117,69 @@ public class GameMain {
 			lastUpdateTime = world.getTime();
 
 			// updates display and sets frame rate
+			Display.sync(60);
 			Display.update();
-			Display.sync(160);
 
 			// handle window resize
 			Window window = uiContext.getWindow();
 			if (Display.wasResized()) {
-				renderingManager.initView();
+				LOGGER.debug("window resized");
+				// renderingManager.initView();
 				window.setWidth(Display.getWidth());
 				window.setHeight(Display.getHeight());
 			}
 
-			GL11.glMatrixMode(GL11.GL_PROJECTION);
-			GL11.glLoadIdentity();
+			// GL11.glMatrixMode(GL11.GL_PROJECTION);
+			// GL11.glLoadIdentity();
 
-			// GL11.glOrtho(-window.getWidth() / 2, window.getWidth(), window.getHeight() / 2, -window.getHeight(), 1, -1);
-			GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
-			GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
+			// // GL11.glOrtho(-window.getWidth() / 2, window.getWidth(), window.getHeight() / 2, -window.getHeight(), 1, -1);
+			// GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
+			// GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
 
-			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			GL11.glLoadIdentity();
+			// Nouveau code
+			Matrix4f ortho = new Matrix4f();
+			ortho.setIdentity();
+			float zNear = 1;
+			float zFar = -1;
+			ortho.m00 = 2f / Display.getWidth();
+			ortho.m11 = 2f / Display.getHeight();
+			ortho.m22 = -2f / (zFar - zNear);
+			ortho.m30 = -1;
+			ortho.m31 = -1;
+			ortho.m32 = -(zFar + zNear) / (zFar - zNear);
+			ortho.m33 = 1f;
+
+			Matrix4f view = new Matrix4f();
+			view.setIdentity();
+			view.m00 = uiContext.getViewport().getZoomFactor();
+			view.m11 = uiContext.getViewport().getZoomFactor();
+			view.m30 = -uiContext.getViewport().getFocalPoint().x * uiContext.getViewport().getZoomFactor() + Display.getWidth() / 2;
+			view.m31 = uiContext.getViewport().getFocalPoint().y * uiContext.getViewport().getZoomFactor() + Display.getHeight() / 2;
+
+			Matrix4f worldVp = new Matrix4f();
+			Matrix4f.mul(ortho, view, worldVp);
+
+			FloatBuffer worldVpFb = renderingManager.getWorldVpFb();
+			worldVp.store(worldVpFb);
+			worldVpFb.flip();
+			GL20.glUniformMatrix4(vpID, false, worldVpFb);
+
+			view.setIdentity();
+			view.m30 = Display.getWidth() / 2;
+			view.m31 = Display.getHeight() / 2;
+
+			Matrix4f guiVp = new Matrix4f();
+			Matrix4f.mul(ortho, view, guiVp);
+
+			FloatBuffer guiVpFb = renderingManager.getGuiVpFb();
+			guiVp.store(guiVpFb);
+			guiVpFb.flip();
+			GL20.glUniformMatrix4(vpID, false, guiVpFb);
+
+			// Nouveau code
+
+			// GL11.glMatrixMode(GL11.GL_MODELVIEW);
+			// GL11.glLoadIdentity();
 
 			// Handles the window close requested event
 			if (Display.isCloseRequested()) {
@@ -163,8 +206,12 @@ public class GameMain {
 				totalFramesDuration += frameDurations[i];
 			}
 			frameRate = 100 / totalFramesDuration * 1000;
-			instantFrameRate = 1000 / world.getMillisSinceLastUpdate();
-			if (instantFrameRate < 30) {
+			if (world.getMillisSinceLastUpdate() > 0) {
+				instantFrameRate = 1000 / world.getMillisSinceLastUpdate();
+			} else {
+				instantFrameRate = -1;
+			}
+			if (instantFrameRate > 0 && instantFrameRate < 30) {
 				LOGGER.debug("frame rate: " + frameRate + " - instant: " + instantFrameRate);
 			}
 		}
@@ -219,6 +266,9 @@ public class GameMain {
 			entity.getSpeed().add(tmp);
 			tmp.copy(entity.getSpeed()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
 			entity.getPos().add(tmp);
+			entity.getModelToWorld().setIdentity();
+			entity.getModelToWorld().translate(entity.getPos(), entity.getModelToWorld());
+			entity.getModelToWorld().rotate((float) (entity.getRotation() / 180 * Math.PI), Vector3f.Z, entity.getModelToWorld());
 
 			// rotations
 			Float rotationTarget = entity.getRotationTarget();
@@ -240,8 +290,8 @@ public class GameMain {
 					entity.setRotationSpeed(0);
 					entity.setRotation(rotationTarget);
 				}
-				entity.setRotation(entity.getRotation() + entity.getRotationSpeed() * world.getMillisSinceLastUpdate() / 1000);
 			}
+			entity.setRotation(entity.getRotation() + entity.getRotationSpeed() * world.getMillisSinceLastUpdate() / 1000);
 		}
 	}
 

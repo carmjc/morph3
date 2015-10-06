@@ -19,7 +19,7 @@ import javax.persistence.Transient;
 
 import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.entities.ship.ShipDeath;
-import net.carmgate.morph.model.animations.world.WorldAnimation;
+import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.ship.Ship;
 
@@ -38,7 +38,7 @@ public class World {
 	@Transient @OneToMany(cascade = CascadeType.ALL) private final List<PhysicalEntity> nonShipsPhysicalEntities = new ArrayList<>();
 	@OneToMany(cascade = CascadeType.ALL) private final Set<PhysicalEntity> physicalEntities = new HashSet<>();
 	@OneToMany(cascade = CascadeType.ALL) private final Map<String, Player> players = new HashMap<>();
-	@Transient private final List<WorldAnimation> animations = new ArrayList<>();
+	@Transient private final Map<Class<? extends Animation>, List<Animation>> animations = new HashMap<>();
 
 	private long lastUpdateTime = 0;
 	private long time = 0;
@@ -54,11 +54,25 @@ public class World {
 		players.put(player.getName(), player);
 	}
 
+	public void addAnimation(Animation anim) {
+		List<Animation> animList = animations.get(anim.getClass());
+		if (animList == null) {
+			animList = new ArrayList<>();
+			animations.put(anim.getClass(), animList);
+		}
+		animList.add(anim);
+	}
+
 	public long getAbsoluteTime() {
 		return absoluteTime;
 	}
+
 	public long getAiLastUpdate() {
 		return aiLastUpdate;
+	}
+
+	public Map<Class<? extends Animation>, List<Animation>> getAnimations() {
+		return animations;
 	}
 
 	public long getMillisSinceLastUpdate() {
@@ -94,10 +108,6 @@ public class World {
 
 	public TimeFreezeCause getTimeFreezeCause() {
 		return timeFreezeCause;
-	}
-
-	public List<WorldAnimation> getWorldAnimations() {
-		return animations;
 	}
 
 	// @PostConstruct
@@ -139,6 +149,11 @@ public class World {
 	private void remove(Ship ship) {
 		ships.remove(ship);
 		physicalEntities.remove(ship);
+	}
+
+	public void removeAnimation(Animation anim) {
+		List<Animation> animList = animations.get(anim.getClass());
+		animList.remove(anim);
 	}
 
 	public void resetLastUpdateTime() {

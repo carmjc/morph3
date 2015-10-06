@@ -128,18 +128,20 @@ public class ComponentManager {
 		Component cmp = componentLoaded.getComponent();
 		if (cmp instanceof Laser) {
 			LaserAnim laserAnim = animationFactory.newInstance(LaserAnim.class);
-			laserAnim.setSourceHolder(cmp.getShipHolder());
+			laserAnim.setSource(cmp);
 			laserAnim.setTargetHolder(cmp.getTargetHolder());
-			cmp.setAnimation(laserAnim);
+			cmp.setAnimation(laserAnim); // TODO probably useless
+			world.addAnimation(laserAnim);
 
 			// FIXME test code, this should be rendered completely dynamic
 			OverClocking overClocking = partFactory.newInstance(OverClocking.class);
 			cmp.addPart(overClocking);
 		} else if (cmp instanceof MiningLaser) {
 			MiningLaserAnim laserAnim = animationFactory.newInstance(MiningLaserAnim.class);
-			laserAnim.setSourceHolder(cmp.getShipHolder());
+			laserAnim.setSource(cmp);
 			laserAnim.setTarget(cmp.getTargetHolder());
 			cmp.setAnimation(laserAnim);
+			world.addAnimation(laserAnim);
 		}
 	}
 

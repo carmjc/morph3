@@ -1,10 +1,14 @@
 package net.carmgate.morph.ui.renderers;
 
+import java.nio.FloatBuffer;
 
 public interface Renderer<T extends Renderable> {
 
-	default void init() {
-	}
+	void clean();
 
-	void render(T renderable, float alpha);
+	default void init() {}
+
+	void prepare();
+
+	void render(T renderable, float alpha, FloatBuffer vpBuffer);
 }

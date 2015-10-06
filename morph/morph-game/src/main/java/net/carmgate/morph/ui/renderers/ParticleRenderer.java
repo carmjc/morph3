@@ -2,6 +2,7 @@ package net.carmgate.morph.ui.renderers;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,6 +29,12 @@ public class ParticleRenderer implements Renderer<Particle> {
 	private Texture particleTexture;
 
 	@Override
+	public void clean() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public void init() {
 		try (BufferedInputStream textureInputStream = new BufferedInputStream(
 				ClassLoader.getSystemResourceAsStream(conf.getProperty("particle.texture")))) { //$NON-NLS-1$
@@ -38,7 +45,13 @@ public class ParticleRenderer implements Renderer<Particle> {
 	}
 
 	@Override
-	public void render(Particle p, float alpha) {
+	public void prepare() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void render(Particle p, float alpha, FloatBuffer vpFb) {
 		final float zoomFactor = uiContext.getViewport().getZoomFactor();
 		long timeToLive = p.getDeathTime() - p.getBirthTime();
 		long timeLived = world.getTime() - p.getBirthTime();

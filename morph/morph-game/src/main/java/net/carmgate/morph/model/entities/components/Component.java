@@ -75,6 +75,7 @@ public abstract class Component implements Renderable {
 		return false;
 	}
 
+	@Deprecated
 	public Animation getAnimation() {
 		return animation;
 	}

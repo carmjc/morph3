@@ -2,6 +2,7 @@ package net.carmgate.morph.ui.renderers.entities.ship;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,12 @@ public class ComponentRenderer implements Renderer<Component> {
 	private Map<ComponentType, Texture> cmpTextures = new HashMap<>();
 
 	@Override
+	public void clean() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public void init() {
 		try (BufferedInputStream laserInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
 				conf.getProperty(Laser.class.getCanonicalName() + ".renderer.texture"))); //$NON-NLS-1$
@@ -58,7 +65,13 @@ public class ComponentRenderer implements Renderer<Component> {
 	}
 
 	@Override
-	public void render(Component cmp, float alpha) {
+	public void prepare() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void render(Component cmp, float alpha, FloatBuffer vpFb) {
 		final float width = 50;
 		final Ship ship = cmp.getShip();
 

@@ -19,6 +19,7 @@ import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentKind;
 import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vector3f;
 
 @Entity
 @NamedQueries({
@@ -134,6 +135,10 @@ public class Ship extends PhysicalEntity {
 	private void postLoad() {
 		eventManager = MEventManager.getInstance();
 		eventManager.scanAndRegister(this);
+
+		getModelToWorld().setIdentity();
+		getModelToWorld().translate(getPos(), getModelToWorld());
+		getModelToWorld().rotate(getRotation(), Vector3f.Z, getModelToWorld());
 	}
 
 	public void setCreationTime(long creationTime) {
