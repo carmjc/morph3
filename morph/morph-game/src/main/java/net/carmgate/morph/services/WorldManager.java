@@ -17,6 +17,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
+import org.jbox2d.dynamics.Body;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.GameLoaded;
@@ -26,12 +27,11 @@ import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.events.world.WorldEvent;
 import net.carmgate.morph.events.world.WorldEventFactory;
 import net.carmgate.morph.events.world.entities.ship.ShipAdded;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.components.ComponentFactory;
 import net.carmgate.morph.model.entities.ship.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
 
 public class WorldManager {
 
@@ -55,18 +55,21 @@ public class WorldManager {
 	@Inject private ComponentFactory componentFactory;
 	@Inject private ShipManager shipManager;
 	@Inject private ComponentManager componentManager;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private Conf conf;
 	@Inject private EntityManager entityManager;
 
 	public void add(PhysicalEntity entity) {
+		Body body = world.getBox2dWorld().createBody(entity.getBodyDef());
+		entity.setBody(body);
+
 		if (entity instanceof Ship) {
 			add((Ship) entity);
-			return;
+			body.createFixture(entity.getFixtureDef(entity.getShape()));
+		} else {
+			world.getNonShipsPhysicalEntities().add(entity);
+			world.getPhysicalEntities().add(entity);
 		}
-
-		world.getNonShipsPhysicalEntities().add(entity);
-		world.getPhysicalEntities().add(entity);
 	}
 
 	private void add(Ship ship) {
@@ -106,7 +109,7 @@ public class WorldManager {
 	}
 
 	private void initWithDb() {
-		World newWorld = entityManager.find(World.class, 1);
+		MWorld newWorld = entityManager.find(MWorld.class, 1);
 		world.loadFrom(newWorld);
 		gameLoadedEvent.fire(new GameLoaded());
 
@@ -114,7 +117,7 @@ public class WorldManager {
 			if ("Me".equals(ship.getPlayer().getName())) {
 				world.setPlayerShip(ship);
 			}
-			ship.getSpeed().copy(Vector2f.NULL);
+			ship.getBody().getLinearVelocity().set(0, 0);
 		}
 
 	}

@@ -6,14 +6,14 @@ import javax.inject.Inject;
 import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.entities.ship.ShipDeath;
 import net.carmgate.morph.model.Holder;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.animations.ComponentAnimation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 
 
 public class LaserAnim extends ComponentAnimation {
 
-	@Inject private World world;
+	@Inject private MWorld world;
 
 	private Holder<PhysicalEntity> targetHolder;
 	public PhysicalEntity getTarget() {

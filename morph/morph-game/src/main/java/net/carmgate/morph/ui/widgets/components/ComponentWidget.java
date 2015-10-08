@@ -1,8 +1,11 @@
 package net.carmgate.morph.ui.widgets.components;
 
+import java.nio.FloatBuffer;
+
 import javax.inject.Inject;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix4f;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.model.entities.components.Component;
@@ -42,7 +45,7 @@ public class ComponentWidget extends Widget {
 	}
 
 	@Override
-	public void renderWidget() {
+	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		GL11.glTranslatef(getWidth() / 2, getHeight() / 2, 0);
 		GL11.glScalef(0.5f, 0.5f, 1);
 		componentRenderer.render(cmp, 1, null); // FIXME

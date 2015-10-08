@@ -1,17 +1,17 @@
 package net.carmgate.morph.ui.renderers;
 
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vec2;
 
 public class StringRenderable implements Renderable {
 
 	private String str;
-	private Vector2f pos = new Vector2f();
+	private Vec2 pos = new Vec2();
 
 	private float size;
 	public StringRenderable() {
 	}
 
-	public Vector2f getPos() {
+	public Vec2 getPos() {
 		return pos;
 	}
 

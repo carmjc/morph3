@@ -8,13 +8,13 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 
 @Singleton
 public class ParticleEngine {
 
 	@Inject private Logger LOGGER;
-	@Inject private World world;
+	@Inject private MWorld world;
 
 	private final List<Particle> bgParticles = new ArrayList<>();
 	private final List<Particle> fgParticles = new ArrayList<>();

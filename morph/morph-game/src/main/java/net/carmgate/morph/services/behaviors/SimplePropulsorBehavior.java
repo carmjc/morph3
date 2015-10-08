@@ -2,28 +2,30 @@ package net.carmgate.morph.services.behaviors;
 
 import javax.inject.Inject;
 
+import org.jbox2d.common.Color3f;
+import org.jbox2d.common.Vec2;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.entities.components.prop.SimplePropulsor;
 import net.carmgate.morph.model.entities.ship.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.particles.ParticleEngine;
 import net.carmgate.morph.ui.particles.ParticleSource;
+import net.carmgate.morph.ui.renderers.MorphDebugDraw;
+import net.carmgate.morph.ui.renderers.RenderMode;
 
 public class SimplePropulsorBehavior extends ComponentBehavior<SimplePropulsor> {
 
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
 	@Inject private ParticleEngine particleEngine;
-	@Inject private World world;
 	@Inject private UIContext uiContext;
+	@Inject private MorphDebugDraw debugDraw;
 
 	private ParticleSource particleSource;
 
-	private Vector2f tmpVect = new Vector2f();
+	private Vec2 toTargetVec = new Vec2();
 
 	private void endBehavior(SimplePropulsor cmp) {
 		cmp.setActive(false);
@@ -35,53 +37,72 @@ public class SimplePropulsorBehavior extends ComponentBehavior<SimplePropulsor> 
 
 	@Override
 	public void eval(SimplePropulsor cmp) {
-
 		if (cmp.getTargetPosInWorld() == null) {
 			cmp.setActive(false);
 			return;
 		}
 
+		float targetDist = 350f;
+
 		// target offset
-		tmpVect.copy(cmp.getTargetPosInWorld()).sub(cmp.getShip().getPos());
-		float actualDistance = tmpVect.length();
-
-		float epsilon = conf.getFloatProperty("order.moveOrder.epsilon"); //$NON-NLS-1$
-		if (actualDistance < epsilon && cmp.getShip().getSpeed().lengthSquared() < epsilon) {
-			if (!cmp.getShip().isForceStop()) {
-				cmp.getShip().setForceStop(true);
-				cmp.getForce().copy(Vector2f.NULL);
-			}
-			endBehavior(cmp);
-			return;
+		Vec2 shipPos = cmp.getShip().getBody().getPosition();
+		Vec2 ttVec = cmp.getTargetPosInWorld().mul(1f / 1000).sub(shipPos).negate();
+		Vec2 vVec = cmp.getShip().getBody().getLinearVelocity();
+		Vec2 shipAppPoint = cmp.getShip().getBody().getWorldPoint(new Vec2(0, -0.1f));
+		Vec2 shipAppVec = cmp.getShip().getBody().getWorldVector(new Vec2(0, -0.05f));
+		Vec2 r1 = new Vec2((float) (Math.sqrt(3) / 2 * ttVec.x - 0.5f * ttVec.y), (float) (0.5f * ttVec.x + Math.sqrt(3) / 2 * ttVec.y));
+		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+			debugDraw.drawSegment(cmp.getTargetPosInWorld().mul(1f / 1000), cmp.getTargetPosInWorld().mul(1f / 1000).add(r1), new Color3f(1, 0, 1));
+		}
+		Vec2 tmp = r1;
+		r1 = r1.mul(targetDist / 1000 / r1.length());
+		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+			debugDraw.drawSegment(tmp, r1, new Color3f(0, 1, 0));
+		}
+		tmp = r1;
+		r1 = r1.sub(vVec);
+		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+			debugDraw.drawSegment(tmp, r1, new Color3f(1, 0, 0));
+		}
+		tmp = r1;
+		r1 = r1.sub(shipAppVec);
+		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+			debugDraw.drawSegment(tmp, r1, new Color3f(0, 1, 1));
 		}
 
-		float maxAccel = Ship.MAX_PROPULSOR_FORCE / cmp.getShip().getMass();
+		float r = ttVec.length();
 
-		if (actualDistance < 0) {
-			cmp.getForce().copy(cmp.getShip().getSpeed()).scale(-1);
-		} else {
-			cmp.getForce().copy(cmp.getTargetPosInWorld()).sub(cmp.getShip().getPos());
-			tmpVect.copy(cmp.getShip().getSpeed()).scale(cmp.getShip().getSpeed().length() / maxAccel);
-			cmp.getForce().sub(tmpVect); // .add(target.getSpeed())
-			if (cmp.getShip().getSpeed().lengthSquared() > 0) {
-				cmp.getForce().scale(cmp.getShip().getSpeed().lengthSquared() / (2 * actualDistance + cmp.getShip().getSpeed().length()));
-			}
+		float alpha = Math.max(1f / 5, Math.min(1, (4f * (r * 1000 - targetDist) / targetDist + 1) / 5));
+		float fMax = Ship.MAX_PROPULSOR_FORCE * alpha;
+
+		// cmp.getForce().set(toTargetVec.sub(vVec));
+		// cmp.getForce().set(cmp.getForce().mul(fMax / cmp.getForce().length()));
+
+		cmp.getForce().set(r1.sub(ttVec));
+		cmp.getForce().set(cmp.getForce().mul(fMax / cmp.getForce().length()));
+		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+			debugDraw.drawSegment(shipAppPoint, shipAppPoint.add(cmp.getForce().mul(1000)), Color3f.BLUE);
+			debugDraw.drawSegment(shipPos, shipPos.add(vVec), Color3f.RED);
 		}
 
-		float length = cmp.getForce().length();
-		if (length > Ship.MAX_PROPULSOR_FORCE) {
-			cmp.getForce().scale(Ship.MAX_PROPULSOR_FORCE / length);
-		}
+		LOGGER.debug("tt: " + ttVec + "(" + ttVec.length() + "), r1: " + r1 + "(" + r1.length() + "), alpha: " + alpha + ", force module: "
+				+ cmp.getForce().length() + ", speed: "
+				+ cmp.getShip().getBody().getLinearVelocity().length());
+
+		// float length = cmp.getForce().length();
+		// if (length > Ship.MAX_PROPULSOR_FORCE) {
+		// cmp.getForce().set(cmp.getForce().mul(Ship.MAX_PROPULSOR_FORCE / length));
+		// }
 
 		// set orientation
 		// TODO This is a very basic orientating method
-		if (cmp.getForce() != null && cmp.getForce().length() != 0) {
-			float angle = (float) (cmp.getForce().angleWith(Vector2f.J) / Math.PI * 180);
-			if (cmp.getForce().x * cmp.getShip().getSpeed().x + cmp.getForce().y * cmp.getShip().getSpeed().y < 0) {
-				angle += 180;
-			}
-			cmp.getShip().setRotationTarget(angle);
-		}
+		// if (cmp.getForce() != null && cmp.getForce().length() != 0) {
+		// float angle = (float) (GeoUtils.angleWith(cmp.getForce(), new Vec2(0, 1)) / Math.PI * 180);
+		// if (cmp.getForce().x * cmp.getShip().getBody().getLinearVelocity().x + cmp.getForce().y * cmp.getShip().getBody().getLinearVelocity().y < 0) {
+		// angle += 180;
+		// }
+		// // FIXME cmp.getShip().setRotationTarget(angle);
+		// }
 	}
 
 	@Override

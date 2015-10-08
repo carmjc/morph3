@@ -23,8 +23,8 @@ public class AngelCodeFont {
 		public final short yoffset;
 		public final short xadvance;
 		protected short dlIndex;
-		protected short[] kerning;
 
+		protected short[] kerning;
 		protected Glyph(short id, short x, short y, short width, short height, short xoffset, short yoffset, short xadvance) {
 			this.id = id;
 			this.x = x;
@@ -72,6 +72,7 @@ public class AngelCodeFont {
 	private short scaleW;
 	private short scaleH;
 	private short size;
+	private short outline;
 
 	private String imgFile;
 
@@ -83,8 +84,23 @@ public class AngelCodeFont {
 	public int getAscent() {
 		return ascent;
 	}
+
 	public int getDescent() {
 		return descent;
+	}
+	public Glyph getGlyph(char c) {
+		Glyph g = c < 0 || c >= chars.length ? null : chars[c];
+		if (g != null) {
+			return g;
+		}
+		if (g == null && singleCase) {
+			if (c >= 'A' && c <= 'Z') {
+				c = (char) (c + ' ');
+			} else if (c >= 'a' && c <= 'z') {
+				c = (char) (c - ' ');
+			}
+		}
+		return c < 0 || c >= chars.length ? null : chars[c];
 	}
 
 	// public AngelCodeFont(String fntFile)
@@ -108,21 +124,6 @@ public class AngelCodeFont {
 	// displayListCaching = caching;
 	// parseFnt(fntFile);
 	// }
-
-	public Glyph getGlyph(char c) {
-		Glyph g = c < 0 || c >= chars.length ? null : chars[c];
-		if (g != null) {
-			return g;
-		}
-		if (g == null && singleCase) {
-			if (c >= 'A' && c <= 'Z') {
-				c = (char) (c + ' ');
-			} else if (c >= 'a' && c <= 'z') {
-				c = (char) (c - ' ');
-			}
-		}
-		return c < 0 || c >= chars.length ? null : chars[c];
-	}
 
 	public int getHeight(CharSequence text) {
 		// DisplayList displayList = null;
@@ -160,6 +161,10 @@ public class AngelCodeFont {
 		// }
 
 		return maxHeight;
+	}
+
+	public String getImgFile() {
+		return imgFile;
 	}
 
 	// public AngelCodeFont(String fntFile, String imgFile, boolean caching)
@@ -208,12 +213,12 @@ public class AngelCodeFont {
 	// GL.glTranslatef(-x, -y, 0.0F);
 	// }
 
-	public String getImgFile() {
-		return imgFile;
-	}
-
 	public int getLineHeight() {
 		return lineHeight;
+	}
+
+	public short getOutline() {
+		return outline;
 	}
 
 	public short getScaleH() {
@@ -358,9 +363,11 @@ public class AngelCodeFont {
 
 			String info = in.readLine();
 			size = parseMetric(info, "size=");
+			outline = parseMetric(info, "outline=");
 
 			String common = in.readLine();
 			ascent = parseMetric(common, "base=");
+			lineHeight = parseMetric(common, "lineHeight=");
 
 			descent = parseMetric(common, "descent=");
 			leading = parseMetric(common, "leading=");

@@ -4,11 +4,11 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Collection;
-import java.util.Random;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jbox2d.common.Vec2;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -18,12 +18,12 @@ import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.inputs.DragContext;
+import net.carmgate.morph.ui.renderers.MorphDebugDraw;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.shaders.ShaderManager;
@@ -55,13 +55,14 @@ public class ShipRenderer implements Renderer<Ship> {
 	private int vaoId;
 
 	@Inject private UIContext uiContext;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private Conf conf;
 	@Inject private Logger LOGGER;
 	@Inject private DragContext dragContext;
 	@Inject private RenderUtils renderUtils;
 	@Inject private ComponentRenderer componentRenderer;
 	@Inject private ShaderManager shaderManager;
+	@Inject private MorphDebugDraw debugDraw;
 
 	private int progId;
 	private FloatBuffer modelToWorldFb;
@@ -375,7 +376,7 @@ public class ShipRenderer implements Renderer<Ship> {
 		GL11.glScalef(scale, scale, 1);
 
 		for (Component cmp : components) {
-			Vector2f posInShip = cmp.getPosInShip();
+			Vec2 posInShip = cmp.getPosInShip();
 
 			if (posInShip != null) {
 				GL11.glTranslatef(posInShip.x, posInShip.y, zoom);
@@ -389,21 +390,21 @@ public class ShipRenderer implements Renderer<Ship> {
 	}
 
 	private void renderRange(Component selectedCmp, float[] color, boolean withLine) {
-		float zoom = uiContext.getViewport().getZoomFactor();
-		float blur = 2 + new Random().nextFloat();
-		int nbSegments = (int) (selectedCmp.getRange() / 10);
-		float timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
-		renderCircling(selectedCmp.getRange() + blur, blur / zoom, (int) (selectedCmp.getRange() / 10), color);
-
-		if (withLine) {
-			Vector2f from = new Vector2f(selectedCmp.getPosInShip()).scale(selectedCmp.getShip().getMass() / Component.SCALE)
-					.rotate(selectedCmp.getShip().getRotation());
-			Vector2f to = new Vector2f(0, selectedCmp.getRange() + blur).rotate(timeAngle - 90 / nbSegments);
-			Vector2f vect = new Vector2f(to).sub(from);
-			vect.scale((128 / Component.SCALE + 2 / zoom) / vect.length());
-			from.add(vect);
-			renderUtils.renderLine(from, to, 0, blur / zoom, color, new float[] { 0, 0, 0, 0 });
-		}
+		// float zoom = uiContext.getViewport().getZoomFactor();
+		// float blur = 2 + new Random().nextFloat();
+		// int nbSegments = (int) (selectedCmp.getRange() / 10);
+		// float timeAngle = (float) (world.getAbsoluteTime() % (5000 * nbSegments)) / (5000 * nbSegments) * 360;
+		// renderCircling(selectedCmp.getRange() + blur, blur / zoom, (int) (selectedCmp.getRange() / 10), color);
+		//
+		// if (withLine) {
+		// Vec2 from = new Vec2(selectedCmp.getPosInShip()).mul(selectedCmp.getShip().getBody().getMass() / Component.SCALE)
+		// .rotate(selectedCmp.getShip().getBody().getAngle());
+		// Vec2 to = new Vec2(0, selectedCmp.getRange() + blur).rotate(timeAngle - 90 / nbSegments);
+		// Vec2 vect = new Vec2(to).sub(from);
+		// vect.scale((128 / Component.SCALE + 2 / zoom) / vect.length());
+		// from.add(vect);
+		// renderUtils.renderLine(from, to, 0, blur / zoom, color, new float[] { 0, 0, 0, 0 });
+		// }
 	}
 
 }

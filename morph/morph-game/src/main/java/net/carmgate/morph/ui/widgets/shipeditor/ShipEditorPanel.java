@@ -1,11 +1,13 @@
 package net.carmgate.morph.ui.widgets.shipeditor;
 
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.lwjgl.util.vector.Matrix4f;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.events.MObserves;
@@ -15,7 +17,6 @@ import net.carmgate.morph.model.entities.parts.HardPart;
 import net.carmgate.morph.model.entities.parts.Part;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.services.ComponentManager;
-import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.UIContext.Context;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
@@ -89,7 +90,8 @@ public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 		ColumnLayoutWidgetContainer labelButtonPanel = widgetFactory.newInstance(ColumnLayoutWidgetContainer.class);
 		labelButtonPanel.getLayoutHints().put(LayoutHint.FILL_HORIZONTAL, null);
 		labelButtonPanel.getLayoutHints().put(LayoutHint.HORIZONTAL_SPACING, 5f);
-		labelButtonPanel.setHeight(RenderingManager.font.getTargetFontSize() + 5);
+		// FIXME
+		// labelButtonPanel.setHeight(RenderingManager.font.getTargetFontSize() + 5);
 		labelButtonPanel.setInsets(new float[] { 1f, 1f, 1f, 1f });
 		hardListPanel.add(labelButtonPanel);
 
@@ -151,10 +153,10 @@ public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 	}
 
 	@Override
-	public void renderWidget() {
+	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		renderUtils.renderQuad(0, 0, getWidth(), getHeight(), getBgColor());
 
-		rootContainer.renderWidget();
+		rootContainer.renderWidget(m, vpFb);
 	}
 
 	private <C extends Component> void upgradeHardPart(Part<C> part) {

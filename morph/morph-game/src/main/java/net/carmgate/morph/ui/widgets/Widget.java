@@ -1,9 +1,12 @@
 package net.carmgate.morph.ui.widgets;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.lwjgl.util.vector.Matrix4f;
 
 public abstract class Widget implements WidgetMouseListener {
 
@@ -92,7 +95,7 @@ public abstract class Widget implements WidgetMouseListener {
 
 	public abstract void renderInteractiveAreas();
 
-	public abstract void renderWidget();
+	public abstract void renderWidget(Matrix4f m, FloatBuffer vpFb);
 
 	public void setBgColor(float[] bgColor) {
 		this.bgColor = bgColor;

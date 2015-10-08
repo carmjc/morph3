@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vec2;
 
 @Singleton
 public class DragContext {
@@ -17,8 +17,8 @@ public class DragContext {
 
 	@Inject private Logger LOGGER;
 
-	private Vector2f oldFP;
-	private Vector2f oldMousePosInWindow;
+	private Vec2 oldFP;
+	private Vec2 oldMousePosInWindow;
 	private DragType dragType;
 
 	public boolean dragInProgress() {
@@ -33,11 +33,11 @@ public class DragContext {
 		return dragType;
 	}
 
-	public Vector2f getOldFP() {
+	public Vec2 getOldFP() {
 		return oldFP;
 	}
 
-	public Vector2f getOldMousePosInWindow() {
+	public Vec2 getOldMousePosInWindow() {
 		return oldMousePosInWindow;
 	}
 
@@ -56,9 +56,9 @@ public class DragContext {
 		this.dragType = dragType;
 	}
 
-	public void setOldFP(Vector2f oldFP) {
+	public void setOldFP(Vec2 oldFP) {
 		if (this.oldFP == null) {
-			this.oldFP = new Vector2f(oldFP);
+			this.oldFP = new Vec2(oldFP);
 		} else {
 			this.oldFP.copy(oldFP);
 		}
@@ -66,7 +66,7 @@ public class DragContext {
 
 	public void setOldMousePosInWindow(float x, float y) {
 		if (oldMousePosInWindow == null) {
-			oldMousePosInWindow = new Vector2f(x, y);
+			oldMousePosInWindow = new Vec2(x, y);
 		} else {
 			oldMousePosInWindow.copy(x, y);
 		}

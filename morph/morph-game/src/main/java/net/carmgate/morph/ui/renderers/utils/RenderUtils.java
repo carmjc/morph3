@@ -12,7 +12,6 @@ import javax.inject.Singleton;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.util.glu.GLU;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.ImageDataFactory;
@@ -22,8 +21,9 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureImpl;
 import org.slf4j.Logger;
 
-import net.carmgate.morph.model.geometry.Vector2f;
-import net.carmgate.morph.ui.renderers.MorphFont;
+import net.carmgate.morph.model.geometry.Vec2;
+import net.carmgate.morph.ui.AngelCodeFont;
+import net.carmgate.morph.ui.renderers.StringRenderable;
 
 @Singleton
 public class RenderUtils {
@@ -39,9 +39,10 @@ public class RenderUtils {
 	private static final double deltaAngle = (float) (2 * Math.PI / nbSegments);
 	private static final float cos = (float) Math.cos(deltaAngle);
 	private static final float sin = (float) Math.sin(deltaAngle);
+
 	@Inject private Logger LOGGER;
 
-	private final Vector2f ortho = new Vector2f();
+	private final Vec2 ortho = new Vec2();
 
 	public float[] getPartialDiscVertices(float radius, float ratio, float deltaX, float deltaY, int dimension) {
 		ratio = Math.max(0, Math.min(1, ratio));
@@ -76,6 +77,35 @@ public class RenderUtils {
 		}
 
 		return result;
+	}
+
+	// TODO The "line" parameter should not be necessary
+	// The method should adapt to the number of lines printed so far
+	@Deprecated
+	public StringRenderable getStringRenderable(AngelCodeFont font, float x, float y, String str, float line, Color color, float targetFontSize) {
+		return getStringRenderable(font, x, y, str, line, color, TextAlign.LEFT, targetFontSize);
+	}
+
+	@Deprecated
+	public StringRenderable getStringRenderable(AngelCodeFont font, float x, float y, String str, float line, Color white, TextAlign align, float targetFontSize) {
+		float fontRatio = targetFontSize / font.getLineHeight();
+		if (align == TextAlign.RIGHT) {
+			x -= font.getWidth(str);
+		} else if (align == TextAlign.CENTER) {
+			x -= font.getWidth(str) / 2;
+		}
+		StringRenderable strR = new StringRenderable();
+		strR.setStr(str);
+		strR.getPos().x = x / fontRatio;
+		strR.getPos().y = (y + targetFontSize * (line - 1)) / fontRatio;
+		strR.setSize(20);
+
+		return strR;
+	}
+
+	@Deprecated
+	public StringRenderable getStringRenderable(AngelCodeFont font, String str, float line, Color white, TextAlign align, float targetFontSize) {
+		return getStringRenderable(font, 0, 0, str, line, white, align, targetFontSize);
 	}
 
 	public TextureImpl getTexture(String resourceName, InputStream in) throws IOException {
@@ -115,7 +145,7 @@ public class RenderUtils {
 		texture.setWidth(width);
 		texture.setHeight(height);
 
-		GL11.glTexParameteri(target, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_NEAREST);
+		GL11.glTexParameteri(target, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 		GL11.glTexParameteri(target, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 
 		// produce a texture from the byte buffer
@@ -149,7 +179,7 @@ public class RenderUtils {
 		renderPartialDisc(radius, 1);
 	}
 
-	public void renderLine(Vector2f from, Vector2f to, float widthFrom, float widthTo, float blurWidth, float[] colorInt, float[] colorExt) {
+	public void renderLine(Vec2 from, Vec2 to, float widthFrom, float widthTo, float blurWidth, float[] colorInt, float[] colorExt) {
 		TextureImpl.bindNone();
 		ortho.copy(to).sub(from);
 		float orthoLength = ortho.length();
@@ -176,7 +206,7 @@ public class RenderUtils {
 		GL11.glEnd();
 	}
 
-	public void renderLine(Vector2f from, Vector2f to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
+	public void renderLine(Vec2 from, Vec2 to, float width, float blurWidth, float[] colorInt, float[] colorExt) {
 		renderLine(from, to, width, width, blurWidth, colorInt, colorExt);
 	}
 
@@ -381,7 +411,6 @@ public class RenderUtils {
 	 */
 	public void renderSpriteFromBigTexture(float width, Texture texture, float texCoordLeft, float texCoordTop, float texCoordRight,
 			float texCoordBottom, float skewRatio) {
-		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL14.GL_GENERATE_MIPMAP, GL11.GL_TRUE);
 		texture.bind();
 
 		float absSkewRatio = Math.abs(skewRatio);
@@ -403,29 +432,6 @@ public class RenderUtils {
 		GL11.glTexCoord2f(texCoordLeft, texCoordTop);
 		GL11.glVertex2f(-width / 2 * absSkewRatio, -width / 2 * skewRatio);
 		GL11.glEnd();
-	}
-
-	// TODO The "line" parameter should not be necessary
-	// The method should adapt to the number of lines printed so far
-	public void renderText(MorphFont font, float x, float y, String str, float line, Color color) {
-		renderText(font, x, y, str, line, color, TextAlign.LEFT);
-	}
-
-	public void renderText(MorphFont font, float x, float y, String str, float line, Color white, TextAlign align) {
-		float fontRatio = (float) font.getTargetFontSize() / font.getLineHeight();
-		GL11.glScalef(fontRatio, fontRatio, 1);
-		if (align == TextAlign.RIGHT) {
-			x -= font.getWidth(str);
-		} else if (align == TextAlign.CENTER) {
-			x -= font.getWidth(str) / 2;
-		}
-		font.drawString(x / fontRatio, (y + font.getTargetFontSize() * (line - 1)) / fontRatio, str, white);
-		GL11.glScalef(1 / fontRatio, 1 / fontRatio, 1);
-		;
-	}
-
-	public void renderText(MorphFont font, String str, float line, Color white, TextAlign align) {
-		renderText(font, 0, 0, str, line, white, align);
 	}
 
 }

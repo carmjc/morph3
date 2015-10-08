@@ -7,10 +7,11 @@ import java.util.Random;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jbox2d.common.Vec2;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.calculator.Calculator;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.components.ComponentFactory;
 import net.carmgate.morph.model.entities.components.generator.SimpleGenerator;
@@ -26,7 +27,7 @@ import net.carmgate.morph.services.WorldManager;
 public class AiManager {
 
 	@Inject private Logger LOGGER;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private AI ai;
 	@Inject private PhysicalEntityFactory physicalEntityFactory;
 	@Inject private ComponentFactory componentFactory;
@@ -40,14 +41,11 @@ public class AiManager {
 		List<Ship> ennemies = new ArrayList<>();
 		while (danger > 2) {
 			Ship ship = physicalEntityFactory.newInstance(Ship.class);
-			ship.getPos().copy(new Random().nextInt(1000) - 500, new Random().nextInt(800) - 400);
 			ship.setPlayer(world.getPlayers().get("Other")); //$NON-NLS-1$
-			ship.setMass(1f);
 			ship.setEnergy(20);
 			ship.setResources(20);
 			ship.setIntegrity(1);
 			ship.setDurability(1);
-			ship.setRotation(new Random().nextFloat() * 360);
 			ship.add(componentFactory.newInstance(Laser.class));
 			ship.add(componentFactory.newInstance(SimplePropulsor.class));
 			ship.add(componentFactory.newInstance(SimpleGenerator.class));
@@ -58,6 +56,11 @@ public class AiManager {
 			LOGGER.debug("Wave global danger (with " + ennemies.size() + " ships): " + danger); //$NON-NLS-1$ //$NON-NLS-2$
 			if (danger > 2) {
 				worldManager.add(ship);
+				ship.getBody().setTransform(new Vec2(new Random().nextFloat() * 10 + 1f, new Random().nextFloat() * 10 + 1),
+						(float) (new Random().nextFloat() * 2 * Math.PI));
+				// ship.getBody().setTransform(new Vec2(0.7f, 0.5f),
+				// (float) (new Random().nextFloat() * 2 * Math.PI));
+				LOGGER.debug("ai initial position: " + ship.getPosition());
 			}
 		}
 	}

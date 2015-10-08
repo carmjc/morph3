@@ -142,7 +142,7 @@ public class AsteroidRenderer implements Renderer<Asteroid> {
 
 	@Override
 	public void render(Asteroid asteroid, float alpha, FloatBuffer vpFb) {
-		float massScale = asteroid.getMass() * massToSizeFactor;
+		float massScale = asteroid.getBody().getMass() * massToSizeFactor;
 		float width = 128;
 
 		m.load(asteroid.getModelToWorld());

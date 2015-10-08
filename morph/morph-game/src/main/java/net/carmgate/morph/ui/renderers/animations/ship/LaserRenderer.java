@@ -8,18 +8,19 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jbox2d.common.Vec2;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
-import org.newdawn.slick.opengl.TextureImpl;
+import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.animations.ship.LaserAnim;
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.GeoUtils;
 import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.shaders.ShaderManager;
@@ -59,7 +60,7 @@ public class LaserRenderer implements Renderer<LaserAnim> {
 	private int vc;
 	private int vaoId;
 
-	private TextureImpl lineTexture;
+	private Texture lineTexture;
 
 	@Override
 	public void clean() {
@@ -137,9 +138,9 @@ public class LaserRenderer implements Renderer<LaserAnim> {
 			return;
 		}
 
-		Vector2f targetPos = laserAnim.getTarget().getPos();
-		Vector2f sourcePos = laserAnim.getSource().getShip().getPos();
-		float dist = targetPos.distanceTo(sourcePos);
+		Vec2 targetPos = laserAnim.getTarget().getPosition();
+		Vec2 sourcePos = laserAnim.getSource().getShip().getPosition();
+		float dist = GeoUtils.distanceTo(targetPos, sourcePos);
 		float deltaX = targetPos.x - sourcePos.x;
 		float deltaY = targetPos.y - sourcePos.y;
 

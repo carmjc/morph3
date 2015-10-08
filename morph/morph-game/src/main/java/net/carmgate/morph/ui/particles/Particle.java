@@ -1,19 +1,19 @@
 package net.carmgate.morph.ui.particles;
 
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.ui.renderers.Renderable;
 
 public class Particle implements Renderable {
 
 	private boolean bg;
-	private Vector2f pos = new Vector2f();
-	private Vector2f speed = new Vector2f();
-	private Vector2f accel = new Vector2f();
+	private Vec2 pos = new Vec2();
+	private Vec2 speed = new Vec2();
+	private Vec2 accel = new Vec2();
 	private float rotation;
 	private long deathTime;
 	private long birthTime;
 
-	public Vector2f getAccel() {
+	public Vec2 getAccel() {
 		return accel;
 	}
 
@@ -25,7 +25,7 @@ public class Particle implements Renderable {
 		return deathTime;
 	}
 
-	public Vector2f getPos() {
+	public Vec2 getPos() {
 		return pos;
 	}
 
@@ -33,7 +33,7 @@ public class Particle implements Renderable {
 		return rotation;
 	}
 
-	public Vector2f getSpeed() {
+	public Vec2 getSpeed() {
 		return speed;
 	}
 
@@ -41,7 +41,7 @@ public class Particle implements Renderable {
 		return bg;
 	}
 
-	public void setAccel(Vector2f accel) {
+	public void setAccel(Vec2 accel) {
 		this.accel = accel;
 	}
 
@@ -57,7 +57,7 @@ public class Particle implements Renderable {
 		this.deathTime = deathTime;
 	}
 
-	public void setPos(Vector2f pos) {
+	public void setPos(Vec2 pos) {
 		this.pos = pos;
 	}
 
@@ -65,7 +65,7 @@ public class Particle implements Renderable {
 		this.rotation = rotation;
 	}
 
-	public void setSpeed(Vector2f speed) {
+	public void setSpeed(Vec2 speed) {
 		this.speed = speed;
 	}
 }

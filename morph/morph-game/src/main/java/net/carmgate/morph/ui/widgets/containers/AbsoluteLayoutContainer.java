@@ -1,15 +1,19 @@
 package net.carmgate.morph.ui.widgets.containers;
 
+import java.nio.FloatBuffer;
+
 import javax.inject.Inject;
 
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix4f;
 
+import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.widgets.Widget;
 
 public final class AbsoluteLayoutContainer extends WidgetContainer {
 
 	@Inject private RenderUtils renderUtils;
+	@Inject private UIContext uiContext;
 
 	@Override
 	public void renderInteractiveAreas() {
@@ -33,14 +37,19 @@ public final class AbsoluteLayoutContainer extends WidgetContainer {
 	}
 
 	@Override
-	public void renderWidget() {
+	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		renderUtils.renderQuad(0, 0, getWidth(), getHeight(), getBgColor());
 
+		m.setIdentity();
+		m.m30 = -uiContext.getWindow().getWidth() / 2;
+		m.m31 = -uiContext.getWindow().getHeight() / 2;
 		for (Widget widget : getWidgets()) {
 			if (widget.isVisible()) {
-				GL11.glTranslatef(widget.getPosition()[0], widget.getPosition()[1], 0);
-				widget.renderWidget();
-				GL11.glTranslatef(-widget.getPosition()[0], -widget.getPosition()[1], 0);
+				m.m30 += widget.getPosition()[0];
+				m.m31 += widget.getPosition()[1];
+				widget.renderWidget(m, vpFb);
+				m.m30 -= widget.getPosition()[0];
+				m.m31 -= widget.getPosition()[1];
 			}
 		}
 	}

@@ -2,20 +2,20 @@ package net.carmgate.morph.ai.impl;
 
 import javax.inject.Inject;
 
+import org.jbox2d.common.Vec2;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.ai.AI;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.entities.ship.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.services.ComponentManager;
 
 public class SimpleAggressiveAI implements AI {
 
 	@Inject private Logger LOGGER;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private ComponentManager componentManager;
 
 	@Override
@@ -28,24 +28,24 @@ public class SimpleAggressiveAI implements AI {
 			// LOGGER.debug("Activating laser");
 			componentManager.startBehavior(laser);
 		} else {
-			Vector2f shipPosToTarget = new Vector2f(ship.getPos()).sub(laser.getTarget().getPos());
+			Vec2 shipPosToTarget = new org.jbox2d.common.Vec2(ship.getPosition()).sub(laser.getTarget().getPosition());
 			if (shipPosToTarget.lengthSquared() > laser.getRange() * laser.getRange()
 					&& componentManager.isAvailable(prop)) {
 
 				// LOGGER.debug("Too far to activate lasers");
-				Vector2f targetPos = new Vector2f(world.getPlayerShip().getPos());
+				Vec2 targetPos = new Vec2(world.getPlayerShip().getPosition());
 
-				if (world.getPlayerShip().getSpeed().lengthSquared() > 0) {
-					targetPos = world.getPlayerShip().getComponents().get(ComponentType.PROPULSORS).getTargetPosInWorld();
+				if (world.getPlayerShip().getBody().getLinearVelocity().lengthSquared() > 0) {
+					// targetPos = world.getPlayerShip().getComponents().get(ComponentType.PROPULSORS).getTargetPosInWorld();
 				}
 
-				Vector2f toTarget = new Vector2f(targetPos).sub(ship.getPos());
-				toTarget.scale((toTarget.length() - laser.getRange() + 10) / toTarget.length());
+				Vec2 toTarget = new Vec2(targetPos).sub(ship.getPosition());
+				toTarget.mul((toTarget.length() - laser.getRange() + 10) / toTarget.length());
 				if (toTarget.lengthSquared() > prop.getRange() * prop.getRange()) {
-					toTarget.scale((prop.getRange() - 10) / toTarget.length());
+					toTarget.mul((prop.getRange() - 10) / toTarget.length());
 					// LOGGER.debug("Too far to go to target with a single propulsor activation: " + toTarget.length());
 				}
-				Vector2f propTarget = toTarget.add(ship.getPos());
+				Vec2 propTarget = toTarget.add(ship.getPosition());
 				prop.setTargetPosInWorld(propTarget);
 				// LOGGER.debug("Activating propulsors");
 				componentManager.startBehavior(prop);

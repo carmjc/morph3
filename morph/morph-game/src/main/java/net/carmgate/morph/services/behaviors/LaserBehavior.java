@@ -2,13 +2,13 @@ package net.carmgate.morph.services.behaviors;
 
 import javax.inject.Inject;
 
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.components.offensive.Laser;
 import net.carmgate.morph.model.entities.ship.Ship;
 
 public class LaserBehavior extends ComponentBehavior<Laser> {
 
-	@Inject private World world;
+	@Inject private MWorld world;
 
 	@Override
 	public void eval(Laser cmp) {

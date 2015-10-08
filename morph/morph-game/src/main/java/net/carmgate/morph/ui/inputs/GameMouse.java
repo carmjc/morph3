@@ -7,8 +7,8 @@ import org.lwjgl.input.Mouse;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.MWorld;
+import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.ui.UIContext;
 
 /**
@@ -19,16 +19,16 @@ public class GameMouse {
 
 	@Inject private UIContext uiContext;
 	@Inject private Logger LOGGER;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private Conf conf;
 
-	private Vector2f posInWorld = new Vector2f();
+	private Vec2 posInWorld = new Vec2();
 	private long lastPickingAbsoluteTime = 0;
 	// private PickingResult pickingResult;
 
-	public Vector2f getPosInWorld() {
+	public Vec2 getPosInWorld() {
 		float zoomFactor = uiContext.getViewport().getZoomFactor();
-		Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		Vec2 focalPoint = uiContext.getViewport().getFocalPoint();
 
 		int xInWorld = (int) ((getX() - uiContext.getWindow().getWidth() / 2 + focalPoint.x * zoomFactor) / zoomFactor);
 		int yInWorld = (int) ((-getY() + uiContext.getWindow().getHeight() / 2 + focalPoint.y * zoomFactor) / zoomFactor);

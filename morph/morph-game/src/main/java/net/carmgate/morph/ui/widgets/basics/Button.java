@@ -1,17 +1,17 @@
 package net.carmgate.morph.ui.widgets.basics;
 
+import java.nio.FloatBuffer;
 import java.util.Arrays;
 
 import javax.inject.Inject;
 
 import org.lwjgl.opengl.GL11;
-import org.newdawn.slick.Color;
+import org.lwjgl.util.vector.Matrix4f;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.ui.RenderingManager;
 import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
-import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 import net.carmgate.morph.ui.widgets.Widget;
 
 public final class Button extends Widget {
@@ -26,7 +26,8 @@ public final class Button extends Widget {
 	@Override
 	public float getHeight() {
 		if (super.getHeight() == 0) {
-			return RenderingManager.font.getTargetFontSize() + getInsets()[0] + getInsets()[2] + getOutsets()[0] + getOutsets()[2];
+			// FIXME
+			// return RenderingManager.font.getTargetFontSize() + getInsets()[0] + getInsets()[2] + getOutsets()[0] + getOutsets()[2];
 		}
 		return super.getHeight();
 	}
@@ -67,7 +68,7 @@ public final class Button extends Widget {
 	}
 
 	@Override
-	public void renderWidget() {
+	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		float[] bgColor = Arrays.copyOf(getBgColor(), 4);
 		if (isButtonDown()) {
 			bgColor[3] = bgColor[3] * 0.1f;
@@ -79,7 +80,8 @@ public final class Button extends Widget {
 				getHeight() - getOutsets()[2],
 				bgColor);
 		GL11.glTranslatef(getInsets()[3] + getOutsets()[3], getInsets()[0] + getOutsets()[0], 0);
-		renderUtils.renderText(RenderingManager.font, getText(), 1, Color.white, TextAlign.LEFT);
+		// FIXME
+		// renderUtils.renderText(RenderingManager.font, getText(), 1, Color.white, TextAlign.LEFT);
 		GL11.glTranslatef(-getInsets()[3] - getOutsets()[3], -getInsets()[0] - getOutsets()[0], 0);
 	}
 

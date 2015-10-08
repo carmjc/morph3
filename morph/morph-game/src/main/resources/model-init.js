@@ -9,6 +9,7 @@ importPackage(Packages.net.carmgate.morph.model.entities.components.offensive)
 importPackage(Packages.net.carmgate.morph.model.entities.components.prop)
 importPackage(Packages.net.carmgate.morph.model.entities.components.repair)
 importPackage(Packages.net.carmgate.morph.model.geometry)
+importPackage(Packages.org.jbox2d.dynamics.Body)
 //importPackage(Packages.net.carmgate.morph.orders)
 importPackage(Packages.org.lwjgl.util.vector)
 var ArrayList = Java.type('java.util.ArrayList');
@@ -21,15 +22,14 @@ other.color = [1, 0.2, 0.2, 1];
 world.add(other);
 
 asteroid = entityFactory.newInstance(Asteroid.class);
-asteroid.getPos().copy(-500, -80);
-asteroid.mass = 2000;
-asteroid.rotationSpeed = -5;
+//asteroid.mass = 2000;
+//asteroid.rotationSpeed = -5;
 worldManager.add(asteroid);
+asteroid.getBody().getPosition().set(-0.5, -0.08);
 
 ship = entityFactory.newInstance(Ship.class);
-ship.getPos().copy(-200, 200);
-ship.mass = 1;
-ship.durability = 30;
+//ship.mass = 1;
+ship.durability = 300;
 ship.player = me;
 ship.energy = 1;
 ship.resources = 10;
@@ -49,4 +49,5 @@ ship.setHardSpaceMax(5);
 ship.setXp(5);
 shipManager.init(ship);
 worldManager.add(ship);
+// FIXME - use transform instead: ship.getBody().getPosition().set(-0.2, 0.2);
 

@@ -14,7 +14,7 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.entities.component.ComponentLoaded;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.ship.LaserAnim;
 import net.carmgate.morph.model.animations.ship.MiningLaserAnim;
@@ -32,7 +32,7 @@ import net.carmgate.morph.services.behaviors.ComponentBehavior;
 public class ComponentManager {
 
 	@Inject private Logger LOGGER;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private Conf conf;
 	@Inject private MEventManager eventManager;
 	@Inject private AnimationFactory animationFactory;

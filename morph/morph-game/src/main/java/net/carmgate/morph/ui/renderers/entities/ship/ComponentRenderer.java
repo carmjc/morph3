@@ -15,7 +15,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentKind;
 import net.carmgate.morph.model.entities.components.ComponentType;
@@ -34,7 +34,7 @@ public class ComponentRenderer implements Renderer<Component> {
 	@Inject private Logger LOGGER;
 	@Inject private RenderUtils renderUtils;
 	@Inject private Conf conf;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private ComponentManager componentManager;
 
 	private Map<ComponentType, Texture> cmpTextures = new HashMap<>();
@@ -79,10 +79,10 @@ public class ComponentRenderer implements Renderer<Component> {
 		Texture texture = cmpTextures.get(cmp.getClass().getAnnotation(ComponentKind.class).value());
 
 		if (componentManager.getAvailability(cmp) < 1 && ship == world.getPlayerShip()) {
-			GL11.glRotatef(-ship.getRotation() - 90, 0, 0, 1);
+			GL11.glRotatef(-ship.getBody().getAngle() - 90, 0, 0, 1);
 			renderUtils.renderAntialiasedPartialDisc(0 + componentManager.getAvailability(cmp), 1, width / 2 - 10,
 					new float[] { 0.3f, 0.3f, 0.3f, 0.8f * alpha }, 1);
-			GL11.glRotatef(ship.getRotation() + 90, 0, 0, 1);
+			GL11.glRotatef(ship.getBody().getAngle() + 90, 0, 0, 1);
 		}
 
 		Color color = new Color(Color.white);

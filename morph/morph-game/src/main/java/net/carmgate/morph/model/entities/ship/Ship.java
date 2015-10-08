@@ -12,13 +12,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
+import org.lwjgl.util.vector.Vector2f;
+
 import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.model.Player;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentKind;
 import net.carmgate.morph.model.entities.components.ComponentType;
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.model.geometry.Vector3f;
 
 @Entity
@@ -27,7 +33,7 @@ import net.carmgate.morph.model.geometry.Vector3f;
 })
 public class Ship extends PhysicalEntity {
 
-	public static final float MAX_PROPULSOR_FORCE = 200f;
+	public static final float MAX_PROPULSOR_FORCE = 0.001f;
 
 	@ManyToOne(cascade = CascadeType.ALL) private Player owner;
 	private float durability;
@@ -43,24 +49,34 @@ public class Ship extends PhysicalEntity {
 	private float maxDamageDt = 0;
 	private float maxDefenseDt = 0;
 
-	@Transient public Vector2f debug1 = new Vector2f();
-	@Transient public Vector2f debug2 = new Vector2f();
-	@Transient public Vector2f debug3 = new Vector2f();
-	@Transient public Vector2f debug4 = new Vector2f();
+	@Transient public Vec2 debug1 = new Vec2();
+	@Transient public Vec2 debug2 = new Vec2();
+	@Transient public Vec2 debug3 = new Vec2();
+	@Transient public Vec2 debug4 = new Vec2();
 	@Transient private boolean forceStop;
 	private long creationTime;
 
 	private int softSpaceMax;
 	private int hardSpaceMax;
 	private Integer xpMax;
-	@Transient private Float perceptionRadius;
 
+	@Transient private Float perceptionRadius;
 	@Transient private MEventManager eventManager;
 
 	public void add(Component component) {
 		component.setShip(this);
 		ComponentKind componentKind = component.getClass().getAnnotation(ComponentKind.class);
 		components.put(componentKind.value(), component);
+	}
+
+	@Override
+	public BodyDef getBodyDef() {
+		BodyDef bd = new BodyDef();
+		bd.position.set(0, 0);
+		bd.type = BodyType.DYNAMIC;
+		bd.linearDamping = 0.5f;
+		bd.angularDamping = 10f;
+		return bd;
 	}
 
 	public Map<ComponentType, Component> getComponents() {
@@ -81,6 +97,17 @@ public class Ship extends PhysicalEntity {
 
 	public float getEnergyMax() {
 		return energyMax;
+	}
+
+	@Override
+	public FixtureDef getFixtureDef(CircleShape cs) {
+		FixtureDef fd = new FixtureDef();
+		fd.shape = cs;
+		fd.density = 5f;
+		fd.friction = 0;
+		fd.restitution = 0;
+		// fd.filter.groupIndex = -1;
+		return fd;
 	}
 
 	public int getHardSpaceMax() {
@@ -115,6 +142,13 @@ public class Ship extends PhysicalEntity {
 		return resourcesMax;
 	}
 
+	@Override
+	public CircleShape getShape() {
+		CircleShape cs = new CircleShape();
+		cs.m_radius = 0.025f;
+		return cs;
+	}
+
 	public int getSoftSpaceMax() {
 		return softSpaceMax;
 	}
@@ -137,8 +171,8 @@ public class Ship extends PhysicalEntity {
 		eventManager.scanAndRegister(this);
 
 		getModelToWorld().setIdentity();
-		getModelToWorld().translate(getPos(), getModelToWorld());
-		getModelToWorld().rotate(getRotation(), Vector3f.Z, getModelToWorld());
+		getModelToWorld().translate(new Vector2f(getPosition().x, getPosition().y), getModelToWorld());
+		getModelToWorld().rotate(getBody().getAngle(), Vector3f.Z, getModelToWorld());
 	}
 
 	public void setCreationTime(long creationTime) {

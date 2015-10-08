@@ -1,7 +1,7 @@
 package net.carmgate.morph.model.physics;
 
-import net.carmgate.morph.model.geometry.Vector2f;
+import org.jbox2d.common.Vec2;
 
 public interface ForceSource {
-   Vector2f getForce();
+	Vec2 getForce();
 }

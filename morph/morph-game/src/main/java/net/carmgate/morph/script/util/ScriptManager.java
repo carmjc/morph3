@@ -15,14 +15,14 @@ import javax.script.ScriptEngineManager;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.model.Player;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.Asteroid;
 
 @Singleton
 public class ScriptManager {
 
 	@Inject private Logger LOGGER;
-	@Inject private World world;
+	@Inject private MWorld world;
 	// @Inject private OrderFactory orderFactory;
 
 	public void callScript(String script, Player player, Map<String, Object> inputs, Map<String, Object> outputs) {

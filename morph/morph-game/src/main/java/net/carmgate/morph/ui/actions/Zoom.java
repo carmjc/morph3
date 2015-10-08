@@ -7,7 +7,7 @@ import org.lwjgl.input.Keyboard;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.ViewPort;
 import net.carmgate.morph.ui.inputs.GameMouse;
@@ -42,10 +42,10 @@ public class Zoom implements MouseListener {
 				zoomVariation = ZOOM_MAX / viewport.getZoomFactor();
 			}
 
-			Vector2f fromWindowCenterToMouse = new Vector2f(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
+			Vec2 fromWindowCenterToMouse = new Vec2(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
 					-uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
-			uiContext.getViewport().getFocalPoint().sub(new Vector2f(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
-			.add(new Vector2f(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
+			uiContext.getViewport().getFocalPoint().sub(new Vec2(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
+			.add(new Vec2(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
 			viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
 
 			inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
@@ -64,10 +64,10 @@ public class Zoom implements MouseListener {
 				zoomVariation = ZOOM_MAX / viewport.getZoomFactor();
 			}
 
-			Vector2f fromWindowCenterToMouse = new Vector2f(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
+			Vec2 fromWindowCenterToMouse = new Vec2(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
 					-uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
-			uiContext.getViewport().getFocalPoint().sub(new Vector2f(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
-			.add(new Vector2f(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
+			uiContext.getViewport().getFocalPoint().sub(new Vec2(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
+			.add(new Vec2(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
 			viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
 
 			inputHistory.consumeEvents(inputHistory.getLastMouseEvent());

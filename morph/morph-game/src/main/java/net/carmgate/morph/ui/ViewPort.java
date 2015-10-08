@@ -4,7 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.Vec2;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class ViewPort {
    private static final Logger LOGGER = LoggerFactory.getLogger(ViewPort.class);
 
    /** The intersection of the diagonals of the viewport (in world coordinates). */
-   private final Vector2f focalPoint = new Vector2f();
+   private final Vec2 focalPoint = new Vec2();
 
    /** The rotation of the scene around the focal point (in radians). */
    private final float rotation = 0;
@@ -37,7 +37,7 @@ public class ViewPort {
    // private Entity lockedOnEntity;
 
    /** The intersection of the diagonals of the viewport (in <b>world coordinates</b>). */
-   public Vector2f getFocalPoint() {
+   public Vec2 getFocalPoint() {
       return focalPoint;
    }
 

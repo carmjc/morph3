@@ -12,7 +12,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.particles.Particle;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
@@ -24,7 +24,7 @@ public class ParticleRenderer implements Renderer<Particle> {
 	@Inject private RenderUtils renderUtils;
 	@Inject private Conf conf;
 	@Inject private UIContext uiContext;
-	@Inject private World world;
+	@Inject private MWorld world;
 
 	private Texture particleTexture;
 

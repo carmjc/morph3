@@ -12,8 +12,8 @@ import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.entities.ship.ShipComponentsUpdated;
 import net.carmgate.morph.events.world.entities.ship.ShipDeath;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.Player.PlayerType;
-import net.carmgate.morph.model.World;
 import net.carmgate.morph.model.animations.AnimationFactory;
 import net.carmgate.morph.model.animations.world.XpAwardedAnimation;
 import net.carmgate.morph.model.entities.components.Component;
@@ -27,7 +27,7 @@ import net.carmgate.morph.ui.MessageManager.Message;
 public class ShipManager {
 
 	@Inject private Conf conf;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private Logger LOGGER;
 	@Inject private MEventManager eventManager;
 	@Inject private AnimationFactory animationFactory;
@@ -73,7 +73,7 @@ public class ShipManager {
 		int turretIndex = 0;
 		int coreIndex = 0;
 		for (Component cmp : ship.getComponents().values()) {
-			if (cmp.getPosInShip().isNull()) {
+			if (cmp.getPosInShip().lengthSquared() == 0) {
 				Float compX;
 				Float compY;
 				if (cmp.getClass().getAnnotation(ComponentKind.class).value() == ComponentType.PROPULSORS) {
@@ -90,7 +90,7 @@ public class ShipManager {
 					coreIndex++;
 				}
 				if (compX != null && compY != null) {
-					cmp.getPosInShip().copy(compX, compY);
+					cmp.getPosInShip().set(compX, compY);
 				} else {
 					cmp.setPosInShip(null);
 				}
@@ -110,7 +110,7 @@ public class ShipManager {
 			ship.setXp(ship.getXp() + 1);
 
 			XpAwardedAnimation xpAwardedAnim = animationFactory.newInstance(XpAwardedAnimation.class);
-			xpAwardedAnim.setPos(shipDeath.getShip().getPos());
+			xpAwardedAnim.setPos(shipDeath.getShip().getPosition());
 			xpAwardedAnim.setXpAmount(1);
 			world.addAnimation(xpAwardedAnim);
 

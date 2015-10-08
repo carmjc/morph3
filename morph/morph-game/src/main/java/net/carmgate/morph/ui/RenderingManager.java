@@ -7,7 +7,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,13 +17,14 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jbox2d.common.Color3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
-import org.newdawn.slick.Color;
+import org.lwjgl.util.vector.Matrix4f;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.opengl.ImageData;
@@ -42,29 +42,27 @@ import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.entities.ship.ShipAdded;
 import net.carmgate.morph.events.world.entities.ship.ShipUpdated;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.Asteroid;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.Planet;
 import net.carmgate.morph.model.entities.components.Component;
-import net.carmgate.morph.model.entities.components.ComponentKind;
 import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.entities.ship.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.GeoUtils;
+import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.particles.Particle;
 import net.carmgate.morph.ui.particles.ParticleEngine;
-import net.carmgate.morph.ui.renderers.MorphFont;
+import net.carmgate.morph.ui.renderers.MorphDebugDraw;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.renderers.Renderable;
 import net.carmgate.morph.ui.renderers.Renderer;
-import net.carmgate.morph.ui.renderers.StringRenderable;
 import net.carmgate.morph.ui.renderers.StringRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
-import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 import net.carmgate.morph.ui.widgets.components.ComponentWidget;
 import net.carmgate.morph.ui.widgets.containers.AbsoluteLayoutContainer;
@@ -76,7 +74,7 @@ import net.carmgate.morph.ui.widgets.shipeditor.ShipEditorPanel;
 @Singleton
 public class RenderingManager {
 
-	public static MorphFont font;
+	public static AngelCodeFont font;
 
 	private Map<ComponentType, Texture> cmpTextures = new HashMap<>();
 
@@ -87,12 +85,13 @@ public class RenderingManager {
 	@Inject private Messages messages;
 	@Inject private InputHistory inputHistory;
 	@Inject private RenderUtils renderUtils;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private ParticleEngine particleEngine;
 	@Inject private Instance<Renderer<? extends Renderable>> rendererInstances;
 	@Inject private MEventManager eventManager;
 	@Inject private PhysicalEntityFactory physicalEntityFactory;
 	@Inject private StringRenderer stringRenderer;
+	@Inject private MorphDebugDraw debugDraw;
 
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> renderers = new HashMap<>();
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
@@ -168,22 +167,24 @@ public class RenderingManager {
 			renderer.init();
 		}
 
+		font = new AngelCodeFont(conf.getProperty("ui.font.angel"), conf.getProperty("ui.font.angel.tga"));
+
 		uiContext.setWidgetRoot(widgetFactory.newInstance(AbsoluteLayoutContainer.class));
 
 		MessagesPanel messagesWidget = widgetFactory.newInstance(MessagesPanel.class);
-		messagesWidget.setPosition(new float[] { 0, 0, 0 });
+		messagesWidget.setPosition(new float[] { 0, uiContext.getWindow().getHeight(), 0 });
 		uiContext.getWidgetRoot().add(messagesWidget);
 
 		ShipEditorPanel shipEditorPanel = widgetFactory.newInstance(ShipEditorPanel.class);
 		shipEditorPanel.setPosition(new float[] { uiContext.getWindow().getWidth() / 2, 0, 0 });
-		uiContext.getWidgetRoot().add(shipEditorPanel);
+		// uiContext.getWidgetRoot().add(shipEditorPanel);
 
 		RadarWidget radarWidget = widgetFactory.newInstance(RadarWidget.class);
 		radarWidget.setWidth(150);
 		radarWidget.setHeight(150);
 		radarWidget.setPosition(new float[] { uiContext.getWindow().getWidth() - radarWidget.getWidth() - 10,
 				uiContext.getWindow().getHeight() - radarWidget.getHeight() - 10 });
-		uiContext.getWidgetRoot().add(radarWidget);
+		// uiContext.getWidgetRoot().add(radarWidget);
 
 		// cmpBar = widgetFactory.newInstance(ComponentBar.class);
 		componentBarWidget = widgetFactory.newInstance(ColumnLayoutWidgetContainer.class);
@@ -191,7 +192,7 @@ public class RenderingManager {
 		componentBarWidget.setHeight(32);
 		componentBarWidget.setPosition(new float[] { 0 + 10,
 				uiContext.getWindow().getHeight() - componentBarWidget.getHeight() - 10 });
-		uiContext.getWidgetRoot().add(componentBarWidget);
+		// uiContext.getWidgetRoot().add(componentBarWidget);
 
 	}
 
@@ -366,16 +367,21 @@ public class RenderingManager {
 		// float borderTopY = -uiContext.getWindow().getHeight() / 2;
 		//
 		// GL11.glTranslatef(borderRightX, borderTopY, 0);
-		// uiContext.getWidgetRoot().renderWidget();
-		// GL11.glTranslatef(-borderRightX, -borderTopY, 0);
 
-		stringRenderer.prepare();
-		StringRenderable str = new StringRenderable();
-		str.setStr("This is a great thing to be able to render this");
-		str.setSize(32);
-		str.getPos().copy(-uiContext.getWindow().getWidth() / 2 + 10, -uiContext.getWindow().getHeight() / 2 + 10);
-		stringRenderer.render(str, 1, guiVpFb);
-		stringRenderer.clean();
+		Matrix4f m = new Matrix4f();
+		m.setIdentity();
+
+		uiContext.getWidgetRoot().renderWidget(m, guiVpFb);
+		// GL11.glTranslatef(-borderRightX, -borderTopY, 0); }
+
+		// stringRenderer.prepare();
+		// StringRenderable str = new StringRenderable();
+		// str.setStr("This is a great thing to be able to render this\ntest\nWhoo !!! |");
+		// str.setSize(20);
+		// str.getPos().copy(-uiContext.getWindow().getWidth() / 2 + 10,
+		// uiContext.getWindow().getHeight() / 2 - 10);
+		// stringRenderer.render(str, 1, guiVpFb);
+		// stringRenderer.clean();
 	}
 
 	private void renderGuiForSelectedShip() {
@@ -383,50 +389,54 @@ public class RenderingManager {
 		float borderLeftX = uiContext.getWindow().getWidth() / 2 - 4;
 		float borderTopY = -uiContext.getWindow().getHeight() / 2 + 2;
 		int line = 1;
-		if (ship != null) {
-			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-				renderUtils.renderText(font, borderLeftX, borderTopY,
-						MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, TextAlign.RIGHT); //$NON-NLS-1$
-				renderUtils.renderText(font, borderLeftX, borderTopY,
-						MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, TextAlign.RIGHT); //$NON-NLS-1$
-				renderUtils.renderText(font, borderLeftX, borderTopY,
-						MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, TextAlign.RIGHT); //$NON-NLS-1$
-				renderUtils.renderText(font, borderLeftX, borderTopY,
-						MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, TextAlign.RIGHT); //$NON-NLS-1$
-				renderUtils.renderText(font, borderLeftX, borderTopY,
-						MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, //$NON-NLS-1$
-						TextAlign.RIGHT);
-				renderUtils.renderText(font, borderLeftX, borderTopY,
-						MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, //$NON-NLS-1$
-						TextAlign.RIGHT);
-
-				for (Component c : ship.getComponents().values()) {
-					Color color = Color.white;
-					if (!c.isActive()) {
-						color = Color.gray;
-					}
-
-					GL11.glTranslatef(borderLeftX - 5, borderTopY + font.getTargetFontSize() * line - 10, 0);
-					ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
-					float[] cmpColor = cmpType.getColor();
-					renderUtils.renderQuad(0, 0, 5, 5, cmpColor);
-					GL11.glTranslatef(-(borderLeftX - 5), -(borderTopY + font.getTargetFontSize() * line - 10), 0);
-
-					renderUtils.renderText(font, borderLeftX - 10, borderTopY,
-							MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), //$NON-NLS-1$
-									c.getResourcesDt()),
-							line++, color, TextAlign.RIGHT);
-
-				}
-			}
-		}
+		float fontSize = 20;
+		// if (ship != null) {
+		// if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+		// StringRenderable stringRenderable = renderUtils.getStringRenderable(font, borderLeftX, borderTopY,
+		// MessageFormat.format(messages.getString("ui.selectedShip.distance"), ship.debug1.length()), line++, Color.white, TextAlign.RIGHT, //$NON-NLS-1$
+		// fontSize);
+		// ???find a way to put Stringrenderables somewhere and to have them renewed/refreshed more cleverly???
+		// renderUtils.getStringRenderable(font, borderLeftX, borderTopY,
+		// MessageFormat.format(messages.getString("ui.selectedShip.speed"), ship.getSpeed().length()), line++, Color.white, TextAlign.RIGHT, //$NON-NLS-1$
+		// fontSize);
+		// renderUtils.getStringRenderable(font, borderLeftX, borderTopY,
+		// MessageFormat.format(messages.getString("ui.selectedShip.accel"), ship.getAccel().length()), line++, Color.white, TextAlign.RIGHT, //$NON-NLS-1$
+		// fontSize);
+		// renderUtils.getStringRenderable(font, borderLeftX, borderTopY,
+		// MessageFormat.format(messages.getString("ui.selectedShip.health"), ship.getIntegrity() * 100), line++, Color.white, TextAlign.RIGHT, //$NON-NLS-1$
+		// fontSize);
+		// renderUtils.getStringRenderable(font, borderLeftX, borderTopY,
+		// MessageFormat.format(messages.getString("ui.selectedShip.eco"), ship.getEnergy(), ship.getResources()), line++, Color.white, //$NON-NLS-1$
+		// TextAlign.RIGHT, fontSize);
+		// renderUtils.getStringRenderable(font, borderLeftX, borderTopY,
+		// MessageFormat.format(messages.getString("ui.selectedShip.ecoMax"), ship.getEnergyMax(), ship.getResourcesMax()), line++, Color.white, //$NON-NLS-1$
+		// TextAlign.RIGHT, fontSize);
+		//
+		// for (Component c : ship.getComponents().values()) {
+		// Color color = Color.white;
+		// if (!c.isActive()) {
+		// color = Color.gray;
+		// }
+		//
+		// ComponentType cmpType = c.getClass().getAnnotation(ComponentKind.class).value();
+		// float[] cmpColor = cmpType.getColor();
+		// renderUtils.renderQuad(0, 0, 5, 5, cmpColor);
+		//
+		// renderUtils.getStringRenderable(font, borderLeftX - 10, borderTopY,
+		// MessageFormat.format(messages.getString("ui.selectedShip.components"), c.getClass().getSimpleName(), c.getEnergyDt(), //$NON-NLS-1$
+		// c.getResourcesDt()),
+		// line++, color, TextAlign.RIGHT, fontSize);
+		//
+		// }
+		// }
+		// }
 
 	}
 
 	private void renderParticles(List<Particle> particles) {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
-		final Vector2f focalPoint = uiContext.getViewport().getFocalPoint();
+		final Vec2 focalPoint = uiContext.getViewport().getFocalPoint();
 		final float zoomFactor = uiContext.getViewport().getZoomFactor();
 		GL11.glScalef(zoomFactor, zoomFactor, 1);
 		GL11.glTranslatef(-focalPoint.x, -focalPoint.y, 0);
@@ -456,7 +466,7 @@ public class RenderingManager {
 		Renderer<PhysicalEntity> renderer = (Renderer<PhysicalEntity>) renderers.get(Asteroid.class);
 		renderer.prepare();
 		for (PhysicalEntity entity : world.getPhysicalEntities()) {
-			float distanceToEntitySq = entity.getPos().distanceToSquared(playerShip.getPos());
+			float distanceToEntitySq = GeoUtils.distanceToSquared(entity.getPosition(), playerShip.getPosition());
 			if (uiContext.getRenderMode() == RenderMode.DEBUG || distanceToEntitySq < appearanceDistanceSq) {
 				float ratio = 1;
 				if (uiContext.getRenderMode() != RenderMode.DEBUG && distanceToEntitySq > interactionDistanceSq) {
@@ -471,9 +481,15 @@ public class RenderingManager {
 		renderer.clean();
 
 		final ShipRenderer shipRenderer = (ShipRenderer) renderers.get(Ship.class);
+		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+			for (final Ship ship : world.getShips()) {
+				debugDraw.drawCircle(ship.getBody().getPosition(), 0.2f, Color3f.WHITE);
+			}
+		}
+
 		shipRenderer.prepare();
 		for (final Ship ship : world.getShips()) {
-			float distanceToPlayerShipSq = ship.getPos().distanceToSquared(playerShip.getPos());
+			float distanceToPlayerShipSq = GeoUtils.distanceToSquared(ship.getPosition(), playerShip.getPosition());
 			if (uiContext.getRenderMode() == RenderMode.DEBUG || distanceToPlayerShipSq < appearanceDistanceSq) {
 				float visibilityRatio = 1;
 				if (uiContext.getRenderMode() != RenderMode.DEBUG && distanceToPlayerShipSq > interactionDistanceSq) {

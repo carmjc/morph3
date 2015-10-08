@@ -13,6 +13,7 @@ import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 
+import org.jbox2d.common.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ import net.carmgate.morph.model.entities.parts.HardPart;
 import net.carmgate.morph.model.entities.parts.Part;
 import net.carmgate.morph.model.entities.parts.SoftPart;
 import net.carmgate.morph.model.entities.ship.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
+import net.carmgate.morph.model.geometry.GeoUtils;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.ui.renderers.Renderable;
 
@@ -37,7 +38,7 @@ public abstract class Component implements Renderable {
 	@Transient protected MEventManager eventManager;
 
 	@Id private int id;
-	private Vector2f posInShip = new Vector2f();
+	private Vec2 posInShip = new Vec2();
 	private boolean active;
 
 	@Transient private Animation animation;
@@ -46,7 +47,7 @@ public abstract class Component implements Renderable {
 	@Transient private final Holder<PhysicalEntity> targetHolder = new Holder<>();
 	@ManyToOne private Ship ship;
 	@ManyToOne private PhysicalEntity target;
-	private Vector2f targetPosInWorld;
+	private Vec2 targetPosInWorld;
 
 	private long lastActivation;
 	private float[] color;
@@ -128,7 +129,7 @@ public abstract class Component implements Renderable {
 		return maxStoredResources;
 	}
 
-	public Vector2f getPosInShip() {
+	public Vec2 getPosInShip() {
 		return posInShip;
 	}
 
@@ -164,7 +165,7 @@ public abstract class Component implements Renderable {
 		return targetHolder;
 	}
 
-	public Vector2f getTargetPosInWorld() {
+	public Vec2 getTargetPosInWorld() {
 		return targetPosInWorld;
 	}
 
@@ -176,8 +177,9 @@ public abstract class Component implements Renderable {
 		return active;
 	}
 
-	public boolean isPosWithinRange(Vector2f pos) {
-		return pos != null && (getRange() == 0 || pos.distanceToSquared(getShip().getPos()) <= getRange() * getRange());
+	public boolean isPosWithinRange(Vec2 pos) {
+		return pos != null && (getRange() == 0
+				|| GeoUtils.distanceToSquared(pos, getShip().getPosition()) <= getRange() * getRange());
 	}
 
 	@PostLoad
@@ -261,7 +263,7 @@ public abstract class Component implements Renderable {
 		this.maxStoredResources = maxStoredResources;
 	}
 
-	public void setPosInShip(Vector2f posInShip) {
+	public void setPosInShip(Vec2 posInShip) {
 		this.posInShip = posInShip;
 	}
 
@@ -280,13 +282,13 @@ public abstract class Component implements Renderable {
 	public void setTarget(PhysicalEntity target) {
 		targetHolder.set(target);
 		if (target != null) {
-			targetPosInWorld = target.getPos();
+			targetPosInWorld = target.getPosition();
 		} else {
 			targetPosInWorld = null;
 		}
 	}
 
-	public void setTargetPosInWorld(Vector2f targetPosInWorld) {
+	public void setTargetPosInWorld(Vec2 targetPosInWorld) {
 		this.targetPosInWorld = targetPosInWorld;
 	}
 

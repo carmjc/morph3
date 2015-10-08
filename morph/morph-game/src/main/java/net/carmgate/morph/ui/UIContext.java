@@ -11,7 +11,7 @@ import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.entities.ship.ShipDeath;
 import net.carmgate.morph.events.world.entities.ship.ShipSelected;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.ui.renderers.RenderMode;
@@ -29,7 +29,7 @@ public class UIContext {
 	@Inject private ViewPort viewport;
 	@Inject private Window window;
 	@Inject private MEventManager eventManager;
-	@Inject private World world;
+	@Inject private MWorld world;
 
 	private RenderMode renderMode = RenderMode.NORMAL;
 	private Ship selectedShip;

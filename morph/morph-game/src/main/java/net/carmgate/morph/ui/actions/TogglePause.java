@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
-import net.carmgate.morph.model.World.TimeFreezeCause;
+import net.carmgate.morph.model.MWorld;
+import net.carmgate.morph.model.MWorld.TimeFreezeCause;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.UIContext.Context;
 import net.carmgate.morph.ui.inputs.InputHistory;
@@ -17,7 +17,7 @@ public class TogglePause implements KeyboardListener {
 
 	@Inject private Logger LOGGER;
 	@Inject private InputHistory inputHistory;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private Conf conf;
 	@Inject private UIContext uiContext;
 

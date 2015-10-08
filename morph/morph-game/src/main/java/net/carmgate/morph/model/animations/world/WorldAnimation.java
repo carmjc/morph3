@@ -3,24 +3,25 @@ package net.carmgate.morph.model.animations.world;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jbox2d.common.Vec2;
+
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.animations.Animation;
-import net.carmgate.morph.model.geometry.Vector2f;
 
 public abstract class WorldAnimation extends Animation {
 
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private Conf conf;
 
-	private Vector2f pos;
+	private Vec2 pos;
 	private long creationTime;
 
 	public long getCreationTime() {
 		return creationTime;
 	}
 
-	public Vector2f getPos() {
+	public Vec2 getPos() {
 		return pos;
 	}
 
@@ -30,7 +31,7 @@ public abstract class WorldAnimation extends Animation {
 		setDuration(conf.getIntProperty(getClass().getCanonicalName() + ".duration"));
 	}
 
-	public void setPos(Vector2f pos) {
+	public void setPos(Vec2 pos) {
 		this.pos = pos;
 	}
 }

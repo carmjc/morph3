@@ -7,10 +7,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.weld.environment.se.events.ContainerInitialized;
+import org.jbox2d.callbacks.DebugDraw;
+import org.jbox2d.common.Vec2;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector2f;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.ai.AiManager;
@@ -18,11 +21,10 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.MEventManager;
 import net.carmgate.morph.events.world.WorldEventFactory;
 import net.carmgate.morph.events.world.entities.ship.ShipDeath;
-import net.carmgate.morph.model.World;
+import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
-import net.carmgate.morph.model.geometry.Vector2f;
 import net.carmgate.morph.model.geometry.Vector3f;
 import net.carmgate.morph.model.physics.ForceSource;
 import net.carmgate.morph.services.ComponentManager;
@@ -34,6 +36,7 @@ import net.carmgate.morph.ui.Window;
 import net.carmgate.morph.ui.inputs.KeyboardManager;
 import net.carmgate.morph.ui.inputs.MouseManager;
 import net.carmgate.morph.ui.particles.ParticleEngine;
+import net.carmgate.morph.ui.renderers.MorphDebugDraw;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.shaders.ShaderManager;
 
@@ -43,7 +46,7 @@ public class GameMain {
 	@Inject private MEventManager eventManager;
 	@Inject private Logger LOGGER;
 	@Inject private Conf conf;
-	@Inject private World world;
+	@Inject private MWorld world;
 	@Inject private UIContext uiContext;
 	@Inject private MouseManager mouseManager;
 	@Inject private KeyboardManager keyboardManager;
@@ -54,9 +57,7 @@ public class GameMain {
 	@Inject private ComponentManager componentManager;
 	@Inject private ParticleEngine particleEngine;
 	@Inject private ShaderManager shaderManager;
-
-	// Computation attributes
-	private long lastUpdateTime = 0;
+	@Inject private MorphDebugDraw debugDraw;
 
 	// frame counter
 	private float[] frameDurations = new float[100];
@@ -87,6 +88,12 @@ public class GameMain {
 		// GL20.glUseProgram(shaderManager.getProgram("basic"));
 		vpID = GL20.glGetUniformLocation(shaderManager.getProgram("basic"), "VP");
 
+		debugDraw.init();
+		debugDraw.updateWorld(1, renderingManager.getWorldVpFb());
+		world.getBox2dWorld().setDebugDraw(debugDraw);
+		debugDraw.setFlags(DebugDraw.e_aabbBit + DebugDraw.e_centerOfMassBit + DebugDraw.e_dynamicTreeBit + DebugDraw.e_jointBit + DebugDraw.e_pairBit
+				+ DebugDraw.e_shapeBit);
+
 		// Rendering loop
 		while (true) {
 
@@ -111,10 +118,18 @@ public class GameMain {
 			// Fire deferred events
 			eventManager.deferredFire();
 
-			// Update kinematics
-			updateKinematics();
 
-			lastUpdateTime = world.getTime();
+			// LOGGER.debug("stepping: " + world.getWorldMillisSinceLastBox2dUpdate());
+			while (world.getWorldMillisSinceLastBox2dUpdate() >= 10) {
+				// Update kinematics
+				updateKinematics();
+				world.getBox2dWorld().step(10f / 1000, 6, 2);
+				world.setWorldMillisSinceLastBox2dUpdate(world.getWorldMillisSinceLastBox2dUpdate() - 10);
+			}
+
+			if (uiContext.getRenderMode() == RenderMode.DEBUG) {
+				world.getBox2dWorld().drawDebugData();
+			}
 
 			// updates display and sets frame rate
 			Display.sync(60);
@@ -176,8 +191,9 @@ public class GameMain {
 			guiVpFb.flip();
 			GL20.glUniformMatrix4(vpID, false, guiVpFb);
 
-			// Nouveau code
+			debugDraw.updateWorld(1, renderingManager.getWorldVpFb());
 
+			// Nouveau code
 			// GL11.glMatrixMode(GL11.GL_MODELVIEW);
 			// GL11.glLoadIdentity();
 
@@ -244,54 +260,62 @@ public class GameMain {
 
 	private void updateKinematics() {
 		for (final PhysicalEntity entity : world.getPhysicalEntities()) {
-			if (entity instanceof Ship && ((Ship) entity).isForceStop()) {
-				entity.getAccel().copy(Vector2f.NULL);
-				entity.getSpeed().copy(Vector2f.NULL);
-				((Ship) entity).setForceStop(false);
-				continue;
-			}
-
-			Vector2f tmpEntityAccel = new Vector2f();
-			Vector2f tmpAccel = new Vector2f();
-			Vector2f tmp = new Vector2f();
+			//			if (entity instanceof Ship && ((Ship) entity).isForceStop()) {
+			//				entity.getAccel().copy(Vec2.NULL);
+			//				entity.getSpeed().copy(Vec2.NULL);
+			//				((Ship) entity).setForceStop(false);
+			//				continue;
+			//			}
+			//
+			//			Vec2 tmpEntityAccel = new Vec2();
+			//			Vec2 tmpAccel = new Vec2();
+			//			Vec2 tmp = new Vec2();
 
 			for (final ForceSource source : entity.getForceSources()) {
-				tmpAccel.copy(source.getForce()).scale(1 / entity.getMass()); // FIXME This is only using one force ... :(
-				tmpEntityAccel.add(tmpAccel);
+				if (source.getForce().length() > 0) {
+					entity.getBody().applyForce(source.getForce(), entity.getBody().getWorldPoint(new Vec2(0, -0.1f)));
+					// tmpAccel.copy(source.getForce()).scale(1 / entity.getBody().getMass()); // FIXME This is only using one force ... :(
+					// tmpEntityAccel.add(tmpAccel);
+				}
 			}
 
-			// kinematics
-			entity.getAccel().copy(tmpEntityAccel);
-			tmp.copy(entity.getAccel()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
-			entity.getSpeed().add(tmp);
-			tmp.copy(entity.getSpeed()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
-			entity.getPos().add(tmp);
+			//
+			//			// kinematics
+			//			entity.getAccel().copy(tmpEntityAccel);
+			//			tmp.copy(entity.getAccel()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
+			//			entity.getSpeed().add(tmp);
+			//			tmp.copy(entity.getSpeed()).scale((float) (world.getTime() - lastUpdateTime) / 1000);
+			//			entity.getPos().add(tmp);
+
 			entity.getModelToWorld().setIdentity();
-			entity.getModelToWorld().translate(entity.getPos(), entity.getModelToWorld());
-			entity.getModelToWorld().rotate((float) (entity.getRotation() / 180 * Math.PI), Vector3f.Z, entity.getModelToWorld());
+			Vec2 position = entity.getPosition();
+			// LOGGER.debug("position for (" + entity + "): " + position);
+			entity.getModelToWorld().translate(new Vector2f(position.x, position.y), entity.getModelToWorld());
+			entity.getModelToWorld().rotate(entity.getBody().getAngle(), Vector3f.Z, entity.getModelToWorld());
 
-			// rotations
-			Float rotationTarget = entity.getRotationTarget();
-			if (rotationTarget != null) {
-				while (rotationTarget < entity.getRotation() - 180) {
-					rotationTarget += 360;
-					entity.setRotationTarget(rotationTarget);
-				}
-				while (rotationTarget > entity.getRotation() + 180) {
-					rotationTarget -= 360;
-					entity.setRotationTarget(rotationTarget);
-				}
-
-				if (entity.getRotation() - rotationTarget < -1) {
-					entity.setRotationSpeed(180);
-				} else if (entity.getRotation() - rotationTarget > 1) {
-					entity.setRotationSpeed(-180);
-				} else		{
-					entity.setRotationSpeed(0);
-					entity.setRotation(rotationTarget);
-				}
-			}
-			entity.setRotation(entity.getRotation() + entity.getRotationSpeed() * world.getMillisSinceLastUpdate() / 1000);
+			//
+			//			// rotations
+			//			Float rotationTarget = entity.getRotationTarget();
+			//			if (rotationTarget != null) {
+			//				while (rotationTarget < entity.getRotation() - 180) {
+			//					rotationTarget += 360;
+			//					entity.setRotationTarget(rotationTarget);
+			//				}
+			//				while (rotationTarget > entity.getRotation() + 180) {
+			//					rotationTarget -= 360;
+			//					entity.setRotationTarget(rotationTarget);
+			//				}
+			//
+			//				if (entity.getRotation() - rotationTarget < -1) {
+			//					entity.setRotationSpeed(180);
+			//				} else if (entity.getRotation() - rotationTarget > 1) {
+			//					entity.setRotationSpeed(-180);
+			//				} else		{
+			//					entity.setRotationSpeed(0);
+			//					entity.setRotation(rotationTarget);
+			//				}
+			//			}
+			//			entity.setRotation(entity.getRotation() + entity.getRotationSpeed() * world.getMillisSinceLastUpdate() / 1000);
 		}
 	}
 

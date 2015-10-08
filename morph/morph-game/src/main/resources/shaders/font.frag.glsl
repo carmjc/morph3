@@ -8,8 +8,13 @@ uniform vec4 fontData[255];
 uniform int charData;
 
 void main() {
+	vec4 text;
 	if (UV.x <= fontData[charData][0] + fontData[charData][2] && UV.y <= fontData[charData][1] + fontData[charData][3]) {
-    	color = texture(myTextureSampler, UV) * constColor;
+    	text = texture(myTextureSampler, UV);
+    	color.a = (text.r) * constColor.a;
+    	color.r = constColor.r;
+    	color.g = constColor.g;
+    	color.b = constColor.b;
     } else {
     	color = vec4(0, 0, 0, 0);
     }

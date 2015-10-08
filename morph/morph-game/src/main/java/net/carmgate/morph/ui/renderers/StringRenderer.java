@@ -168,25 +168,40 @@ public class StringRenderer implements Renderer<StringRenderable> {
 
 	@Override
 	public void render(StringRenderable str, float alpha, FloatBuffer vpFb) {
-		float width = str.getSize();
 
+		m.setIdentity();
+
+		render(str, alpha, vpFb, m);
+	}
+
+	public void render(StringRenderable str, float alpha, FloatBuffer vpFb, Matrix4f m) {
 		GL20.glUniform1f(charSizeLocation, (float) font.getSize() / font.getScaleW());
 		GL20.glUniform4f(contColorLocation, 0, 0, 0, 1 * alpha);
 
-		m.setIdentity();
-		m.m00 *= width;
-		m.m01 *= width;
-		m.m10 *= width;
-		m.m11 *= width;
+		float size = str.getSize();
+		m.m00 *= size;
+		m.m01 *= size;
+		m.m10 *= size;
+		m.m11 *= size;
 		m.m30 += str.getPos().x;
-		m.m31 += str.getPos().y;
+		m.m31 += str.getPos().y - font.getAscent() * str.getSize() / font.getSize();
 
+		float cumulatedAdvance = 0;
 		for (int i = 0; i < str.getStr().length(); i++) {
 			char c = str.getStr().charAt(i);
+
+			if (c == 10) {
+				m.m30 -= cumulatedAdvance;
+				m.m31 -= font.getLineHeight() * str.getSize() / font.getSize();
+
+				cumulatedAdvance = 0;
+				continue;
+			}
+
 			Glyph g = font.getGlyph(c);
 
-			float xOffset = g.xoffset * width / font.getSize();
-			float yOffset = g.yoffset * width / font.getSize();
+			float xOffset = g.xoffset * str.getSize() / font.getSize();
+			float yOffset = g.yoffset * str.getSize() / font.getSize();
 
 			m.m30 += xOffset;
 			m.m31 -= yOffset;
@@ -201,7 +216,9 @@ public class StringRenderer implements Renderer<StringRenderable> {
 
 			m.m30 -= xOffset;
 			m.m31 += yOffset;
-			m.m30 += g.xadvance * width / font.getSize();
+			m.m30 += g.xadvance * str.getSize() / font.getSize();
+			cumulatedAdvance += g.xadvance * str.getSize() / font.getSize();
+
 		}
 	}
 
