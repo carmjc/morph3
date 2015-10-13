@@ -23,7 +23,6 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Matrix4f;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
@@ -145,15 +144,15 @@ public class RenderingManager {
 	public void initGL(int width, int height) {
 		try {
 
-			PixelFormat pixelFormat = new PixelFormat();
+			// PixelFormat pixelFormat = new PixelFormat();
 			// ContextAttribs contextAtrributes = new ContextAttribs(3, 3)
 			// .withForwardCompatible(true)
 			// .withProfileCore(true);
 
 			Display.setDisplayMode(new DisplayMode(width, height));
-			Display.create(pixelFormat);
+			Display.setResizable(false);
 			Display.setTitle(conf.getProperty("ui.window.title")); //$NON-NLS-1$
-			Display.setResizable(true);
+			Display.create();
 		} catch (final LWJGLException e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -200,10 +199,6 @@ public class RenderingManager {
 	 * Inits the view, viewport, window, etc. This should be called at init and when the view changes (window is resized for instance).
 	 */
 	public void initView() {
-
-		final int width = Display.getWidth();
-		final int height = Display.getHeight();
-		LOGGER.debug("init view: " + width + "x" + height); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// set clear color - Wont be needed once we have a background
 		GL11.glClearColor(147f / 256, 114f / 256, 132f / 256, 1f);

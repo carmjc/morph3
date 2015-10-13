@@ -26,7 +26,6 @@ public class SimplePropulsorBehavior extends ComponentBehavior<SimplePropulsor> 
 	private ParticleSource particleSource;
 
 	private Vec2 toTargetVec = new Vec2();
-
 	private void endBehavior(SimplePropulsor cmp) {
 		cmp.setActive(false);
 		cmp.setTarget(null);
@@ -45,38 +44,37 @@ public class SimplePropulsorBehavior extends ComponentBehavior<SimplePropulsor> 
 		float targetDist = 350f;
 
 		// target offset
+		Vec2 tmp = null;
 		Vec2 shipPos = cmp.getShip().getBody().getPosition();
-		Vec2 ttVec = cmp.getTargetPosInWorld().mul(1f / 1000).sub(shipPos).negate();
+		Vec2 targetPos = cmp.getTargetPosInWorld().mul(1f / 1000);
+		Vec2 ttVec = targetPos.sub(shipPos).negate();
 		Vec2 vVec = cmp.getShip().getBody().getLinearVelocity();
 		Vec2 shipAppPoint = cmp.getShip().getBody().getWorldPoint(new Vec2(0, -0.1f));
 		Vec2 shipAppVec = cmp.getShip().getBody().getWorldVector(new Vec2(0, -0.05f));
 		Vec2 r1 = new Vec2((float) (Math.sqrt(3) / 2 * ttVec.x - 0.5f * ttVec.y), (float) (0.5f * ttVec.x + Math.sqrt(3) / 2 * ttVec.y));
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-			debugDraw.drawSegment(cmp.getTargetPosInWorld().mul(1f / 1000), cmp.getTargetPosInWorld().mul(1f / 1000).add(r1), new Color3f(1, 0, 1));
+			debugDraw.drawSegment(targetPos, targetPos.add(r1), new Color3f(1, 0, 1));
+			tmp = r1;
 		}
-		Vec2 tmp = r1;
 		r1 = r1.mul(targetDist / 1000 / r1.length());
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-			debugDraw.drawSegment(tmp, r1, new Color3f(0, 1, 0));
+			debugDraw.drawSegment(tmp.add(targetPos), r1.add(targetPos), new Color3f(0, 1, 0));
+			tmp = r1;
 		}
-		tmp = r1;
 		r1 = r1.sub(vVec);
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-			debugDraw.drawSegment(tmp, r1, new Color3f(1, 0, 0));
+			debugDraw.drawSegment(tmp.add(targetPos), r1.add(targetPos), new Color3f(1, 0, 0));
+			tmp = r1;
 		}
-		tmp = r1;
 		r1 = r1.sub(shipAppVec);
 		if (uiContext.getRenderMode() == RenderMode.DEBUG) {
-			debugDraw.drawSegment(tmp, r1, new Color3f(0, 1, 1));
+			debugDraw.drawSegment(tmp.add(targetPos), r1.add(targetPos), new Color3f(0, 1, 1));
 		}
 
 		float r = ttVec.length();
 
-		float alpha = Math.max(1f / 5, Math.min(1, (4f * (r * 1000 - targetDist) / targetDist + 1) / 5));
+		float alpha = Math.max(0.2f, Math.min(1, 0.8f * (r * 1000 - targetDist) / targetDist + 0.2f));
 		float fMax = Ship.MAX_PROPULSOR_FORCE * alpha;
-
-		// cmp.getForce().set(toTargetVec.sub(vVec));
-		// cmp.getForce().set(cmp.getForce().mul(fMax / cmp.getForce().length()));
 
 		cmp.getForce().set(r1.sub(ttVec));
 		cmp.getForce().set(cmp.getForce().mul(fMax / cmp.getForce().length()));
@@ -85,24 +83,6 @@ public class SimplePropulsorBehavior extends ComponentBehavior<SimplePropulsor> 
 			debugDraw.drawSegment(shipPos, shipPos.add(vVec), Color3f.RED);
 		}
 
-		LOGGER.debug("tt: " + ttVec + "(" + ttVec.length() + "), r1: " + r1 + "(" + r1.length() + "), alpha: " + alpha + ", force module: "
-				+ cmp.getForce().length() + ", speed: "
-				+ cmp.getShip().getBody().getLinearVelocity().length());
-
-		// float length = cmp.getForce().length();
-		// if (length > Ship.MAX_PROPULSOR_FORCE) {
-		// cmp.getForce().set(cmp.getForce().mul(Ship.MAX_PROPULSOR_FORCE / length));
-		// }
-
-		// set orientation
-		// TODO This is a very basic orientating method
-		// if (cmp.getForce() != null && cmp.getForce().length() != 0) {
-		// float angle = (float) (GeoUtils.angleWith(cmp.getForce(), new Vec2(0, 1)) / Math.PI * 180);
-		// if (cmp.getForce().x * cmp.getShip().getBody().getLinearVelocity().x + cmp.getForce().y * cmp.getShip().getBody().getLinearVelocity().y < 0) {
-		// angle += 180;
-		// }
-		// // FIXME cmp.getShip().setRotationTarget(angle);
-		// }
 	}
 
 	@Override

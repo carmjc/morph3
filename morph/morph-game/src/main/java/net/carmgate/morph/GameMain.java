@@ -72,6 +72,9 @@ public class GameMain {
 	public void loop() {
 		// init OpenGL context
 		renderingManager.initGL(conf.getIntProperty("window.initialWidth"), conf.getIntProperty("window.initialHeight")); //$NON-NLS-1$ //$NON-NLS-2$
+		Window window = uiContext.getWindow();
+		window.setWidth(Display.getWidth());
+		window.setHeight(Display.getHeight());
 
 		// init GUI
 		renderingManager.initGui();
@@ -136,10 +139,10 @@ public class GameMain {
 			Display.update();
 
 			// handle window resize
-			Window window = uiContext.getWindow();
 			if (Display.wasResized()) {
+				// DOES NOT WORK
 				LOGGER.debug("window resized");
-				// renderingManager.initView();
+				window = uiContext.getWindow();
 				window.setWidth(Display.getWidth());
 				window.setHeight(Display.getHeight());
 			}
@@ -156,8 +159,8 @@ public class GameMain {
 			ortho.setIdentity();
 			float zNear = 1;
 			float zFar = -1;
-			ortho.m00 = 2f / Display.getWidth();
-			ortho.m11 = 2f / Display.getHeight();
+			ortho.m00 = 2f / window.getWidth();
+			ortho.m11 = 2f / window.getHeight();
 			ortho.m22 = -2f / (zFar - zNear);
 			ortho.m30 = -1;
 			ortho.m31 = -1;
@@ -168,20 +171,21 @@ public class GameMain {
 			view.setIdentity();
 			view.m00 = uiContext.getViewport().getZoomFactor();
 			view.m11 = uiContext.getViewport().getZoomFactor();
-			view.m30 = -uiContext.getViewport().getFocalPoint().x * uiContext.getViewport().getZoomFactor() + Display.getWidth() / 2;
-			view.m31 = uiContext.getViewport().getFocalPoint().y * uiContext.getViewport().getZoomFactor() + Display.getHeight() / 2;
+			view.m30 = -uiContext.getViewport().getFocalPoint().x * uiContext.getViewport().getZoomFactor() + window.getWidth() / 2;
+			view.m31 = uiContext.getViewport().getFocalPoint().y * uiContext.getViewport().getZoomFactor() + window.getHeight() / 2;
 
 			Matrix4f worldVp = new Matrix4f();
 			Matrix4f.mul(ortho, view, worldVp);
 
+			// LOGGER.debug("worldVp:\n" + worldVp);
 			FloatBuffer worldVpFb = renderingManager.getWorldVpFb();
 			worldVp.store(worldVpFb);
 			worldVpFb.flip();
 			GL20.glUniformMatrix4(vpID, false, worldVpFb);
 
 			view.setIdentity();
-			view.m30 = Display.getWidth() / 2;
-			view.m31 = Display.getHeight() / 2;
+			view.m30 = window.getWidth() / 2;
+			view.m31 = window.getHeight() / 2;
 
 			Matrix4f guiVp = new Matrix4f();
 			Matrix4f.mul(ortho, view, guiVp);

@@ -12,6 +12,8 @@ importPackage(Packages.net.carmgate.morph.model.geometry)
 importPackage(Packages.org.jbox2d.dynamics.Body)
 //importPackage(Packages.net.carmgate.morph.orders)
 importPackage(Packages.org.lwjgl.util.vector)
+importPackage(Packages.org.jbox2d.common)
+
 var ArrayList = Java.type('java.util.ArrayList');
 
 me = new Player("Me", Player.PlayerType.PLAYER);
@@ -29,7 +31,7 @@ asteroid.getBody().getPosition().set(-0.5, -0.08);
 
 ship = entityFactory.newInstance(Ship.class);
 //ship.mass = 1;
-ship.durability = 300;
+ship.durability = 30;
 ship.player = me;
 ship.energy = 1;
 ship.resources = 10;
@@ -49,5 +51,5 @@ ship.setHardSpaceMax(5);
 ship.setXp(5);
 shipManager.init(ship);
 worldManager.add(ship);
-// FIXME - use transform instead: ship.getBody().getPosition().set(-0.2, 0.2);
+ship.getBody().setTransform(new Packages.org.jbox2d.common.Vec2(-1.5, 0.2), 0);
 
