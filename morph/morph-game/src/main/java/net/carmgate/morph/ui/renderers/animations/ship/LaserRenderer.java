@@ -134,12 +134,18 @@ public class LaserRenderer implements Renderer<LaserAnim> {
 
 	@Override
 	public void render(LaserAnim laserAnim, float alpha, FloatBuffer vpFb) {
-		if (!laserAnim.getSource().isActive()) {
+		if (!laserAnim.getSource().isActive() || laserAnim.getTarget() == null) {
 			return;
 		}
 
+		double cosAngleShip = Math.cos(laserAnim.getSource().getShip().getBody().getAngle());
+		double sinAngleShip = Math.sin(laserAnim.getSource().getShip().getBody().getAngle());
+
 		Vec2 targetPos = laserAnim.getTarget().getPosition();
-		Vec2 sourcePos = laserAnim.getSource().getShip().getPosition();
+		Vec2 posInShip = laserAnim.getSource().getPosInShip();
+		Vec2 sourcePos = laserAnim.getSource().getShip().getPosition()
+				.add(new Vec2((float) (posInShip.x * cosAngleShip - posInShip.y * sinAngleShip),
+						(float) (posInShip.x * sinAngleShip + posInShip.y * cosAngleShip)));
 		float dist = GeoUtils.distanceTo(targetPos, sourcePos);
 		float deltaX = targetPos.x - sourcePos.x;
 		float deltaY = targetPos.y - sourcePos.y;

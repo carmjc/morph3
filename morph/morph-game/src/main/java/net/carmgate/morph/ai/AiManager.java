@@ -56,7 +56,7 @@ public class AiManager {
 			LOGGER.debug("Wave global danger (with " + ennemies.size() + " ships): " + danger); //$NON-NLS-1$ //$NON-NLS-2$
 			if (danger > 2) {
 				worldManager.add(ship);
-				ship.getBody().setTransform(new Vec2(new Random().nextFloat() * 10 + 1f, new Random().nextFloat() * 10 + 1),
+				ship.getBody().setTransform(new Vec2(new Random().nextFloat() * 0.5f + 0f, new Random().nextFloat() * 0.5f + 0f),
 						(float) (new Random().nextFloat() * 2 * Math.PI));
 				// ship.getBody().setTransform(new Vec2(0.7f, 0.5f),
 				// (float) (new Random().nextFloat() * 2 * Math.PI));

@@ -58,14 +58,14 @@ public final class Button extends Widget {
 		buttonDown = false;
 	}
 
-	@Override
-	public void renderInteractiveAreas() {
-		renderUtils.renderQuad(getOutsets()[3],
-				getOutsets()[0],
-				getWidth() - getOutsets()[1],
-				getHeight() - getOutsets()[2],
-				new float[] { 1, 1, 1, 1 });
-	}
+	// @Override
+	// public void renderInteractiveAreas() {
+	// renderUtils.renderQuad(getOutsets()[3],
+	// getOutsets()[0],
+	// getWidth() - getOutsets()[1],
+	// getHeight() - getOutsets()[2],
+	// new float[] { 1, 1, 1, 1 });
+	// }
 
 	@Override
 	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {

@@ -41,11 +41,6 @@ public class Label extends Widget {
 	}
 
 	@Override
-	public void renderInteractiveAreas() {
-		// not interactive widget
-	}
-
-	@Override
 	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		renderUtils.renderQuad(getOutsets()[3],
 				getOutsets()[0],

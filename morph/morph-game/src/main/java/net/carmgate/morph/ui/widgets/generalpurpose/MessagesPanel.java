@@ -21,6 +21,7 @@ public class MessagesPanel extends Widget {
 	@Inject private StringRenderer stringRenderer;
 
 	private StringRenderable strR = new StringRenderable();
+	private Matrix4f m = new Matrix4f();
 
 	public MessagesPanel() {
 		strR.setSize(20);
@@ -28,12 +29,7 @@ public class MessagesPanel extends Widget {
 	}
 
 	@Override
-	public void renderInteractiveAreas() {
-		// not interactive widget
-	}
-
-	@Override
-	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
+	public void renderWidget(Matrix4f mTmp, FloatBuffer vpFb) {
 		StringBuilder sb = new StringBuilder();
 		for (Message msg : messageManager.getMessages()) {
 			if (sb.length() > 0) {
@@ -43,6 +39,7 @@ public class MessagesPanel extends Widget {
 		}
 		strR.setStr(sb.toString());
 
+		m.load(mTmp);
 		m.m30 += 4;
 		m.m31 += -4;
 

@@ -182,16 +182,15 @@ public class RenderingManager {
 		radarWidget.setWidth(150);
 		radarWidget.setHeight(150);
 		radarWidget.setPosition(new float[] { uiContext.getWindow().getWidth() - radarWidget.getWidth() - 10,
-				uiContext.getWindow().getHeight() - radarWidget.getHeight() - 10 });
-		// uiContext.getWidgetRoot().add(radarWidget);
+				radarWidget.getHeight() + 10 });
+		uiContext.getWidgetRoot().add(radarWidget);
 
 		// cmpBar = widgetFactory.newInstance(ComponentBar.class);
 		componentBarWidget = widgetFactory.newInstance(ColumnLayoutWidgetContainer.class);
 		componentBarWidget.setWidth(500);
 		componentBarWidget.setHeight(32);
-		componentBarWidget.setPosition(new float[] { 0 + 10,
-				uiContext.getWindow().getHeight() - componentBarWidget.getHeight() - 10 });
-		// uiContext.getWidgetRoot().add(componentBarWidget);
+		componentBarWidget.setPosition(new float[] { 10, 10 });
+		uiContext.getWidgetRoot().add(componentBarWidget);
 
 	}
 
@@ -450,7 +449,7 @@ public class RenderingManager {
 		GL11.glTranslatef(+focalPoint.x, +focalPoint.y, 0);
 		GL11.glScalef(1 / zoomFactor, 1 / zoomFactor, 1);
 
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);// GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	public void renderPhysical() {

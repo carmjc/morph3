@@ -147,11 +147,11 @@ public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 
 	}
 
-	@Override
-	public void renderInteractiveAreas() {
-		rootContainer.renderInteractiveAreas();
-	}
-
+//	@Override
+//	public void renderInteractiveAreas() {
+//		rootContainer.renderInteractiveAreas();
+//	}
+//
 	@Override
 	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		renderUtils.renderQuad(0, 0, getWidth(), getHeight(), getBgColor());

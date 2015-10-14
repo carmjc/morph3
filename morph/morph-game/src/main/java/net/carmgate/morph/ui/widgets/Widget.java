@@ -93,8 +93,6 @@ public abstract class Widget implements WidgetMouseListener {
 		return widgetMouseListeners.remove(o);
 	}
 
-	public abstract void renderInteractiveAreas();
-
 	public abstract void renderWidget(Matrix4f m, FloatBuffer vpFb);
 
 	public void setBgColor(float[] bgColor) {

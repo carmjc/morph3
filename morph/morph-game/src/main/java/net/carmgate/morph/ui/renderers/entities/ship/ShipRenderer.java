@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.util.vector.Matrix4f;
 import org.newdawn.slick.opengl.Texture;
 import org.slf4j.Logger;
 
@@ -21,6 +22,8 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.MWorld;
 import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
+import net.carmgate.morph.model.geometry.GeoUtils;
+import net.carmgate.morph.model.geometry.Vector3f;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.inputs.DragContext;
 import net.carmgate.morph.ui.renderers.MorphDebugDraw;
@@ -32,12 +35,12 @@ import net.carmgate.morph.ui.shaders.ShaderManager;
 public class ShipRenderer implements Renderer<Ship> {
 
 	private float[] quadInTrianglesVertices = new float[] {
-			-100, -100, 0,
-			-100, 100, 0,
-			100, -100, 0,
-			-100, 100, 0,
-			100, 100, 0,
-			100, -100, 0
+			-0.5f, -0.5f, 0,
+			-0.5f, 0.5f, 0,
+			0.5f, -0.5f, 0,
+			-0.5f, 0.5f, 0,
+			0.5f, 0.5f, 0,
+			0.5f, -0.5f, 0
 	};
 
 	private float[] quadInTrianglesTexCoords = new float[] {
@@ -152,7 +155,12 @@ public class ShipRenderer implements Renderer<Ship> {
 
 		// Bind to the VAO that has all the information about the quad vertices
 
-		ship.getModelToWorld().store(modelToWorldFb);
+		Matrix4f m = new Matrix4f(ship.getModelToWorld());
+		m.m00 *= 200;
+		m.m01 *= 200;
+		m.m10 *= 200;
+		m.m11 *= 200;
+		m.store(modelToWorldFb);
 		modelToWorldFb.flip();
 
 		// selection ship rendering
@@ -184,6 +192,8 @@ public class ShipRenderer implements Renderer<Ship> {
 		float[] ownerShipColor = ship.getPlayer().getColor();
 		GL20.glUniform4f(contColorLocation, ownerShipColor[0], ownerShipColor[1], ownerShipColor[2], ownerShipColor[3] * alpha);
 		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, shipVc);
+
+		renderComponents(ship, alpha, vpFb);
 
 		// Put everything back to default (deselect)
 
@@ -369,23 +379,26 @@ public class ShipRenderer implements Renderer<Ship> {
 	 * @param width
 	 */
 	private void renderComponents(Ship ship, float alpha, FloatBuffer vpFb) {
-		float zoom = uiContext.getViewport().getZoomFactor();
-		final float scale = 1;
+		double cosAngleShip = Math.cos(ship.getBody().getAngle());
+		double sinAngleShip = Math.sin(ship.getBody().getAngle());
 
 		Collection<Component> components = ship.getComponents().values();
-		GL11.glScalef(scale, scale, 1);
 
 		for (Component cmp : components) {
+			Matrix4f m = new Matrix4f(ship.getModelToWorld());
 			Vec2 posInShip = cmp.getPosInShip();
-
 			if (posInShip != null) {
-				GL11.glTranslatef(posInShip.x, posInShip.y, zoom);
-				componentRenderer.render(cmp, alpha, vpFb);
-				GL11.glTranslatef(-posInShip.x, -posInShip.y, zoom);
+				if (cmp.getTargetPosInWorld() != null) {
+					Vec2 toTarget = cmp.getTargetPosInWorld().sub(ship.getPosition().add(posInShip));
+					m.rotate(-ship.getBody().getAngle(), Vector3f.Z);
+					GeoUtils.rotate(-toTarget.y / toTarget.length(), toTarget.x / toTarget.length(), Vector3f.Z, m, m);
+				}
+
+				m.m30 += posInShip.x * cosAngleShip - posInShip.y * sinAngleShip;
+				m.m31 += posInShip.x * sinAngleShip + posInShip.y * cosAngleShip;
+				componentRenderer.render(cmp, alpha, m, vpFb);
 			}
 		}
-
-		GL11.glScalef(1 / scale, 1 / scale, 1);
 
 	}
 
