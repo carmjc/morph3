@@ -3,11 +3,11 @@ package net.carmgate.morph.ui.actions;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jbox2d.common.Vec2;
 import org.lwjgl.input.Keyboard;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
-import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.ViewPort;
 import net.carmgate.morph.ui.inputs.GameMouse;
@@ -44,8 +44,9 @@ public class Zoom implements MouseListener {
 
 			Vec2 fromWindowCenterToMouse = new Vec2(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
 					-uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
-			uiContext.getViewport().getFocalPoint().sub(new Vec2(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
-			.add(new Vec2(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
+			uiContext.getViewport().getFocalPoint()
+			.set(uiContext.getViewport().getFocalPoint().sub(new Vec2(fromWindowCenterToMouse).mul(1f / viewport.getZoomFactor()))
+					.add(new Vec2(fromWindowCenterToMouse).mul(1f / (viewport.getZoomFactor() * zoomVariation))));
 			viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
 
 			inputHistory.consumeEvents(inputHistory.getLastMouseEvent());
@@ -66,8 +67,9 @@ public class Zoom implements MouseListener {
 
 			Vec2 fromWindowCenterToMouse = new Vec2(uiContext.getWindow().getWidth() / 2 - gameMouse.getX(),
 					-uiContext.getWindow().getHeight() / 2 + gameMouse.getY());
-			uiContext.getViewport().getFocalPoint().sub(new Vec2(fromWindowCenterToMouse).scale(1f / viewport.getZoomFactor()))
-			.add(new Vec2(fromWindowCenterToMouse).scale(1f / (viewport.getZoomFactor() * zoomVariation)));
+			uiContext.getViewport().getFocalPoint()
+					.set(uiContext.getViewport().getFocalPoint().sub(new Vec2(fromWindowCenterToMouse).mul(1f / viewport.getZoomFactor()))
+							.add(new Vec2(fromWindowCenterToMouse).mul(1f / (viewport.getZoomFactor() * zoomVariation))));
 			viewport.setZoomFactor(viewport.getZoomFactor() * zoomVariation);
 
 			inputHistory.consumeEvents(inputHistory.getLastMouseEvent());

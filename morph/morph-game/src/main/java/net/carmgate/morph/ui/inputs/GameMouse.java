@@ -3,13 +3,16 @@ package net.carmgate.morph.ui.inputs;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.Fixture;
 import org.lwjgl.input.Mouse;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.MWorld;
-import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.ui.UIContext;
+import net.carmgate.morph.ui.widgets.Widget;
 
 /**
  * Allows mouse manipulation in world coordinates.
@@ -27,13 +30,14 @@ public class GameMouse {
 	// private PickingResult pickingResult;
 
 	public Vec2 getPosInWorld() {
+
 		float zoomFactor = uiContext.getViewport().getZoomFactor();
 		Vec2 focalPoint = uiContext.getViewport().getFocalPoint();
 
 		int xInWorld = (int) ((getX() - uiContext.getWindow().getWidth() / 2 + focalPoint.x * zoomFactor) / zoomFactor);
-		int yInWorld = (int) ((-getY() + uiContext.getWindow().getHeight() / 2 + focalPoint.y * zoomFactor) / zoomFactor);
+		int yInWorld = (int) ((getY() - uiContext.getWindow().getHeight() / 2 - focalPoint.y * zoomFactor) / zoomFactor);
 
-		return posInWorld.copy(xInWorld, yInWorld);
+		return posInWorld.set(xInWorld, yInWorld);
 	}
 
 	/**
@@ -52,6 +56,31 @@ public class GameMouse {
 
 	public boolean isButtonDown(int button) {
 		return Mouse.isButtonDown(button);
+	}
+
+	public Body pick() {
+		Vec2 posInBox2dWorld = getPosInWorld().mul(1f / 1000);
+		Vec2 posInGui = new Vec2(getX() / 1000f, getY() / 1000f);
+
+		Body body = world.getBox2dWorld().getBodyList();
+		while (body != null) {
+			if (body.getUserData() != null) {
+				Fixture fixture = body.getFixtureList();
+				while (fixture != null) {
+					if (body.getUserData() instanceof Widget && fixture.testPoint(posInGui)) {
+						return body;
+					}
+					if (!(body.getUserData() instanceof Widget) && fixture.testPoint(posInBox2dWorld)) {
+						return body;
+					}
+					fixture = fixture.getNext();
+				}
+			}
+
+			body = body.getNext();
+		}
+
+		return null;
 	}
 
 	// /**

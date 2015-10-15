@@ -3,9 +3,8 @@ package net.carmgate.morph.ui.inputs;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jbox2d.common.Vec2;
 import org.slf4j.Logger;
-
-import net.carmgate.morph.model.geometry.Vec2;
 
 @Singleton
 public class DragContext {
@@ -22,11 +21,11 @@ public class DragContext {
 	private DragType dragType;
 
 	public boolean dragInProgress() {
-		return oldFP != null;
+		return oldFP != null || dragType != null;
 	}
 
 	public boolean dragInProgress(DragType dragType) {
-		return oldFP != null && dragType == this.dragType;
+		return (oldFP != null || dragType != null) && dragType == this.dragType;
 	}
 
 	public DragType getDragType() {
@@ -60,7 +59,7 @@ public class DragContext {
 		if (this.oldFP == null) {
 			this.oldFP = new Vec2(oldFP);
 		} else {
-			this.oldFP.copy(oldFP);
+			this.oldFP.set(oldFP);
 		}
 	}
 
@@ -68,7 +67,7 @@ public class DragContext {
 		if (oldMousePosInWindow == null) {
 			oldMousePosInWindow = new Vec2(x, y);
 		} else {
-			oldMousePosInWindow.copy(x, y);
+			oldMousePosInWindow.set(x, y);
 		}
 	}
 }

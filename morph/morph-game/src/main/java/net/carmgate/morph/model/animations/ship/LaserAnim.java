@@ -28,7 +28,9 @@ public class LaserAnim extends ComponentAnimation {
 
 	// FIXME
 	protected void onShipDeath(@MObserves ShipDeath shipDeath) {
-		setEnd(0);
+		if (shipDeath.getShip() == targetHolder.get()) {
+			setEnd(0);
+		}
 	}
 
 	public void setTargetHolder(Holder<PhysicalEntity> targetHolder) {

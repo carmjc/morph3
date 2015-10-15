@@ -67,6 +67,7 @@ public class ComponentRenderer implements Renderer<Component> {
 	private FloatBuffer modelToWorldFb;
 	@Inject private ShaderManager shaderManager;
 	private Matrix4f m = new Matrix4f();
+	private Texture whiteTexture;
 
 	@Override
 	public void clean() {
@@ -133,11 +134,14 @@ public class ComponentRenderer implements Renderer<Component> {
 				BufferedInputStream repairerInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
 						conf.getProperty(SimpleRepairer.class.getCanonicalName() + ".renderer.texture"))); //$NON-NLS-1$
 				BufferedInputStream propInputStream = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
-						conf.getProperty(SimplePropulsor.class.getCanonicalName() + ".renderer.texture")))) {
+						conf.getProperty(SimplePropulsor.class.getCanonicalName() + ".renderer.texture"))); //$NON-NLS-1$
+				BufferedInputStream whiteIs = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(
+						conf.getProperty("white.texture")))) {
 			cmpTextures.put(ComponentType.LASERS, renderUtils.getTexture("PNG", laserInputStream));
 			cmpTextures.put(ComponentType.MINING_LASERS, renderUtils.getTexture("PNG", mlInputStream));
 			cmpTextures.put(ComponentType.REPAIRER, renderUtils.getTexture("PNG", repairerInputStream));
 			cmpTextures.put(ComponentType.PROPULSORS, renderUtils.getTexture("PNG", propInputStream));
+			whiteTexture = renderUtils.getTexture("PNG", whiteIs);
 		} catch (IOException e) {
 			LOGGER.error("Exception raised while loading texture", e); //$NON-NLS-1$
 		}

@@ -21,8 +21,6 @@ import javax.persistence.Transient;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 
-import net.carmgate.morph.events.MObserves;
-import net.carmgate.morph.events.world.entities.ship.ShipDeath;
 import net.carmgate.morph.model.animations.Animation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.ship.Ship;
@@ -149,11 +147,6 @@ public class MWorld {
 		players.putAll(newWorld.getPlayers());
 	}
 
-	@SuppressWarnings("unused")
-	private void onShipDeath(@MObserves ShipDeath shipDeath) {
-		remove(shipDeath.getShip());
-	}
-
 	@PostConstruct private void postConstruct() {
 		box2dWorld = new World(new Vec2(0, 0));
 	}
@@ -168,7 +161,7 @@ public class MWorld {
 		}
 	}
 
-	private void remove(Ship ship) {
+	public void remove(Ship ship) {
 		ships.remove(ship);
 		physicalEntities.remove(ship);
 	}

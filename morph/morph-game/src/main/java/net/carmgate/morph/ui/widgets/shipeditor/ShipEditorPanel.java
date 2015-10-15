@@ -28,8 +28,9 @@ import net.carmgate.morph.ui.widgets.basics.Button;
 import net.carmgate.morph.ui.widgets.basics.Label;
 import net.carmgate.morph.ui.widgets.containers.ColumnLayoutWidgetContainer;
 import net.carmgate.morph.ui.widgets.containers.RowLayoutWidgetContainer;
+import net.carmgate.morph.ui.widgets.containers.WidgetContainer;
 
-public class ShipEditorPanel extends Widget implements WidgetMouseListener {
+public class ShipEditorPanel extends WidgetContainer implements WidgetMouseListener {
 
 	@Inject private Logger LOGGER;
 	@Inject private UIContext uiContext;
@@ -64,6 +65,12 @@ public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 		softHardListPanel.setBgColor(new float[] { 0, 1f, 0, 0.1f });
 		softHardListPanel.getLayoutHints().put(LayoutHint.FILL_VERTICAL, null);
 		rootContainer.add(softHardListPanel);
+	}
+
+	@Override
+	public float[] getPosition(Widget widget) {
+		// FIXME Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -147,11 +154,11 @@ public class ShipEditorPanel extends Widget implements WidgetMouseListener {
 
 	}
 
-//	@Override
-//	public void renderInteractiveAreas() {
-//		rootContainer.renderInteractiveAreas();
-//	}
-//
+	//	@Override
+	//	public void renderInteractiveAreas() {
+	//		rootContainer.renderInteractiveAreas();
+	//	}
+	//
 	@Override
 	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		renderUtils.renderQuad(0, 0, getWidth(), getHeight(), getBgColor());

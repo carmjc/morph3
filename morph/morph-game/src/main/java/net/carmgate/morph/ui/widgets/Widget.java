@@ -6,11 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.dynamics.Body;
 import org.lwjgl.util.vector.Matrix4f;
+
+import net.carmgate.morph.ui.widgets.containers.WidgetContainer;
 
 public abstract class Widget implements WidgetMouseListener {
 
-	private float[] position = new float[2];
+	private float[] position;
 	private int id;
 	private boolean visible = true;
 
@@ -21,8 +25,10 @@ public abstract class Widget implements WidgetMouseListener {
 	private float[] bgColor = new float[] { 0, 0, 0, 0 };
 	private final Map<LayoutHint, Float> layoutHints = new HashMap<>();
 
-	private Widget parent;
+	private WidgetContainer parent;
 	private List<WidgetMouseListener> widgetMouseListeners = new ArrayList<>();
+	protected Shape shape;
+	private Body body;
 
 	public boolean addWidgetMouseListener(WidgetMouseListener e) {
 		return widgetMouseListeners.add(e);
@@ -63,12 +69,20 @@ public abstract class Widget implements WidgetMouseListener {
 		return outsets;
 	}
 
-	public Widget getParent() {
+	public WidgetContainer getParent() {
 		return parent;
 	}
 
 	public float[] getPosition() {
-		return position;
+		float[] pos = position;
+		if (pos == null) {
+			pos = getParent().getPosition(this);
+		}
+		return pos;
+	}
+
+	public final Shape getShape() {
+		return shape;
 	}
 
 	public float getWidth() {
@@ -99,6 +113,10 @@ public abstract class Widget implements WidgetMouseListener {
 		this.bgColor = bgColor;
 	}
 
+	public void setBody(Body body) {
+		this.body = body;
+	}
+
 	public void setHeight(float height) {
 		this.height = height;
 	}
@@ -115,7 +133,7 @@ public abstract class Widget implements WidgetMouseListener {
 		this.outsets = outsets;
 	}
 
-	public void setParent(Widget parent) {
+	public void setParent(WidgetContainer parent) {
 		this.parent = parent;
 	}
 

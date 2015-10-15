@@ -5,12 +5,12 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.slf4j.Logger;
 
 import net.carmgate.morph.ui.RenderingManager;
-import net.carmgate.morph.ui.inputs.GameMouse;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.widgets.Widget;
 
@@ -18,10 +18,14 @@ public final class Button extends Widget {
 
 	@Inject private Logger LOGGER;
 	@Inject private RenderUtils renderUtils;
-	@Inject private GameMouse gameMouse;
 
 	private String text = "";
 	private boolean buttonDown;
+
+	public Button() {
+		shape = new PolygonShape();
+		((PolygonShape) shape).setAsBox(getWidth(), getHeight());
+	}
 
 	@Override
 	public float getHeight() {
@@ -53,11 +57,6 @@ public final class Button extends Widget {
 		buttonDown = true;
 	}
 
-	@Override
-	public void onMouseUp() {
-		buttonDown = false;
-	}
-
 	// @Override
 	// public void renderInteractiveAreas() {
 	// renderUtils.renderQuad(getOutsets()[3],
@@ -66,6 +65,11 @@ public final class Button extends Widget {
 	// getHeight() - getOutsets()[2],
 	// new float[] { 1, 1, 1, 1 });
 	// }
+
+	@Override
+	public void onMouseUp() {
+		buttonDown = false;
+	}
 
 	@Override
 	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {

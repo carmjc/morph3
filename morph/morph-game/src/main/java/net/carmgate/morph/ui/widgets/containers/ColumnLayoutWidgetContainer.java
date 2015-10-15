@@ -15,6 +15,21 @@ public final class ColumnLayoutWidgetContainer extends WidgetContainer {
 	@Inject private Logger LOGGER;
 
 	@Override
+	public float[] getPosition(Widget widget) {
+		Float horizontalSpacing = getLayoutHints().get(LayoutHint.HORIZONTAL_SPACING);
+		horizontalSpacing = horizontalSpacing != null ? horizontalSpacing : 0;
+		float[] pos = new float[] { getInsets()[3] + getParent().getPosition(this)[0], getInsets()[0] + getParent().getPosition(this)[1] };
+
+		for (Widget w : getWidgets()) {
+			if (w == widget) {
+				break;
+			}
+			pos[0] += widget.getWidth() + horizontalSpacing;
+		}
+		return pos;
+	}
+
+	@Override
 	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		Float horizontalSpacing = getLayoutHints().get(LayoutHint.HORIZONTAL_SPACING);
 		horizontalSpacing = horizontalSpacing != null ? horizontalSpacing : 0;

@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
@@ -24,10 +26,13 @@ import net.carmgate.morph.GameLoaded;
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.events.MEvent;
 import net.carmgate.morph.events.MEventManager;
+import net.carmgate.morph.events.MObserves;
 import net.carmgate.morph.events.world.WorldEvent;
 import net.carmgate.morph.events.world.WorldEventFactory;
 import net.carmgate.morph.events.world.entities.ship.ShipAdded;
+import net.carmgate.morph.events.world.entities.ship.ShipDeath;
 import net.carmgate.morph.model.MWorld;
+import net.carmgate.morph.model.animations.ComponentAnimation;
 import net.carmgate.morph.model.entities.PhysicalEntity;
 import net.carmgate.morph.model.entities.PhysicalEntityFactory;
 import net.carmgate.morph.model.entities.components.ComponentFactory;
@@ -66,6 +71,7 @@ public class WorldManager {
 		if (entity instanceof Ship) {
 			add((Ship) entity);
 			body.createFixture(entity.getFixtureDef(entity.getShape()));
+			body.setUserData(entity);
 		} else {
 			world.getNonShipsPhysicalEntities().add(entity);
 			world.getPhysicalEntities().add(entity);
@@ -136,17 +142,40 @@ public class WorldManager {
 			engine.put("componentManager", componentManager);
 			engine.put("worldManager", this);
 			engine.eval(reader);
+
+			for (Ship ship : world.getShips()) {
+				if ("Me".equals(ship.getPlayer().getName())) {
+					world.setPlayerShip(ship);
+				}
+			}
+
 			gameLoadedEvent.fire(new GameLoaded());
 		} catch (final Exception e) {
 			LOGGER.error("Cannot open init file", e); //$NON-NLS-1$
 			System.exit(1);
 		}
 
-		for (Ship ship : world.getShips()) {
-			if ("Me".equals(ship.getPlayer().getName())) {
-				world.setPlayerShip(ship);
-			}
-		}
+	}
+
+	@SuppressWarnings("unused")
+	private void onShipDeath(final @MObserves ShipDeath shipDeath) {
+		world.getAnimations().values().forEach(list -> {
+			List<ComponentAnimation> toDelete = new ArrayList<>();
+
+			list.forEach(anim -> {
+				if (anim instanceof ComponentAnimation) {
+					Ship ship = ((ComponentAnimation) anim).getSource().getShip();
+					if (ship == shipDeath.getShip()) {
+						toDelete.add((ComponentAnimation) anim);
+					}
+				}
+			});
+
+			list.removeAll(toDelete);
+		});
+
+		world.getBox2dWorld().destroyBody(shipDeath.getShip().getBody());
+		world.remove(shipDeath.getShip());
 	}
 
 }

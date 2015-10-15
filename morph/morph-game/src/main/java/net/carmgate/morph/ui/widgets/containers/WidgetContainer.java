@@ -14,6 +14,8 @@ public abstract class WidgetContainer extends Widget {
 		return widgets.add(widget);
 	}
 
+	public abstract float[] getPosition(Widget widget);
+
 	public List<Widget> getWidgets() {
 		return widgets;
 	}

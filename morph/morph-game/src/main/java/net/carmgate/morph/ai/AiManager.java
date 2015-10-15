@@ -58,8 +58,6 @@ public class AiManager {
 				worldManager.add(ship);
 				ship.getBody().setTransform(new Vec2(new Random().nextFloat() * 0.5f + 0f, new Random().nextFloat() * 0.5f + 0f),
 						(float) (new Random().nextFloat() * 2 * Math.PI));
-				// ship.getBody().setTransform(new Vec2(0.7f, 0.5f),
-				// (float) (new Random().nextFloat() * 2 * Math.PI));
 				LOGGER.debug("ai initial position: " + ship.getPosition());
 			}
 		}

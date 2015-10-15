@@ -389,7 +389,12 @@ public class ShipRenderer implements Renderer<Ship> {
 			Vec2 posInShip = cmp.getPosInShip();
 			if (posInShip != null) {
 				if (cmp.getTargetPosInWorld() != null) {
-					Vec2 toTarget = cmp.getTargetPosInWorld().sub(ship.getPosition().add(posInShip));
+					Vec2 toTarget = null;
+					if (cmp.getTarget() != null) {
+						toTarget = cmp.getTarget().getPosition().sub(ship.getPosition().add(posInShip));
+					} else {
+						toTarget = cmp.getTargetPosInWorld().sub(ship.getPosition().add(posInShip));
+					}
 					m.rotate(-ship.getBody().getAngle(), Vector3f.Z);
 					GeoUtils.rotate(-toTarget.y / toTarget.length(), toTarget.x / toTarget.length(), Vector3f.Z, m, m);
 				}

@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 
 import javax.inject.Inject;
 
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.lwjgl.util.vector.Matrix4f;
 import org.slf4j.Logger;
 
@@ -20,28 +21,33 @@ public class ComponentWidget extends Widget {
 
 	private Component cmp;
 
+	public ComponentWidget() {
+		shape = new PolygonShape();
+		((PolygonShape) shape).setAsBox(getWidth() / 2000, getHeight() / 2000);
+	}
+
 	public Component getCmp() {
 		return cmp;
 	}
 
 	@Override
 	public float getHeight() {
-		return 50;
+		return 40;
 	}
 
 	@Override
 	public float getWidth() {
-		return 50;
+		return 40;
 	}
 
 	@Override
 	public void renderWidget(Matrix4f mTmp, FloatBuffer vpFb) {
 
 		m.load(mTmp);
-		m.m00 *= 1f;
-		m.m01 *= 1f;
-		m.m10 *= -1f;
-		m.m11 *= -1f;
+		m.m00 *= getWidth() / 50;
+		m.m01 *= getHeight() / 50;
+		m.m10 *= -getWidth() / 50;
+		m.m11 *= -getHeight() / 50;
 		m.m30 += getWidth() / 2;
 		m.m31 += getHeight() / 2;
 

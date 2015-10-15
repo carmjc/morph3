@@ -14,6 +14,16 @@ public final class AbsoluteLayoutContainer extends WidgetContainer {
 	@Inject private UIContext uiContext;
 
 	@Override
+	public float[] getPosition(Widget widget) {
+		for (Widget w : getWidgets()) {
+			if (w == widget) {
+				return w.getPosition();
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public void renderWidget(Matrix4f m, FloatBuffer vpFb) {
 		m.setIdentity();
 		m.m32 = -1;

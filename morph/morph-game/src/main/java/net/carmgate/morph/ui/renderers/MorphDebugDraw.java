@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 
 import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.model.geometry.GeoUtils;
+import net.carmgate.morph.ui.UIContext;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.shaders.ShaderManager;
 
@@ -41,6 +42,7 @@ public class MorphDebugDraw extends DebugDraw {
 	private int progId;
 	@Inject private RenderUtils renderUtils;
 	@Inject private ShaderManager shaderManager;
+	@Inject private UIContext uiContext;
 
 	private float[] texCoords = new float[] { // quadInTrianglesTexCoords
 			0, 0,
@@ -62,6 +64,7 @@ public class MorphDebugDraw extends DebugDraw {
 	};
 	private FloatBuffer vpFb;
 	private float alpha;
+	private boolean gui;
 
 	public MorphDebugDraw() {
 		super(new OBBViewportTransform());
@@ -89,8 +92,13 @@ public class MorphDebugDraw extends DebugDraw {
 		m.m01 *= width;
 		m.m10 *= width;
 		m.m11 *= width;
-		m.m30 = center.x * 1000;
-		m.m31 = center.y * 1000;
+		if (gui) {
+			m.m30 = center.x * 1000 - uiContext.getWindow().getWidth() / 2;
+			m.m31 = center.y * 1000 - uiContext.getWindow().getHeight() / 2;
+		} else {
+			m.m30 = center.x * 1000;
+			m.m31 = center.y * 1000;
+		}
 		m.store(mFb);
 		mFb.flip();
 
@@ -122,8 +130,13 @@ public class MorphDebugDraw extends DebugDraw {
 		m.m10 = -5 * deltaY / dist;
 		m.m11 = 5 * deltaX / dist;
 		m.m22 = 1;
-		m.m30 = p1.x * 1000 + deltaX * 1000 / 2;
-		m.m31 = p1.y * 1000 + deltaY * 1000 / 2;
+		if (gui) {
+			m.m30 = p1.x * 1000 + deltaX * 1000 / 2 - uiContext.getWindow().getWidth() / 2;
+			m.m31 = p1.y * 1000 + deltaY * 1000 / 2 - uiContext.getWindow().getHeight() / 2;
+		} else {
+			m.m30 = p1.x * 1000 + deltaX * 1000 / 2;
+			m.m31 = p1.y * 1000 + deltaY * 1000 / 2;
+		}
 
 		m.store(mFb);
 		mFb.flip();
@@ -228,9 +241,10 @@ public class MorphDebugDraw extends DebugDraw {
 		GL20.glEnableVertexAttribArray(1);
 	}
 
-	public void updateWorld(float alpha, FloatBuffer vpFb) {
+	public void updateWorld(float alpha, FloatBuffer vpFb, boolean gui) {
 		this.alpha = alpha;
 		this.vpFb = vpFb;
+		this.gui = gui;
 	}
 
 }

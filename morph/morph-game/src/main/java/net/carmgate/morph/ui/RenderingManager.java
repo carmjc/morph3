@@ -18,6 +18,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jbox2d.common.Color3f;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -51,7 +56,6 @@ import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.components.ComponentType;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.model.geometry.GeoUtils;
-import net.carmgate.morph.model.geometry.Vec2;
 import net.carmgate.morph.ui.inputs.InputHistory;
 import net.carmgate.morph.ui.particles.Particle;
 import net.carmgate.morph.ui.particles.ParticleEngine;
@@ -62,6 +66,7 @@ import net.carmgate.morph.ui.renderers.Renderer;
 import net.carmgate.morph.ui.renderers.StringRenderer;
 import net.carmgate.morph.ui.renderers.entities.ship.ShipRenderer;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
+import net.carmgate.morph.ui.widgets.Widget;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 import net.carmgate.morph.ui.widgets.components.ComponentWidget;
 import net.carmgate.morph.ui.widgets.containers.AbsoluteLayoutContainer;
@@ -96,7 +101,7 @@ public class RenderingManager {
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
 
 	private Texture particleTexture;
-	private ColumnLayoutWidgetContainer componentBarWidget;
+	private ColumnLayoutWidgetContainer cmpBarWidget;
 	private final FloatBuffer worldVpFb = BufferUtils.createFloatBuffer(16);
 	private final FloatBuffer guiVpFb = BufferUtils.createFloatBuffer(16);
 
@@ -185,12 +190,11 @@ public class RenderingManager {
 				radarWidget.getHeight() + 10 });
 		uiContext.getWidgetRoot().add(radarWidget);
 
-		// cmpBar = widgetFactory.newInstance(ComponentBar.class);
-		componentBarWidget = widgetFactory.newInstance(ColumnLayoutWidgetContainer.class);
-		componentBarWidget.setWidth(500);
-		componentBarWidget.setHeight(32);
-		componentBarWidget.setPosition(new float[] { 10, 10 });
-		uiContext.getWidgetRoot().add(componentBarWidget);
+		cmpBarWidget = widgetFactory.newInstance(ColumnLayoutWidgetContainer.class);
+		cmpBarWidget.setWidth(500);
+		cmpBarWidget.setHeight(32);
+		cmpBarWidget.setPosition(new float[] { 10, 10 });
+		uiContext.getWidgetRoot().add(cmpBarWidget);
 
 	}
 
@@ -233,23 +237,14 @@ public class RenderingManager {
 	@SuppressWarnings("unused")
 	private void onShipAdded(@MObserves ShipAdded shipAdded) {
 		if (shipAdded.getShip() == world.getPlayerShip()) {
-			for (Component cmp : world.getPlayerShip().getComponents().values()) {
-				ComponentWidget cmpWidget = widgetFactory.newInstance(ComponentWidget.class);
-				cmpWidget.setCmp(cmp);
-				componentBarWidget.add(cmpWidget);
-			}
+			refreshCmpBar();
 		}
 	}
 
 	@SuppressWarnings("unused")
 	private void onShipAdded(@MObserves ShipUpdated shipUpdated) {
 		if (shipUpdated.getShip() == world.getPlayerShip()) {
-			componentBarWidget.getWidgets().clear();
-			for (Component cmp : world.getPlayerShip().getComponents().values()) {
-				ComponentWidget cmpWidget = widgetFactory.newInstance(ComponentWidget.class);
-				cmpWidget.setCmp(cmp);
-				componentBarWidget.add(cmpWidget);
-			}
+			refreshCmpBar();
 		}
 	}
 
@@ -259,6 +254,40 @@ public class RenderingManager {
 			registerRenderer(renderer);
 		});
 		eventManager.scanAndRegister(this);
+	}
+
+	private void refreshCmpBar() {
+		// remove old widgets
+		for (Widget widget : cmpBarWidget.getWidgets()) {
+
+		}
+		cmpBarWidget.getWidgets().clear();
+
+		// add new widgets
+		for (Component cmp : world.getPlayerShip().getComponents().values()) {
+			ComponentWidget cmpWidget = widgetFactory.newInstance(ComponentWidget.class);
+			cmpWidget.setCmp(cmp);
+			cmpBarWidget.add(cmpWidget);
+
+			if (cmpWidget.getShape() != null && cmpWidget.getPosition() != null) {
+				BodyDef bodyDef = new BodyDef();
+				bodyDef.type = BodyType.STATIC;
+				Body body = world.getBox2dWorld().createBody(bodyDef);
+
+				FixtureDef fixtureDef = new FixtureDef();
+				fixtureDef.filter.groupIndex = -2;
+				fixtureDef.shape = cmpWidget.getShape();
+
+				body.createFixture(fixtureDef);
+				body.setUserData(cmpWidget);
+				Vec2 wPosition = new Vec2(cmpWidget.getPosition()[0] / 1000 + cmpWidget.getWidth() / 2000,
+						cmpWidget.getPosition()[1] / 1000 + cmpWidget.getHeight() / 2000);
+				LOGGER.debug("" + cmp + " position: " + wPosition);
+				body.setTransform(wPosition, 0);
+
+				cmpWidget.setBody(body);
+			}
+		}
 	}
 
 	public void registerRenderer(final Renderer<? extends Renderable> renderer) {
@@ -285,7 +314,12 @@ public class RenderingManager {
 			Renderer<Renderable> renderer = (Renderer<Renderable>) renderers.get(anims.getKey());
 			renderer.prepare();
 			for (Animation anim : anims.getValue()) {
-				renderer.render(anim, 1, worldVpFb);
+				if (anim.getEnd() > world.getTime()) {
+					renderer.render(anim, 1, worldVpFb);
+				}
+				if (anim.getEnd() + anim.getCoolDown() < world.getTime()) {
+					anim.setEnd(anim.getEnd() + anim.getCoolDown() + anim.getDuration());
+				}
 			}
 			renderer.clean();
 		}

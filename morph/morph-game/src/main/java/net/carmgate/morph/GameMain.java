@@ -92,10 +92,11 @@ public class GameMain {
 		vpID = GL20.glGetUniformLocation(shaderManager.getProgram("basic"), "VP");
 
 		debugDraw.init();
-		debugDraw.updateWorld(1, renderingManager.getWorldVpFb());
+		debugDraw.updateWorld(1, renderingManager.getWorldVpFb(), false);
 		world.getBox2dWorld().setDebugDraw(debugDraw);
 		debugDraw.setFlags(DebugDraw.e_aabbBit + DebugDraw.e_centerOfMassBit + DebugDraw.e_dynamicTreeBit + DebugDraw.e_jointBit + DebugDraw.e_pairBit
 				+ DebugDraw.e_shapeBit);
+				// debugDraw.setFlags(DebugDraw.e_shapeBit);
 
 		// Rendering loop
 		while (true) {
@@ -147,14 +148,6 @@ public class GameMain {
 				window.setHeight(Display.getHeight());
 			}
 
-			// GL11.glMatrixMode(GL11.GL_PROJECTION);
-			// GL11.glLoadIdentity();
-
-			// // GL11.glOrtho(-window.getWidth() / 2, window.getWidth(), window.getHeight() / 2, -window.getHeight(), 1, -1);
-			// GL11.glOrtho(-window.getWidth() / 2, window.getWidth() / 2, window.getHeight() / 2, -window.getHeight() / 2, 1, -1);
-			// GL11.glViewport(0, 0, window.getWidth(), window.getHeight());
-
-			// Nouveau code
 			Matrix4f ortho = new Matrix4f();
 			ortho.setIdentity();
 			float zNear = 1;
@@ -195,7 +188,7 @@ public class GameMain {
 			guiVpFb.flip();
 			GL20.glUniformMatrix4(vpID, false, guiVpFb);
 
-			debugDraw.updateWorld(1, renderingManager.getWorldVpFb());
+			debugDraw.updateWorld(1, renderingManager.getWorldVpFb(), false);
 
 			// Nouveau code
 			// GL11.glMatrixMode(GL11.GL_MODELVIEW);
