@@ -23,7 +23,7 @@ public class StringRenderable implements Renderable {
 		return str;
 	}
 
-	public void setSize(float size) {
+	public void setFontSize(float size) {
 		this.size = size;
 	}
 

@@ -69,11 +69,8 @@ import net.carmgate.morph.ui.renderers.utils.RenderUtils;
 import net.carmgate.morph.ui.widgets.Widget;
 import net.carmgate.morph.ui.widgets.WidgetFactory;
 import net.carmgate.morph.ui.widgets.components.ComponentWidget;
-import net.carmgate.morph.ui.widgets.containers.AbsoluteLayoutContainer;
 import net.carmgate.morph.ui.widgets.containers.ColumnLayoutWidgetContainer;
-import net.carmgate.morph.ui.widgets.generalpurpose.MessagesPanel;
-import net.carmgate.morph.ui.widgets.radar.RadarWidget;
-import net.carmgate.morph.ui.widgets.shipeditor.ShipEditorPanel;
+import net.carmgate.morph.ui.widgets.containers.RootContainer;
 
 @Singleton
 public class RenderingManager {
@@ -101,7 +98,6 @@ public class RenderingManager {
 	private final Map<Class<? extends Renderable>, Renderer<? extends Renderable>> selectRenderers = new HashMap<>();
 
 	private Texture particleTexture;
-	private ColumnLayoutWidgetContainer cmpBarWidget;
 	private final FloatBuffer worldVpFb = BufferUtils.createFloatBuffer(16);
 	private final FloatBuffer guiVpFb = BufferUtils.createFloatBuffer(16);
 
@@ -167,35 +163,16 @@ public class RenderingManager {
 	}
 
 	public void initGui() {
+		// initialize renderers
 		for (final Renderer<?> renderer : renderers.values()) {
 			renderer.init();
 		}
 
+		// initialize fonts
 		font = new AngelCodeFont(conf.getProperty("ui.font.angel"), conf.getProperty("ui.font.angel.tga"));
 
-		uiContext.setWidgetRoot(widgetFactory.newInstance(AbsoluteLayoutContainer.class));
-
-		MessagesPanel messagesWidget = widgetFactory.newInstance(MessagesPanel.class);
-		messagesWidget.setPosition(new float[] { 0, uiContext.getWindow().getHeight(), 0 });
-		uiContext.getWidgetRoot().add(messagesWidget);
-
-		ShipEditorPanel shipEditorPanel = widgetFactory.newInstance(ShipEditorPanel.class);
-		shipEditorPanel.setPosition(new float[] { uiContext.getWindow().getWidth() / 2, 0, 0 });
-		// uiContext.getWidgetRoot().add(shipEditorPanel);
-
-		RadarWidget radarWidget = widgetFactory.newInstance(RadarWidget.class);
-		radarWidget.setWidth(150);
-		radarWidget.setHeight(150);
-		radarWidget.setPosition(new float[] { uiContext.getWindow().getWidth() - radarWidget.getWidth() - 10,
-				radarWidget.getHeight() + 10 });
-		uiContext.getWidgetRoot().add(radarWidget);
-
-		cmpBarWidget = widgetFactory.newInstance(ColumnLayoutWidgetContainer.class);
-		cmpBarWidget.setWidth(500);
-		cmpBarWidget.setHeight(32);
-		cmpBarWidget.setPosition(new float[] { 10, 10 });
-		uiContext.getWidgetRoot().add(cmpBarWidget);
-
+		// initialize gui
+		uiContext.setWidgetRoot(widgetFactory.newInstance(RootContainer.class));
 	}
 
 	/**
@@ -258,8 +235,9 @@ public class RenderingManager {
 
 	private void refreshCmpBar() {
 		// remove old widgets
+		ColumnLayoutWidgetContainer cmpBarWidget = uiContext.getWidgetRoot().getCmpBarWidget();
 		for (Widget widget : cmpBarWidget.getWidgets()) {
-
+			// FIXME
 		}
 		cmpBarWidget.getWidgets().clear();
 

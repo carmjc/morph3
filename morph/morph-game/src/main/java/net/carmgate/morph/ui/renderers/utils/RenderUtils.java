@@ -98,7 +98,7 @@ public class RenderUtils {
 		strR.setStr(str);
 		strR.getPos().x = x / fontRatio;
 		strR.getPos().y = (y + targetFontSize * (line - 1)) / fontRatio;
-		strR.setSize(20);
+		strR.setFontSize(20);
 
 		return strR;
 	}

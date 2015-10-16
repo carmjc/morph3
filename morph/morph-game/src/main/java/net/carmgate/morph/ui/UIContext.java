@@ -16,7 +16,7 @@ import net.carmgate.morph.model.entities.components.Component;
 import net.carmgate.morph.model.entities.ship.Ship;
 import net.carmgate.morph.ui.renderers.RenderMode;
 import net.carmgate.morph.ui.widgets.Widget;
-import net.carmgate.morph.ui.widgets.containers.WidgetContainer;
+import net.carmgate.morph.ui.widgets.containers.RootContainer;
 
 @Singleton
 public class UIContext {
@@ -34,7 +34,7 @@ public class UIContext {
 	private RenderMode renderMode = RenderMode.NORMAL;
 	private Ship selectedShip;
 	private Widget selectedWidget;
-	private WidgetContainer widgetRoot;
+	private RootContainer widgetRoot;
 	private Map<Integer, Widget> widgets = new WeakHashMap<>();
 	private Component selectedCmp;
 	private Context context = Context.GAME;
@@ -63,7 +63,7 @@ public class UIContext {
 		return viewport;
 	}
 
-	public WidgetContainer getWidgetRoot() {
+	public RootContainer getWidgetRoot() {
 		return widgetRoot;
 	}
 
@@ -111,7 +111,7 @@ public class UIContext {
 		this.selectedWidget = selectedWidget;
 	}
 
-	public void setWidgetRoot(WidgetContainer widgetRoot) {
+	public void setWidgetRoot(RootContainer widgetRoot) {
 		this.widgetRoot = widgetRoot;
 	}
 

@@ -20,6 +20,7 @@ import net.carmgate.morph.conf.Conf;
 import net.carmgate.morph.ui.AngelCodeFont;
 import net.carmgate.morph.ui.AngelCodeFont.Glyph;
 import net.carmgate.morph.ui.renderers.utils.RenderUtils;
+import net.carmgate.morph.ui.renderers.utils.RenderUtils.TextAlign;
 import net.carmgate.morph.ui.shaders.ShaderManager;
 
 @Singleton
@@ -174,7 +175,23 @@ public class StringRenderer implements Renderer<StringRenderable> {
 		render(str, alpha, vpFb, m);
 	}
 
+
 	public void render(StringRenderable str, float alpha, FloatBuffer vpFb, Matrix4f m) {
+		float maxWidth = 0;
+		for (int i = 0; i < str.getStr().length(); i++) {
+			int currentLineWidth = 0;
+			char c = str.getStr().charAt(i);
+			if (c == 10) {
+				currentLineWidth = 0;
+			} else {
+				Glyph g = font.getGlyph(c);
+				currentLineWidth += g.xadvance * str.getSize() / font.getSize();
+				maxWidth = Math.max(maxWidth, currentLineWidth);
+			}
+		}
+
+		TextAlign align = TextAlign.RIGHT;
+
 		GL20.glUniform1f(charSizeLocation, (float) font.getSize() / font.getScaleW());
 		GL20.glUniform4f(contColorLocation, 0, 0, 0, 1 * alpha);
 
@@ -185,6 +202,12 @@ public class StringRenderer implements Renderer<StringRenderable> {
 		m.m11 *= size;
 		m.m30 += str.getPos().x;
 		m.m31 += str.getPos().y - font.getAscent() * str.getSize() / font.getSize();
+		switch (align) {
+		case RIGHT:
+			m.m30 -= maxWidth / 2;
+		case CENTER:
+			m.m30 -= maxWidth / 2;
+		}
 
 		float cumulatedAdvance = 0;
 		for (int i = 0; i < str.getStr().length(); i++) {
